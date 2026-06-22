@@ -303,6 +303,81 @@ body.dark-mode thead tr{background:#0d1520}
 .login-shake{animation:shake .4s ease}
 @keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-8px)}40%,80%{transform:translateX(8px)}}
 
+/* ══════════════════════ RESPONSIVE MOBILE ══════════════════════ */
+.sb-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:140}
+.sb-backdrop.show{display:block}
+@media (max-width:860px){
+  body{font-size:13px}
+
+  /* Topbar : passe en 2 lignes compactes, on cache le superflu */
+  .topbar{flex-wrap:wrap;height:auto;min-height:48px;padding:8px 10px;gap:8px}
+  .topbar-sub{display:none}
+  .topbar-date{display:none}
+  #connectedUser{display:none}
+  .topbar .notif-bell,.topbar button{padding:5px 8px;font-size:11px}
+  .notif-panel{width:92vw;right:-4px}
+
+  /* Sidebar devient un panneau coulissant (off-canvas) */
+  .layout{position:relative}
+  .sidebar{
+    position:fixed;top:0;left:0;bottom:0;height:100vh;width:230px!important;
+    transform:translateX(-100%);transition:transform .25s ease;z-index:150;
+    box-shadow:4px 0 18px rgba(0,0,0,.35);padding-top:48px;
+  }
+  /* sur mobile, .collapsed (posé par le bouton ☰) = menu OUVERT */
+  .sidebar.collapsed{transform:translateX(0);width:230px!important}
+  .sidebar.collapsed .sid-sec,.sidebar.collapsed .nav-lbl,
+  .sidebar.collapsed .nav-badge,.sidebar.collapsed .sid-foot{display:block!important}
+  .sidebar.collapsed .nav-item{padding:10px 16px;justify-content:flex-start;gap:10px}
+  .sidebar.collapsed .nav-ico{font-size:14px;min-width:16px;text-align:left}
+  .sidebar:not(.collapsed){box-shadow:none}
+
+  .main{padding:12px;width:100%}
+
+  /* Grilles -> 1 colonne */
+  .grid2,.grid3,.ishikawa-grid{grid-template-columns:1fr!important;gap:10px}
+  .kpi-grid{grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px}
+  .form-grid{grid-template-columns:1fr}
+
+  /* Cartes / titres */
+  .pg-title{font-size:17px}
+  .card-body{padding:12px}
+  .card-hdr{padding:9px 12px;font-size:12px;flex-wrap:wrap}
+
+  /* Modales plein écran */
+  .modal-bg{padding:0;align-items:flex-end}
+  .modal{max-width:100%;width:100%;max-height:94vh;border-radius:12px 12px 0 0}
+  .modal-body{padding:14px}
+  .modal-hdr{padding:12px 14px;font-size:13px}
+  .modal-footer{padding:10px 14px;flex-wrap:wrap}
+  .modal-footer .btn{flex:1;justify-content:center}
+
+  /* Tableaux : scroll horizontal explicite + indication visuelle */
+  .tbl-wrap{-webkit-overflow-scrolling:touch}
+  table{font-size:11.5px}
+  thead th,tbody td{padding:7px 8px}
+
+  /* Bannière utilisateur */
+  .user-banner{padding:14px 16px}
+  .user-banner-stats{margin-left:0;width:100%;justify-content:flex-start}
+  .ubs-card{min-width:78px;padding:8px 10px}
+
+  /* Pareto : libellés tronqués */
+  .pareto-lbl{width:110px;font-size:10.5px}
+
+  /* Boutons et onglets */
+  .btn{padding:8px 12px;font-size:12px}
+  .tab-row{overflow-x:auto;flex-wrap:nowrap;-webkit-overflow-scrolling:touch}
+  .tab-btn{padding:9px 12px;white-space:nowrap}
+
+  .login-card{max-width:94vw}
+  .login-header{padding:24px 22px 18px}
+  .login-body{padding:22px 22px}
+}
+@media (max-width:420px){
+  .kpi-grid{grid-template-columns:repeat(2,1fr)}
+  .pareto-lbl{width:84px;font-size:10px}
+}
 </style>
 </head>
 <body>
@@ -375,6 +450,7 @@ body.dark-mode thead tr{background:#0d1520}
 </div>
 
 <div class="layout">
+<div class="sb-backdrop" id="sbBackdrop" onclick="toggleSidebar()"></div>
 <nav class="sidebar">
   <div class="sid-sec">Principal</div>
   <div class="nav-item active" onclick="show('dashboard')"><span class="nav-ico">📊</span><span class="nav-lbl">Tableau de bord</span></div>
@@ -1999,6 +2075,14 @@ function show(name){
   if(RESTRICTED_PAGES&&RESTRICTED_PAGES.includes(name)&&!isResponsable()){
     toast('🔒 Accès réservé au Responsable, Adjoint et Administrateurs','e');
     return;
+  }
+  if(window.innerWidth<=860){
+    const sb=document.querySelector('.sidebar');
+    if(sb.classList.contains('collapsed')){
+      sb.classList.remove('collapsed');
+      const bd=document.getElementById('sbBackdrop');
+      if(bd) bd.classList.remove('show');
+    }
   }
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
@@ -5279,8 +5363,13 @@ function toggleSidebar(){
   const sb = document.querySelector('.sidebar');
   sb.classList.toggle('collapsed');
   const isCollapsed = sb.classList.contains('collapsed');
-  // Mémoriser l'état
-  try { localStorage.setItem('gmao_sidebar_collapsed', isCollapsed?'1':'0'); } catch(e){}
+  const isMobile = window.innerWidth<=860;
+  const bd = document.getElementById('sbBackdrop');
+  if(bd) bd.classList.toggle('show', isMobile && isCollapsed);
+  // Sur mobile, "collapsed" = menu ouvert : ne pas mémoriser cet état comme préférence desktop
+  if(!isMobile){
+    try { localStorage.setItem('gmao_sidebar_collapsed', isCollapsed?'1':'0'); } catch(e){}
+  }
   // Redessiner les graphiques après transition
   setTimeout(()=>{
     const activePage = document.querySelector('.page.active');
@@ -5846,9 +5935,9 @@ async function init(){
     const lbl = ni.querySelector('.nav-lbl');
     if(lbl) ni.setAttribute('data-label', lbl.textContent.trim());
   });
-  // Restaurer état sidebar
+  // Restaurer état sidebar (uniquement sur bureau)
   try {
-    if(localStorage.getItem('gmao_sidebar_collapsed')==='1'){
+    if(window.innerWidth>860 && localStorage.getItem('gmao_sidebar_collapsed')==='1'){
       document.querySelector('.sidebar').classList.add('collapsed');
     }
   } catch(e){}
