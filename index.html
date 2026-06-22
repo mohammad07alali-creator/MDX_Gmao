@@ -2019,7 +2019,88 @@ function subscribeCloudRealtime(){
     .subscribe();
 }
 
-// ════ HELPERS ════
+// ════ SESSION UNIQUE PAR COMPTE (1 appareil à la fois, expiration après 1h d'inactivité) ════
+const SESSION_TIMEOUT_MS = 60 * 60 * 1000; // 1 heure
+let _heartbeatTimer = null;
+
+// Identifiant unique de cet appareil/navigateur, persistant entre les onglets (localStorage)
+function getDeviceId(){
+  let id = localStorage.getItem('gmao_device_id');
+  if(!id){
+    id = 'dev_' + Date.now() + '_' + Math.random().toString(36).slice(2, 10);
+    localStorage.setItem('gmao_device_id', id);
+  }
+  return id;
+}
+
+// Vérifie si le login est déjà utilisé sur un AUTRE appareil avec une session encore active.
+// Retourne null si la connexion peut se faire, ou un message d'erreur sinon.
+async function checkSessionAvailable(login){
+  if(!supabaseClient) return null; // pas de cloud = pas de vérification possible, on laisse passer
+  try {
+    const { data, error } = await supabaseClient
+      .from('gmao_sessions')
+      .select('*')
+      .eq('login', login)
+      .maybeSingle();
+    if(error){ console.error('Erreur vérification session:', error); return null; }
+    if(!data) return null; // pas de session active connue
+    const myDevice = getDeviceId();
+    if(data.device_id === myDevice) return null; // c'est moi-même (autre onglet), on autorise
+    const lastSeen = new Date(data.last_seen).getTime();
+    const elapsed = Date.now() - lastSeen;
+    if(elapsed > SESSION_TIMEOUT_MS){
+      // Session expirée : on la libère et on autorise la connexion
+      await supabaseClient.from('gmao_sessions').delete().eq('login', login);
+      return null;
+    }
+    const minutesAgo = Math.max(1, Math.round(elapsed/60000));
+    return `🔒 Ce compte est déjà connecté sur un autre appareil (actif il y a ${minutesAgo} min). Réessayez plus tard.`;
+  } catch(e){
+    console.error('Erreur vérification session:', e);
+    return null; // en cas de doute (réseau coupé), on n'empêche pas la connexion
+  }
+}
+
+// Enregistre/renouvelle la session de l'utilisateur courant
+async function registerSession(login, nom){
+  if(!supabaseClient) return;
+  try {
+    await supabaseClient.from('gmao_sessions').upsert({
+      login, device_id: getDeviceId(), user_nom: nom,
+      connected_at: new Date().toISOString(), last_seen: new Date().toISOString()
+    });
+  } catch(e){ console.error('Erreur enregistrement session:', e); }
+  startHeartbeat(login);
+}
+
+// Toutes les 3 minutes, on "prouve" que la session est toujours active
+function startHeartbeat(login){
+  stopHeartbeat();
+  _heartbeatTimer = setInterval(async ()=>{
+    if(!supabaseClient || !window._currentUser) return;
+    try {
+      await supabaseClient.from('gmao_sessions')
+        .update({ last_seen: new Date().toISOString() })
+        .eq('login', login).eq('device_id', getDeviceId());
+    } catch(e){ console.error('Erreur heartbeat session:', e); }
+  }, 3*60*1000);
+}
+
+function stopHeartbeat(){
+  if(_heartbeatTimer){ clearInterval(_heartbeatTimer); _heartbeatTimer=null; }
+}
+
+// Libère la session au moment de la déconnexion volontaire
+async function releaseSession(login){
+  stopHeartbeat();
+  if(!supabaseClient || !login) return;
+  try {
+    await supabaseClient.from('gmao_sessions').delete().eq('login', login).eq('device_id', getDeviceId());
+  } catch(e){ console.error('Erreur libération session:', e); }
+}
+
+
 const today=()=>new Date().toISOString().slice(0,10);
 const fmtD=d=>{if(!d)return'–';const p=d.slice(0,10).split('-');return p[2]+'/'+p[1]+'/'+p[0];};
 const fmtE=n=>((n||0).toLocaleString('fr-FR',{minimumFractionDigits:0}))+'€';
@@ -5003,7 +5084,7 @@ function requireMasterCode(action){
   }
 }
 
-function doLogin(){
+async function doLogin(){
   if(loginLocked)return;
   const login=document.getElementById('loginUser').value.trim();
   const mdp=document.getElementById('loginPass').value;
@@ -5020,10 +5101,26 @@ function doLogin(){
 
   const user=DB.users.find(u=>u.login===login&&u.mdp===mdp&&u.actif);
   if(user){
+    // Vérifier qu'aucune autre session active n'existe déjà pour ce compte
+    btn.disabled=true;
+    btn.textContent='⏳ Vérification…';
+    const sessionError = await checkSessionAvailable(login);
+    if(sessionError){
+      btn.disabled=false;
+      btn.textContent='🔐 Se connecter';
+      err.textContent=sessionError;
+      err.classList.add('show');
+      const card=document.querySelector('.login-card');
+      card.classList.remove('login-shake');
+      void card.offsetWidth;
+      card.classList.add('login-shake');
+      return;
+    }
     // Succès
     loginAttempts=0;
     user.lastConn=new Date().toISOString().slice(0,10);
     auditLog('login',`Connexion : ${user.nom} (${user.role})`);
+    await registerSession(login, user.nom);
     btn.textContent='✅ Connexion réussie…';
     btn.disabled=true;
     // Animation de sortie
@@ -5095,7 +5192,9 @@ function checkCapsLock(e){
 function doLogout(){
   const who=window._currentUser?window._currentUser.nom:'–';
   const role=window._currentUser?window._currentUser.role:'–';
+  const login=window._currentUser?window._currentUser.login:null;
   auditLog('login',`Déconnexion : ${who} (${role})`);
+  if(login) releaseSession(login);
   window._currentUser=null;
   updateNavVisibility();
   const screen=document.getElementById('loginScreen');
