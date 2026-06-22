@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <title>GMAO v1_Vanilla – Atelier Matériels Roulants – GHRMSA</title>
 <meta name="gmao-theme" id="gmaoThemeMeta" content="blue"><!--GMAO_STYLE_STATE_START--><!--GMAO_STYLE_STATE_END-->
 <style>
@@ -1807,6 +1808,137 @@ const BUDGET={
   ]
 };/*GMAO_BUDGET_END*/
 
+// ════ SYNCHRONISATION CLOUD (SUPABASE) ════
+const SUPABASE_URL = 'https://eiwhgoppbprhdmparfqf.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVpd2hnb3BwYnByaGRtcGFyZnFmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIxMjExMjQsImV4cCI6MjA5NzY5NzEyNH0.p8pHVWB_cub3blhbhX2XKKU1z3AWrpjldtBHn8lSjE4';
+let supabaseClient = null;
+let _cloudSyncTimer = null;
+let _cloudReady = false;
+let _applyingRemote = false; // évite de re-déclencher une sync en boucle quand on reçoit une mise à jour distante
+
+try {
+  supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+} catch(e) {
+  console.error('Erreur init Supabase:', e);
+}
+
+function buildCloudSnapshot(){
+  return {
+    eq: DB.eq, bt: DB.bt, sk: DB.sk, tech: DB.tech, metro: DB.metro,
+    plan: DB.plan, contrats: DB.contrats, docs: DB.docs, actions: DB.actions,
+    immob: DB.immob||[], conformite: DB.conformite||[], users: DB.users||[],
+    mvtLog: DB.mvtLog||[], pareto: PARETO, budget: BUDGET,
+    db_rondes: DB_RONDES, db_consignes: DB_CONSIGNES, db_bat_zones: DB_BAT_ZONES, db_devis: DB_DEVIS,
+    db_amdec: window.DB_AMDEC||[], db_pdca: window.DB_PDCA||[]
+  };
+}
+
+function applyCloudSnapshot(snap){
+  if(!snap) return;
+  _applyingRemote = true;
+  try {
+    const fields = ['eq','bt','sk','tech','metro','plan','contrats','docs','actions','immob','conformite','users','mvtLog'];
+    fields.forEach(k=>{ if(snap[k]!==undefined) DB[k]=snap[k]; });
+    if(snap.pareto){ PARETO.length=0; snap.pareto.forEach(p=>PARETO.push(p)); }
+    if(snap.budget){ Object.assign(BUDGET, snap.budget); }
+    if(snap.db_rondes){ DB_RONDES.length=0; snap.db_rondes.forEach(x=>DB_RONDES.push(x)); }
+    if(snap.db_consignes){ DB_CONSIGNES.length=0; snap.db_consignes.forEach(x=>DB_CONSIGNES.push(x)); }
+    if(snap.db_bat_zones){ DB_BAT_ZONES.length=0; snap.db_bat_zones.forEach(x=>DB_BAT_ZONES.push(x)); }
+    if(snap.db_devis){ DB_DEVIS.length=0; snap.db_devis.forEach(x=>DB_DEVIS.push(x)); }
+    if(snap.db_amdec){ window.DB_AMDEC=snap.db_amdec; }
+    if(snap.db_pdca){ window.DB_PDCA=snap.db_pdca; }
+  } finally {
+    _applyingRemote = false;
+  }
+}
+
+// Envoie l'état complet vers Supabase, avec un léger délai (debounce)
+// pour regrouper plusieurs actions rapprochées en un seul envoi réseau.
+function syncToCloud(){
+  if(!supabaseClient || _applyingRemote) return;
+  clearTimeout(_cloudSyncTimer);
+  _cloudSyncTimer = setTimeout(async ()=>{
+    try {
+      const snap = buildCloudSnapshot();
+      const { error } = await supabaseClient
+        .from('gmao_state')
+        .update({ data: snap, updated_at: new Date().toISOString() })
+        .eq('id', 1);
+      if(error){
+        console.error('Erreur sync cloud:', error);
+        updateCloudStatus(false);
+      } else {
+        updateCloudStatus(true);
+      }
+    } catch(e){
+      console.error('Erreur sync cloud:', e);
+      updateCloudStatus(false);
+    }
+  }, 1200);
+}
+
+function updateCloudStatus(ok){
+  const el = document.getElementById('cloudSyncStatus');
+  if(!el) return;
+  if(ok){
+    el.textContent = '☁️ Synchronisé';
+    el.style.color = '#1E6B3C';
+  } else {
+    el.textContent = '⚠️ Hors ligne';
+    el.style.color = '#9B2335';
+  }
+}
+
+// Charge l'état initial depuis Supabase au démarrage de l'application.
+// Si la base distante est vide (première utilisation), on y pousse les données locales par défaut.
+async function loadFromCloud(){
+  if(!supabaseClient) return false;
+  try {
+    const { data, error } = await supabaseClient
+      .from('gmao_state')
+      .select('data')
+      .eq('id', 1)
+      .single();
+    if(error){
+      console.error('Erreur chargement cloud:', error);
+      updateCloudStatus(false);
+      return false;
+    }
+    const remote = data && data.data;
+    if(remote && Object.keys(remote).length > 0 && remote.eq && remote.eq.length){
+      applyCloudSnapshot(remote);
+    } else {
+      // Base distante vide : on y initialise avec les données locales par défaut
+      syncToCloud();
+    }
+    updateCloudStatus(true);
+    _cloudReady = true;
+    return true;
+  } catch(e){
+    console.error('Erreur chargement cloud:', e);
+    updateCloudStatus(false);
+    return false;
+  }
+}
+
+// Écoute en temps réel les changements faits par d'autres utilisateurs connectés
+function subscribeCloudRealtime(){
+  if(!supabaseClient) return;
+  supabaseClient
+    .channel('gmao_state_changes')
+    .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'gmao_state', filter: 'id=eq.1' }, (payload)=>{
+      if(!payload.new || !payload.new.data) return;
+      applyCloudSnapshot(payload.new.data);
+      populateSelects();
+      renderEq();renderBT();renderSk();renderPlan();renderTech();renderMetro();renderContrats();renderDocs();renderConformite();renderHistoSelect();renderUsers();
+      updateBadges();
+      if(document.getElementById('page-dashboard') && document.getElementById('page-dashboard').classList.contains('active')) renderDashboard();
+      updateDescList();updateCausePanneList();
+      toast('🔄 Données mises à jour par un autre utilisateur','s');
+    })
+    .subscribe();
+}
+
 // ════ HELPERS ════
 const today=()=>new Date().toISOString().slice(0,10);
 const fmtD=d=>{if(!d)return'–';const p=d.slice(0,10).split('-');return p[2]+'/'+p[1]+'/'+p[0];};
@@ -2097,7 +2229,8 @@ function savePlan(){
   _editPlanIdx=null;
   closeM('mPlan');renderPlan();toast('Planning enregistré','s');
   auditLog(action,`${label} : ${eq} – ${des}`);
-}
+
+  syncToCloud();}
 
 // ════ RENDER TECH ════
 function renderTech(){
@@ -3180,8 +3313,9 @@ function amdecAddRow(){
   const mode=prompt('Mode de défaillance :');if(!mode)return;
   window.DB_AMDEC.push({id:'AM'+String(Date.now()).slice(-4),comp,mode,effet:'-',cause:'-',f:1,g:1,d:1,action:'-',resp:'-'});
   renderAMDEC();
+  syncToCloud();
 }
-function amdecDel(i){if(confirm('Supprimer cette ligne AMDEC ?')){window.DB_AMDEC.splice(i,1);renderAMDEC();}}
+function amdecDel(i){if(confirm('Supprimer cette ligne AMDEC ?')){window.DB_AMDEC.splice(i,1);renderAMDEC();syncToCloud();}}
 function amdecExport(){
   const rows=window.DB_AMDEC.map(r=>`${r.comp}\t${r.mode}\t${r.effet}\t${r.cause}\t${r.f}\t${r.g}\t${r.d}\t${amdecCrit(r.f,r.g,r.d)}\t${r.action}\t${r.resp}`).join('\n');
   const head='Composant\tMode\tEffet\tCause\tF\tG\tD\tCriticité\tAction\tResponsable\n';
@@ -3297,8 +3431,9 @@ function pdcaAddRow(){
   const resp=prompt('Responsable :');
   window.DB_PDCA.push({phase,action,obj:obj||'-',resp:resp||'-',ech:'',avance:0,stat:'Planifié'});
   renderPDCA();
+  syncToCloud();
 }
-function pdcaDel(i){if(confirm('Supprimer cette ligne ?')){window.DB_PDCA.splice(i,1);renderPDCA();}}
+function pdcaDel(i){if(confirm('Supprimer cette ligne ?')){window.DB_PDCA.splice(i,1);renderPDCA();syncToCloud();}}
 
 // ════ ABC PANNES ════
 function renderABC(){
@@ -3430,7 +3565,8 @@ function saveBudgetPoste(){
   else{BUDGET.postes[parseInt(idx)]=p;auditLog('update',`Budget : poste modifié "${p.nom}" – Prév. ${fmtE(p.prev)}`);}
   closeM('mBudgetPoste');renderBudget();
   toast(idx===''?'✅ Poste ajouté':'✅ Poste modifié','s');
-}
+
+  syncToCloud();}
 function deleteBudgetPoste(i){
   if(!isAdmin()){toast('🔒 Accès réservé aux administrateurs','e');return;}
   confirmDelete(`Supprimer le poste "${BUDGET.postes[i].nom}" (${fmtE(BUDGET.postes[i].prev)} prévisionnel) ?`,()=>{
@@ -3439,7 +3575,8 @@ function deleteBudgetPoste(i){
     toast('🗑️ Poste supprimé','w');
     auditLog('delete',`Budget : poste supprimé "${nom}"`);
   });
-}
+
+  syncToCloud();}
 function openBudgetAnnee(){
   document.getElementById('baAnnee').value=BUDGET.annee||new Date().getFullYear();
   document.getElementById('baService').value=BUDGET.service||'';
@@ -3454,6 +3591,7 @@ function saveBudgetAnnee(){
   closeM('mBudgetAnnee');renderBudget();
   toast('✅ Paramètres budgétaires enregistrés','s');
   auditLog('update',`Budget : paramètres mis à jour – Année ${BUDGET.annee}, Service "${BUDGET.service}", Resp. "${BUDGET.responsable}"`);
+  syncToCloud();
 }
 
 // ════ CHARTS CANVAS ════
@@ -3750,7 +3888,8 @@ function saveInterv(){
   DB.bt.push(newBT);
   auditLog('create',`BT créé : ${id} – ${newBT.des} – ${newBT.type} (${prior})`);
   closeM('mInterv');renderBT();updateBadges();populateSelects();updateDescList();updateCausePanneList();generateNotifications();toast(`✅ ${id} créé`,'s');
-}
+
+  syncToCloud();}
 function quickClo(id){
   document.getElementById('fc_bt').value=id;
   document.getElementById('fc_date').value=today();
@@ -3800,7 +3939,8 @@ function saveCloture(){
   closeM('mCloture');renderBT();renderSk();updateBadges();populateSelects();
   generateNotifications();
   toast(`✅ ${id} clôturé`+(piecesClotureLabel.length?' – '+piecesClotureLabel.length+' pièce(s) déstockée(s)':''),'s');
-}
+
+  syncToCloud();}
 function showStkInfo(){
   const ref=document.getElementById('fm_ref').value;
   const s=DB.sk.find(x=>x.ref===ref);
@@ -3825,7 +3965,8 @@ function saveMvt(){
   if(DB.mvtLog.length>200) DB.mvtLog.pop();
   closeM('mMvt');renderSk();updateBadges();renderMvtLog();toast(`${type} ${qte}× ${ref} → Stock: ${s.qte} ${alrt(s).txt}`,'s');
   auditLog('update',`Mouvement stock ${type}: ${qte}× ${ref} (${s.des}) – Motif: ${motif||'–'}`);
-}
+
+  syncToCloud();}
 function qMvt(ref,type){document.getElementById('fm_ref').value=ref;document.getElementById('fm_type').value=type;document.getElementById('fm_qte').value=1;showStkInfo();openM('mMvt');}
 function saveEq(){
   if(!isAdmin()){toast('🔒 Accès réservé aux administrateurs','e');return;}
@@ -3836,7 +3977,8 @@ function saveEq(){
   DB.eq.push({id,des,marq:document.getElementById('feq_marq').value,ser:document.getElementById('feq_ser').value,inv:document.getElementById('feq_inv').value||'',mttrCible:parseFloat(document.getElementById('feq_mttr').value)||0,numSvc:document.getElementById('feq_numsvc').value||'',svc:document.getElementById('feq_svc').value,bat:document.getElementById('feq_bat').value,crit:document.getElementById('feq_crit').value,cat:isAGV?'agv':'lits',stat:'✅ Opérationnel',mes:document.getElementById('feq_mes').value||today(),next:document.getElementById('feq_next').value,obs:''});
   closeM('mEq');renderEq();populateSelects();toast(`✅ ${id} – ${des} ajouté`,'s');
   auditLog('create',`Équipement ajouté : ${id} – ${des} (${document.getElementById('feq_svc')?document.getElementById('feq_svc').value:''}) | S/N: ${document.getElementById('feq_ser').value||'–'} | Inv: ${document.getElementById('feq_inv').value||'–'}`);
-}
+
+  syncToCloud();}
 function openNewContrat(){
   document.getElementById('fct_idx').value='';
   document.getElementById('fct_eq').value='';
@@ -3858,7 +4000,8 @@ function saveContrat(){
   if(idx===''){DB.contrats.push(obj);toast('✅ Contrat enregistré','s');auditLog('create',`Contrat ajouté : ${obj.type} – ${obj.fourn} (${eq} ${obj.deb}→${obj.fin} | ${fmtE(obj.mont)})`);}
   else{DB.contrats[parseInt(idx)]=obj;toast('✅ Contrat modifié','s');auditLog('update',`Contrat modifié : ${obj.type} – ${obj.fourn} (${eq})`);}
   closeM('mContrat');renderContrats();
-}
+
+  syncToCloud();}
 function editContrat(i){
   if(!isAdmin()){toast('🔒 Accès réservé aux administrateurs','e');return;}
   const c=DB.contrats[i];if(!c)return;
@@ -3880,7 +4023,8 @@ function deleteContrat(i){
     DB.contrats.splice(i,1);renderContrats();toast('🗑️ Contrat supprimé','w');
     auditLog('delete',`Contrat supprimé : ${c.type} – ${c.fourn} (${c.eq})`);
   });
-}
+
+  syncToCloud();}
 function saveDoc(){
   if(!isAdmin()){toast('🔒 Accès réservé aux administrateurs','e');return;}
   const eq=document.getElementById('fd_eq').value;if(!eq){toast('Sélectionnez un équipement','w');return;}
@@ -3904,7 +4048,8 @@ function saveDoc(){
     closeM('mDoc');renderDocs();toast('✅ Document enregistré (sans fichier)','s');
     auditLog('create',`Document ajouté : "${newDoc.titre}" (${newDoc.type}) – ${eq} – Sans fichier joint`);
   }
-}
+
+  syncToCloud();}
 function deleteDoc(eqId, globalIdx){
   if(!isAdmin()){toast('🔒 Accès réservé aux administrateurs','e');return;}
   const item=DB.docs[globalIdx];
@@ -3915,7 +4060,8 @@ function deleteDoc(eqId, globalIdx){
     toast('🗑️ Document supprimé','w');
     auditLog('delete',`Document supprimé : "${item.titre}" (${item.type}) – ${eqId}`);
   });
-}
+
+  syncToCloud();}
 function saveTech(){
   if(!isAdmin()){toast('🔒 Accès réservé aux administrateurs','e');return;}
   const nom=document.getElementById('ft_nom').value.trim();
@@ -3923,7 +4069,8 @@ function saveTech(){
   DB.tech.push({nom,poste:document.getElementById('ft_poste').value,elec:document.getElementById('ft_elec').value||'Non',gestes:document.getElementById('ft_gestes').value||'Non',bio:document.getElementById('ft_bio').value||'Non',sst:document.getElementById('ft_sst').value,caces:document.getElementById('ft_caces').value||'Non',metro:document.getElementById('ft_metro').value||'Non',astr:document.getElementById('ft_astr').value,next:document.getElementById('ft_next').value||'–'});
   closeM('mTech');renderTech();toast('✅ Technicien ajouté','s');
   auditLog('create',`Technicien ajouté : ${nom} – ${document.getElementById('ft_poste')?document.getElementById('ft_poste').value:''}`);
-}
+
+  syncToCloud();}
 function saveArt(){
   if(!isAdmin()){toast('🔒 Accès réservé aux administrateurs','e');return;}
   const ref=document.getElementById('fart_ref').value.trim();
@@ -3933,7 +4080,8 @@ function saveArt(){
   DB.sk.push(newArt);
   closeM('mArt');renderSk();updateBadges();populateSelects();toast('✅ Article ajouté','s');
   auditLog('create',`Stock : article ajouté ${ref} – "${newArt.des}" | Qté: ${newArt.qte} | PU: ${newArt.pu}€ | Fournisseur: ${newArt.fourn}`);
-}
+
+  syncToCloud();}
 
 function saveAction(){
   if(!isAdmin()){toast('🔒 Accès réservé aux administrateurs','e');return;}
@@ -3941,7 +4089,8 @@ function saveAction(){
   DB.actions.push(newAc);
   closeM('mAction');renderCauses();toast('✅ Action enregistrée','s');
   auditLog('create',`Action corrective ajoutée : ${newAc.ref} – Cause: "${newAc.cause}" | Resp: ${newAc.resp} | Échéance: ${newAc.ech}`);
-}
+
+  syncToCloud();}
 function saveMetro(){
   if(!isAdmin()){toast('🔒 Accès réservé aux administrateurs','e');return;}
   const eq=document.getElementById('fm2_eq').value;
@@ -3955,7 +4104,8 @@ function saveMetro(){
   DB.metro.push({eq,des:eqO?eqO.des:'',svc:eqO?eqO.svc:'',tol:tolStr,err:err+' g',verd,date,next:verd.includes('Conforme')?d.toISOString().slice(0,10):'',tech:document.getElementById('fm2_tech').value,obs:document.getElementById('fm2_obs').value});
   closeM('mMetro');renderMetro();toast('Contrôle enregistré – '+verd,'s');
   auditLog('create',`Métrologie : contrôle enregistré ${eq} – Erreur: ${err}g / Tol: ${tolStr} → ${verd} | Tech: ${document.getElementById('fm2_tech').value}`);
-}
+
+  syncToCloud();}
 function quickBT(id){document.getElementById('fi_eq').value=id;fillSvc();document.getElementById('fi_date').value=today();openM('mInterv');}
 
 // ════ POPULATE SELECTS ════
@@ -4034,6 +4184,7 @@ function resetAll(){
   show('dashboard');
   toast('🔄 GMAO réinitialisée — toutes les données effacées','w');
   auditLog('delete','⚠️ RÉINITIALISATION COMPLÈTE de la base de données – Toutes les données ont été effacées');
+  syncToCloud();
 }
 
 // ════ UTILISATEURS ════
@@ -4103,7 +4254,8 @@ function saveUser(){
     auditLog('update',`Utilisateur modifié : ${nom} (${login}) – Rôle: ${role} – Actif: ${actif?'Oui':'Non'}`);
   }
   closeM('mUser');renderUsers();
-}
+
+  syncToCloud();}
 function resetMdp(i){
   if(DB.users[i] && DB.users[i].id==='USR-000'){
     requireMasterCode(()=>{
@@ -4132,7 +4284,8 @@ function saveNewMdp(){
   closeM('mResetMdp');renderUsers();
   toast('🔑 Mot de passe mis à jour','s');
   auditLog('update',`Mot de passe réinitialisé pour : ${DB.users[i].nom} (${DB.users[i].login})`);
-}
+
+  syncToCloud();}
 function deleteUser(i){
   if(!isAdmin()){toast('🔒 Accès réservé aux administrateurs','e');return;}
   if(DB.users[i] && DB.users[i].id==='USR-000'){
@@ -4155,7 +4308,8 @@ function deleteUser(i){
     toast('🗑️ Utilisateur supprimé','w');
     auditLog('delete',`Utilisateur supprimé : ${u.nom} (${u.login}) – Rôle: ${u.role}`);
   });
-}
+
+  syncToCloud();}
 
 // ════ PERSONNALISATION STYLE ════
 const THEMES={
@@ -4340,7 +4494,8 @@ function deleteBT(btId, eqId){
     toast(`🗑️ Intervention ${btId} supprimée`,'w');
     auditLog('delete',`BT supprimé : ${btId} – ${b.des} (${b.type}) – Tech: ${b.tech} – ${b.ouv}`);
   });
-}
+
+  syncToCloud();}
 
 function deleteMetro(eqId, localIdx){
   if(!isAdmin()){toast('🔒 Accès réservé aux administrateurs','e');return;}
@@ -4354,7 +4509,8 @@ function deleteMetro(eqId, localIdx){
     toast('🗑️ Contrôle métrologique supprimé','w');
     auditLog('delete',`Métrologie supprimée : ${eqId} – ${item.date} – ${item.verd}`);
   });
-}
+
+  syncToCloud();}
 
 
 // ════ FONCTIONS SUPPRESSION ════
@@ -4364,7 +4520,8 @@ function deletePlan(pi){
     DB.plan.splice(pi,1);renderPlan();toast('🗑️ Ligne planning supprimée','w');
     auditLog('delete',`Planning supprimé : ${p.eq} – ${p.des}`);
   });
-}
+
+  syncToCloud();}
 function deleteSk(ref){
   const s=DB.sk.find(x=>x.ref===ref);if(!s)return;
   confirmDelete('Supprimer l\'article "'+ref+' – '+s.des+'" du stock ?',()=>{
@@ -4372,35 +4529,40 @@ function deleteSk(ref){
     renderSk();updateBadges();populateSelects();toast('🗑️ Article supprimé','w');
     auditLog('delete',`Stock : article supprimé ${ref} – "${s.des}" (valeur: ${fmtE(s.qte*s.pu)})`);
   });
-}
+
+  syncToCloud();}
 function deleteTech(ti){
   const t=DB.tech[ti];if(!t)return;
   confirmDelete('Supprimer le technicien "'+t.nom+'" ?',()=>{
     DB.tech.splice(ti,1);renderTech();toast('🗑️ Technicien supprimé','w');
     auditLog('delete',`Technicien supprimé : ${t.nom} – ${t.poste}`);
   });
-}
+
+  syncToCloud();}
 function deleteMetro(mi){
   const m=DB.metro[mi];if(!m)return;
   confirmDelete('Supprimer le contrôle métrologique de "'+m.des+'" du '+m.date+' ?',()=>{
     DB.metro.splice(mi,1);renderMetro();toast('🗑️ Contrôle supprimé','w');
     auditLog('delete',`Métrologie supprimée : ${m.eq} – ${m.des} – ${m.date} – ${m.verd}`);
   });
-}
+
+  syncToCloud();}
 function deleteContrat(ci){
   const cont=DB.contrats[ci];if(!cont)return;
   confirmDelete('Supprimer le contrat "'+cont.type+'" de '+cont.fourn+' ?',()=>{
     DB.contrats.splice(ci,1);renderContrats();toast('🗑️ Contrat supprimé','w');
     auditLog('delete',`Contrat supprimé : ${cont.type} – ${cont.fourn} (${cont.eq})`);
   });
-}
+
+  syncToCloud();}
 function deleteDoc(eqId,i){
   const d=DB.docs[i];if(!d)return;
   confirmDelete('Supprimer le document "'+d.titre+'" ?',()=>{
     DB.docs.splice(i,1);renderDocs();toast('🗑️ Document supprimé','w');
     auditLog('delete',`Document supprimé : "${d.titre}" (${d.type}) – ${eqId}`);
   });
-}
+
+  syncToCloud();}
 
 
 // ════ IDENTITÉ / PERSONNALISATION ════
@@ -5281,12 +5443,14 @@ function demarrerRonde(){
   show('rondes');
   renderRondeEnCours();
   auditLog('create',`Ronde ${_rondeActive.id} démarrée (${type}) – ${tech}`);
+  syncToCloud();
 }
 function toggleRondeItem(idx){
   if(!_rondeActive||_rondeActive.done) return;
   _rondeActive.items[idx].check = !_rondeActive.items[idx].check;
   _rondeActive.items[idx].ts = _rondeActive.items[idx].check ? new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}) : null;
   renderRondeEnCours();
+  syncToCloud();
 }
 function cloreRonde(){
   if(!_rondeActive) return;
@@ -5298,6 +5462,7 @@ function cloreRonde(){
   _rondeActive = null;
   renderRondeEnCours();
   renderRondes();
+  syncToCloud();
 }
 function renderRondeEnCours(){
   const el = document.getElementById('rondeEnCours');
@@ -5365,7 +5530,8 @@ function saveConsigne(){
   renderConsignes();
   auditLog('create',`Consigne créée : "${cons.titre}" (${cons.equipe})`);
   toast('✅ Consigne enregistrée','s');
-}
+
+  syncToCloud();}
 function fltConsignes(type){
   const list = type ? DB_CONSIGNES.filter(c=>c.type===type) : DB_CONSIGNES;
   renderConsignesInEl(document.getElementById('consignesToutes'), list);
@@ -5403,7 +5569,8 @@ function deleteConsigne(i){
     renderConsignes();
     toast('🗑️ Consigne supprimée','w');
   });
-}
+
+  syncToCloud();}
 
 // ════ PLAN BÂTIMENT ════
 // Zones personnalisées (notes de zone)
@@ -5425,7 +5592,8 @@ function saveBatimentZone(){
   else{DB_BAT_ZONES[parseInt(idx)]={bat,desc};auditLog('update',`Zone bâtiment modifiée : "${bat}"`);}
   closeM('mBatZone');renderBatiment();
   toast('✅ Zone enregistrée','s');
-}
+
+  syncToCloud();}
 function deleteBatZone(i){
   if(!isAdmin()){toast('🔒 Accès réservé aux administrateurs','e');return;}
   confirmDelete(`Supprimer la zone "${DB_BAT_ZONES[i].bat}" ?`,()=>{
@@ -5434,7 +5602,8 @@ function deleteBatZone(i){
     toast('🗑️ Zone supprimée','w');
     auditLog('delete',`Zone bâtiment supprimée : "${nom}"`);
   });
-}
+
+  syncToCloud();}
 function renderBatiment(){
   const el = document.getElementById('batimentPlan');
   if(!el) return;
@@ -5505,6 +5674,7 @@ function endOfLifeEq(id){
     auditLog('delete',`Fin de vie équipement : ${id} – ${e.des} (${e.svc})`);
     renderEq();populateSelects();
     toast('⚰️ Équipement mis en fin de vie et supprimé','w');
+    syncToCloud();
   });
 }
 
@@ -5599,7 +5769,8 @@ function saveDevis(){
   closeM('mDevis');renderDevis();
   auditLog(idx===''?'create':'update',(idx===''?'Devis créé : ':'Devis modifié : ')+obj.id+' – '+objet);
   toast(idx===''?'✅ Devis créé':'✅ Devis modifié','s');
-}
+
+  syncToCloud();}
 function editDevis(i){
   const d=DB_DEVIS[i];if(!d)return;
   document.getElementById('dv_idx').value=i;
@@ -5624,7 +5795,8 @@ function deleteDevis(i){
     DB_DEVIS.splice(i,1);renderDevis();
     toast('🗑️ Devis supprimé','w');
   });
-}
+
+  syncToCloud();}
 function fltDevisStatut(v){
   document.querySelectorAll('#tDevis tbody tr').forEach(r=>{
     r.style.display=(!v||r.textContent.includes(v))?'':'none';
@@ -5663,7 +5835,7 @@ function renderDevis(){
     </tr>`).join('');
 }
 
-function init(){
+async function init(){
   const el=document.getElementById('topDate');
   const upd=()=>{const d=new Date();el.textContent=d.toLocaleDateString('fr-FR',{weekday:'short',day:'2-digit',month:'short',year:'numeric'})+' – '+d.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});};
   upd();setInterval(upd,30000);
@@ -5680,6 +5852,10 @@ function init(){
       document.querySelector('.sidebar').classList.add('collapsed');
     }
   } catch(e){}
+  // Charger les données partagées depuis Supabase avant d'afficher quoi que ce soit
+  updateCloudStatus(false);
+  await loadFromCloud();
+  subscribeCloudRealtime();
   loadFilters();
   populateSelects();
   renderEq();renderBT();renderSk();renderPlan();renderTech();renderMetro();renderContrats();renderDocs();renderConformite();renderHistoSelect();renderUsers();
@@ -5818,7 +5994,8 @@ function importJSON(input){
       renderEq();renderBT();renderSk();renderPlan();renderTech();renderMetro();renderContrats();renderDocs();renderConformite();renderHistoSelect();renderUsers();
       updateBadges();renderDashboard();updateDescList();updateCausePanneList();
       auditLog('import','Import JSON : ' + file.name);
-      toast('✅ Données importées – cliquez Sauvegarder pour intégrer au fichier','s');
+      toast('✅ Données importées et synchronisées','s');
+      syncToCloud();
     } catch(ex){ toast('⚠️ Fichier illisible : ' + ex.message,'e'); }
     input.value = '';
   };
