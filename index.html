@@ -303,81 +303,6 @@ body.dark-mode thead tr{background:#0d1520}
 .login-shake{animation:shake .4s ease}
 @keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-8px)}40%,80%{transform:translateX(8px)}}
 
-/* ══════════════════════ RESPONSIVE MOBILE ══════════════════════ */
-.sb-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:140}
-.sb-backdrop.show{display:block}
-@media (max-width:860px){
-  body{font-size:13px}
-
-  /* Topbar : passe en 2 lignes compactes, on cache le superflu */
-  .topbar{flex-wrap:wrap;height:auto;min-height:48px;padding:8px 10px;gap:8px}
-  .topbar-sub{display:none}
-  .topbar-date{display:none}
-  #connectedUser{display:none}
-  .topbar .notif-bell,.topbar button{padding:5px 8px;font-size:11px}
-  .notif-panel{width:92vw;right:-4px}
-
-  /* Sidebar devient un panneau coulissant (off-canvas) */
-  .layout{position:relative}
-  .sidebar{
-    position:fixed;top:0;left:0;bottom:0;height:100vh;width:230px!important;
-    transform:translateX(-100%);transition:transform .25s ease;z-index:150;
-    box-shadow:4px 0 18px rgba(0,0,0,.35);padding-top:48px;
-  }
-  /* sur mobile, .collapsed (posé par le bouton ☰) = menu OUVERT */
-  .sidebar.collapsed{transform:translateX(0);width:230px!important}
-  .sidebar.collapsed .sid-sec,.sidebar.collapsed .nav-lbl,
-  .sidebar.collapsed .nav-badge,.sidebar.collapsed .sid-foot{display:block!important}
-  .sidebar.collapsed .nav-item{padding:10px 16px;justify-content:flex-start;gap:10px}
-  .sidebar.collapsed .nav-ico{font-size:14px;min-width:16px;text-align:left}
-  .sidebar:not(.collapsed){box-shadow:none}
-
-  .main{padding:12px;width:100%}
-
-  /* Grilles -> 1 colonne */
-  .grid2,.grid3,.ishikawa-grid{grid-template-columns:1fr!important;gap:10px}
-  .kpi-grid{grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px}
-  .form-grid{grid-template-columns:1fr}
-
-  /* Cartes / titres */
-  .pg-title{font-size:17px}
-  .card-body{padding:12px}
-  .card-hdr{padding:9px 12px;font-size:12px;flex-wrap:wrap}
-
-  /* Modales plein écran */
-  .modal-bg{padding:0;align-items:flex-end}
-  .modal{max-width:100%;width:100%;max-height:94vh;border-radius:12px 12px 0 0}
-  .modal-body{padding:14px}
-  .modal-hdr{padding:12px 14px;font-size:13px}
-  .modal-footer{padding:10px 14px;flex-wrap:wrap}
-  .modal-footer .btn{flex:1;justify-content:center}
-
-  /* Tableaux : scroll horizontal explicite + indication visuelle */
-  .tbl-wrap{-webkit-overflow-scrolling:touch}
-  table{font-size:11.5px}
-  thead th,tbody td{padding:7px 8px}
-
-  /* Bannière utilisateur */
-  .user-banner{padding:14px 16px}
-  .user-banner-stats{margin-left:0;width:100%;justify-content:flex-start}
-  .ubs-card{min-width:78px;padding:8px 10px}
-
-  /* Pareto : libellés tronqués */
-  .pareto-lbl{width:110px;font-size:10.5px}
-
-  /* Boutons et onglets */
-  .btn{padding:8px 12px;font-size:12px}
-  .tab-row{overflow-x:auto;flex-wrap:nowrap;-webkit-overflow-scrolling:touch}
-  .tab-btn{padding:9px 12px;white-space:nowrap}
-
-  .login-card{max-width:94vw}
-  .login-header{padding:24px 22px 18px}
-  .login-body{padding:22px 22px}
-}
-@media (max-width:420px){
-  .kpi-grid{grid-template-columns:repeat(2,1fr)}
-  .pareto-lbl{width:84px;font-size:10px}
-}
 </style>
 </head>
 <body>
@@ -428,6 +353,7 @@ body.dark-mode thead tr{background:#0d1520}
   <div class="topbar-logo">⚙ G<span>MAO</span></div>
   <div class="topbar-sub">Atelier Maintenance Matériels Roulants &amp; Transport Automatique – GHRMSA Emile Muller</div>
   <div class="topbar-date" id="topDate"></div>
+  <div id="cloudSyncStatus" style="font-size:11px;font-weight:600;white-space:nowrap;margin-right:8px" title="État de la synchronisation avec la base partagée">☁️ Connexion…</div>
   <div id="connectedUser" style="font-size:11.5px;color:#BDD7EE;white-space:nowrap;display:flex;align-items:center;gap:6px"></div>
   <!-- CLOCHE NOTIFICATIONS -->
   <div class="notif-wrap" id="notifWrap">
@@ -450,7 +376,6 @@ body.dark-mode thead tr{background:#0d1520}
 </div>
 
 <div class="layout">
-<div class="sb-backdrop" id="sbBackdrop" onclick="toggleSidebar()"></div>
 <nav class="sidebar">
   <div class="sid-sec">Principal</div>
   <div class="nav-item active" onclick="show('dashboard')"><span class="nav-ico">📊</span><span class="nav-lbl">Tableau de bord</span></div>
@@ -1896,6 +1821,10 @@ try {
   supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 } catch(e) {
   console.error('Erreur init Supabase:', e);
+  document.addEventListener('DOMContentLoaded', ()=>{
+    const el = document.getElementById('cloudSyncStatus');
+    if(el){ el.textContent = '⚠️ Mode local (cloud indisponible)'; el.style.color = '#9B2335'; }
+  });
 }
 
 function buildCloudSnapshot(){
@@ -1968,7 +1897,12 @@ function updateCloudStatus(ok){
 // Charge l'état initial depuis Supabase au démarrage de l'application.
 // Si la base distante est vide (première utilisation), on y pousse les données locales par défaut.
 async function loadFromCloud(){
-  if(!supabaseClient) return false;
+  if(!supabaseClient){
+    updateCloudStatus(false);
+    const el = document.getElementById('cloudSyncStatus');
+    if(el){ el.textContent = '⚠️ Mode local (cloud indisponible)'; el.style.color = '#9B2335'; }
+    return false;
+  }
   try {
     const { data, error } = await supabaseClient
       .from('gmao_state')
@@ -2075,14 +2009,6 @@ function show(name){
   if(RESTRICTED_PAGES&&RESTRICTED_PAGES.includes(name)&&!isResponsable()){
     toast('🔒 Accès réservé au Responsable, Adjoint et Administrateurs','e');
     return;
-  }
-  if(window.innerWidth<=860){
-    const sb=document.querySelector('.sidebar');
-    if(sb.classList.contains('collapsed')){
-      sb.classList.remove('collapsed');
-      const bd=document.getElementById('sbBackdrop');
-      if(bd) bd.classList.remove('show');
-    }
   }
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
@@ -3658,9 +3584,9 @@ function deleteBudgetPoste(i){
     BUDGET.postes.splice(i,1);renderBudget();
     toast('🗑️ Poste supprimé','w');
     auditLog('delete',`Budget : poste supprimé "${nom}"`);
+    syncToCloud();
   });
-
-  syncToCloud();}
+}
 function openBudgetAnnee(){
   document.getElementById('baAnnee').value=BUDGET.annee||new Date().getFullYear();
   document.getElementById('baService').value=BUDGET.service||'';
@@ -4009,7 +3935,7 @@ function saveCloture(){
   const photoInput = document.getElementById('fc_photo');
   if(photoInput && photoInput.files && photoInput.files[0]){
     const reader = new FileReader();
-    reader.onload = e => { b.photo = e.target.result; };
+    reader.onload = e => { b.photo = e.target.result; syncToCloud(); };
     reader.readAsDataURL(photoInput.files[0]);
   }
   // Signature
@@ -4106,9 +4032,9 @@ function deleteContrat(i){
     const c=DB.contrats[i];
     DB.contrats.splice(i,1);renderContrats();toast('🗑️ Contrat supprimé','w');
     auditLog('delete',`Contrat supprimé : ${c.type} – ${c.fourn} (${c.eq})`);
+    syncToCloud();
   });
-
-  syncToCloud();}
+}
 function saveDoc(){
   if(!isAdmin()){toast('🔒 Accès réservé aux administrateurs','e');return;}
   const eq=document.getElementById('fd_eq').value;if(!eq){toast('Sélectionnez un équipement','w');return;}
@@ -4125,15 +4051,16 @@ function saveDoc(){
       DB.docs.push(newDoc);
       closeM('mDoc');renderDocs();toast('✅ Document enregistré avec fichier','s');
       auditLog('create',`Document ajouté : "${newDoc.titre}" (${newDoc.type}) – ${eq} – Fichier: ${file.name}`);
+      syncToCloud();
     };
     reader.readAsDataURL(file);
   } else {
     DB.docs.push(newDoc);
     closeM('mDoc');renderDocs();toast('✅ Document enregistré (sans fichier)','s');
     auditLog('create',`Document ajouté : "${newDoc.titre}" (${newDoc.type}) – ${eq} – Sans fichier joint`);
+    syncToCloud();
   }
-
-  syncToCloud();}
+}
 function deleteDoc(eqId, globalIdx){
   if(!isAdmin()){toast('🔒 Accès réservé aux administrateurs','e');return;}
   const item=DB.docs[globalIdx];
@@ -4143,9 +4070,9 @@ function deleteDoc(eqId, globalIdx){
     renderDocs();renderHistorique();
     toast('🗑️ Document supprimé','w');
     auditLog('delete',`Document supprimé : "${item.titre}" (${item.type}) – ${eqId}`);
+    syncToCloud();
   });
-
-  syncToCloud();}
+}
 function saveTech(){
   if(!isAdmin()){toast('🔒 Accès réservé aux administrateurs','e');return;}
   const nom=document.getElementById('ft_nom').value.trim();
@@ -4379,6 +4306,7 @@ function deleteUser(i){
         DB.users.splice(i,1);renderUsers();
         toast('🗑️ Utilisateur supprimé','w');
         auditLog('delete',`Utilisateur supprimé : ${u.nom} (${u.login}) – Rôle: ${u.role}`);
+        syncToCloud();
       });
     });
     return;
@@ -4391,9 +4319,9 @@ function deleteUser(i){
     DB.users.splice(i,1);renderUsers();
     toast('🗑️ Utilisateur supprimé','w');
     auditLog('delete',`Utilisateur supprimé : ${u.nom} (${u.login}) – Rôle: ${u.role}`);
+    syncToCloud();
   });
-
-  syncToCloud();}
+}
 
 // ════ PERSONNALISATION STYLE ════
 const THEMES={
@@ -4577,9 +4505,9 @@ function deleteBT(btId, eqId){
     renderHistorique();
     toast(`🗑️ Intervention ${btId} supprimée`,'w');
     auditLog('delete',`BT supprimé : ${btId} – ${b.des} (${b.type}) – Tech: ${b.tech} – ${b.ouv}`);
+    syncToCloud();
   });
-
-  syncToCloud();}
+}
 
 function deleteMetro(eqId, localIdx){
   if(!isAdmin()){toast('🔒 Accès réservé aux administrateurs','e');return;}
@@ -4592,9 +4520,9 @@ function deleteMetro(eqId, localIdx){
     renderMetro();renderHistorique();
     toast('🗑️ Contrôle métrologique supprimé','w');
     auditLog('delete',`Métrologie supprimée : ${eqId} – ${item.date} – ${item.verd}`);
+    syncToCloud();
   });
-
-  syncToCloud();}
+}
 
 
 // ════ FONCTIONS SUPPRESSION ════
@@ -4603,50 +4531,50 @@ function deletePlan(pi){
   confirmDelete('Supprimer la ligne "'+p.eq+' – '+p.des+'" du planning ?',()=>{
     DB.plan.splice(pi,1);renderPlan();toast('🗑️ Ligne planning supprimée','w');
     auditLog('delete',`Planning supprimé : ${p.eq} – ${p.des}`);
+    syncToCloud();
   });
-
-  syncToCloud();}
+}
 function deleteSk(ref){
   const s=DB.sk.find(x=>x.ref===ref);if(!s)return;
   confirmDelete('Supprimer l\'article "'+ref+' – '+s.des+'" du stock ?',()=>{
     DB.sk.splice(DB.sk.findIndex(x=>x.ref===ref),1);
     renderSk();updateBadges();populateSelects();toast('🗑️ Article supprimé','w');
     auditLog('delete',`Stock : article supprimé ${ref} – "${s.des}" (valeur: ${fmtE(s.qte*s.pu)})`);
+    syncToCloud();
   });
-
-  syncToCloud();}
+}
 function deleteTech(ti){
   const t=DB.tech[ti];if(!t)return;
   confirmDelete('Supprimer le technicien "'+t.nom+'" ?',()=>{
     DB.tech.splice(ti,1);renderTech();toast('🗑️ Technicien supprimé','w');
     auditLog('delete',`Technicien supprimé : ${t.nom} – ${t.poste}`);
+    syncToCloud();
   });
-
-  syncToCloud();}
+}
 function deleteMetro(mi){
   const m=DB.metro[mi];if(!m)return;
   confirmDelete('Supprimer le contrôle métrologique de "'+m.des+'" du '+m.date+' ?',()=>{
     DB.metro.splice(mi,1);renderMetro();toast('🗑️ Contrôle supprimé','w');
     auditLog('delete',`Métrologie supprimée : ${m.eq} – ${m.des} – ${m.date} – ${m.verd}`);
+    syncToCloud();
   });
-
-  syncToCloud();}
+}
 function deleteContrat(ci){
   const cont=DB.contrats[ci];if(!cont)return;
   confirmDelete('Supprimer le contrat "'+cont.type+'" de '+cont.fourn+' ?',()=>{
     DB.contrats.splice(ci,1);renderContrats();toast('🗑️ Contrat supprimé','w');
     auditLog('delete',`Contrat supprimé : ${cont.type} – ${cont.fourn} (${cont.eq})`);
+    syncToCloud();
   });
-
-  syncToCloud();}
+}
 function deleteDoc(eqId,i){
   const d=DB.docs[i];if(!d)return;
   confirmDelete('Supprimer le document "'+d.titre+'" ?',()=>{
     DB.docs.splice(i,1);renderDocs();toast('🗑️ Document supprimé','w');
     auditLog('delete',`Document supprimé : "${d.titre}" (${d.type}) – ${eqId}`);
+    syncToCloud();
   });
-
-  syncToCloud();}
+}
 
 
 // ════ IDENTITÉ / PERSONNALISATION ════
@@ -5363,13 +5291,8 @@ function toggleSidebar(){
   const sb = document.querySelector('.sidebar');
   sb.classList.toggle('collapsed');
   const isCollapsed = sb.classList.contains('collapsed');
-  const isMobile = window.innerWidth<=860;
-  const bd = document.getElementById('sbBackdrop');
-  if(bd) bd.classList.toggle('show', isMobile && isCollapsed);
-  // Sur mobile, "collapsed" = menu ouvert : ne pas mémoriser cet état comme préférence desktop
-  if(!isMobile){
-    try { localStorage.setItem('gmao_sidebar_collapsed', isCollapsed?'1':'0'); } catch(e){}
-  }
+  // Mémoriser l'état
+  try { localStorage.setItem('gmao_sidebar_collapsed', isCollapsed?'1':'0'); } catch(e){}
   // Redessiner les graphiques après transition
   setTimeout(()=>{
     const activePage = document.querySelector('.page.active');
@@ -5657,9 +5580,9 @@ function deleteConsigne(i){
     DB_CONSIGNES.splice(i,1);
     renderConsignes();
     toast('🗑️ Consigne supprimée','w');
+    syncToCloud();
   });
-
-  syncToCloud();}
+}
 
 // ════ PLAN BÂTIMENT ════
 // Zones personnalisées (notes de zone)
@@ -5690,9 +5613,9 @@ function deleteBatZone(i){
     DB_BAT_ZONES.splice(i,1);renderBatiment();
     toast('🗑️ Zone supprimée','w');
     auditLog('delete',`Zone bâtiment supprimée : "${nom}"`);
+    syncToCloud();
   });
-
-  syncToCloud();}
+}
 function renderBatiment(){
   const el = document.getElementById('batimentPlan');
   if(!el) return;
@@ -5883,9 +5806,9 @@ function deleteDevis(i){
     auditLog('delete','Devis supprimé : '+d.id+' – '+d.objet);
     DB_DEVIS.splice(i,1);renderDevis();
     toast('🗑️ Devis supprimé','w');
+    syncToCloud();
   });
-
-  syncToCloud();}
+}
 function fltDevisStatut(v){
   document.querySelectorAll('#tDevis tbody tr').forEach(r=>{
     r.style.display=(!v||r.textContent.includes(v))?'':'none';
@@ -5935,9 +5858,9 @@ async function init(){
     const lbl = ni.querySelector('.nav-lbl');
     if(lbl) ni.setAttribute('data-label', lbl.textContent.trim());
   });
-  // Restaurer état sidebar (uniquement sur bureau)
+  // Restaurer état sidebar
   try {
-    if(window.innerWidth>860 && localStorage.getItem('gmao_sidebar_collapsed')==='1'){
+    if(localStorage.getItem('gmao_sidebar_collapsed')==='1'){
       document.querySelector('.sidebar').classList.add('collapsed');
     }
   } catch(e){}
