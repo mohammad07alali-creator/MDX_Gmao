@@ -6,6 +6,10 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <title>GMAO v1_Vanilla – Atelier Matériels Roulants – GHRMSA</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1F4E79">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
 <meta name="gmao-theme" id="gmaoThemeMeta" content="blue"><!--GMAO_STYLE_STATE_START--><!--GMAO_STYLE_STATE_END-->
 <style>
 :root{
@@ -255,6 +259,7 @@ body.dark-mode thead tr{background:#0d1520}
   transition:background 0.4s ease;
 }
 #loginScreen.hidden{display:none}
+#loginScreen.fading{pointer-events:none}
 .login-card{
   background:#fff;border-radius:16px;
   box-shadow:0 24px 80px rgba(0,0,0,.45);
@@ -401,7 +406,7 @@ body.dark-mode thead tr{background:#0d1520}
         if(raw){
           const s = JSON.parse(raw);
           if(s && s.login && s.expiresAt && Date.now() < s.expiresAt){
-            document.write('<style>#loginScreen{display:none}</style>');
+            document.currentScript.parentElement.style.display='none';
           }
         }
       } catch(e){}
@@ -2064,6 +2069,17 @@ function subscribeCloudRealtime(){
 const SESSION_TIMEOUT_MS = 60 * 60 * 1000; // 1 heure
 let _heartbeatTimer = null;
 
+// Empêche qu'un appel réseau (Supabase) lent ou bloqué ne fige l'interface indéfiniment.
+// Si la promesse ne répond pas dans le délai imparti, on continue comme si le réseau était indisponible.
+function withTimeout(promise, ms){
+  return new Promise((resolve)=>{
+    let done=false;
+    const timer=setTimeout(()=>{ if(!done){ done=true; resolve({data:null,error:new Error('timeout')}); } }, ms);
+    promise.then(res=>{ if(!done){ done=true; clearTimeout(timer); resolve(res); } })
+           .catch(err=>{ if(!done){ done=true; clearTimeout(timer); resolve({data:null,error:err}); } });
+  });
+}
+
 // Identifiant unique de cet appareil/navigateur, persistant entre les onglets (localStorage)
 function getDeviceId(){
   let id = localStorage.getItem('gmao_device_id');
@@ -2079,11 +2095,10 @@ function getDeviceId(){
 async function checkSessionAvailable(login){
   if(!supabaseClient) return null; // pas de cloud = pas de vérification possible, on laisse passer
   try {
-    const { data, error } = await supabaseClient
-      .from('gmao_sessions')
-      .select('*')
-      .eq('login', login)
-      .maybeSingle();
+    const { data, error } = await withTimeout(
+      supabaseClient.from('gmao_sessions').select('*').eq('login', login).maybeSingle(),
+      4000
+    );
     if(error){ console.error('Erreur vérification session:', error); return null; }
     if(!data) return null; // pas de session active connue
     const myDevice = getDeviceId();
@@ -2107,10 +2122,10 @@ async function checkSessionAvailable(login){
 async function registerSession(login, nom){
   if(!supabaseClient) return;
   try {
-    await supabaseClient.from('gmao_sessions').upsert({
+    await withTimeout(supabaseClient.from('gmao_sessions').upsert({
       login, device_id: getDeviceId(), user_nom: nom,
       connected_at: new Date().toISOString(), last_seen: new Date().toISOString()
-    });
+    }), 4000);
   } catch(e){ console.error('Erreur enregistrement session:', e); }
   startHeartbeat(login);
 }
@@ -5195,13 +5210,22 @@ async function tryAutoLogin(){
 
   if(supabaseClient){
     try {
-      const { data, error } = await supabaseClient
-        .from('gmao_sessions').select('*').eq('login', local.login).maybeSingle();
-      if(error || !data){ clearLocalSession(); showLoginScreenIfHidden(); return false; }
-      const lastSeen = new Date(data.last_seen).getTime();
-      if(Date.now() - lastSeen > SESSION_TIMEOUT_MS){ clearLocalSession(); showLoginScreenIfHidden(); return false; }
-      if(data.device_id !== getDeviceId()){ clearLocalSession(); showLoginScreenIfHidden(); return false; } // session reprise par un autre appareil
-    } catch(e){ clearLocalSession(); showLoginScreenIfHidden(); return false; }
+      const { data, error } = await withTimeout(
+        supabaseClient.from('gmao_sessions').select('*').eq('login', local.login).maybeSingle(),
+        4000
+      );
+      // Si le réseau est trop lent ou indisponible, on ne pénalise pas l'utilisateur :
+      // la session locale (déjà vérifiée non expirée par getLocalSession) reste valable.
+      if(error && error.message === 'timeout'){
+        // on continue sans bloquer — pas de clearLocalSession ici
+      } else if(error || !data){
+        clearLocalSession(); showLoginScreenIfHidden(); return false;
+      } else {
+        const lastSeen = new Date(data.last_seen).getTime();
+        if(Date.now() - lastSeen > SESSION_TIMEOUT_MS){ clearLocalSession(); showLoginScreenIfHidden(); return false; }
+        if(data.device_id !== getDeviceId()){ clearLocalSession(); showLoginScreenIfHidden(); return false; } // session reprise par un autre appareil
+      }
+    } catch(e){ /* erreur réseau imprévue : on laisse passer, la session locale fait foi */ }
   }
 
   // Reconnexion automatique acceptée
@@ -5263,22 +5287,26 @@ async function doLogin(){
     saveLocalSession(login);
     btn.textContent='✅ Connexion réussie…';
     btn.disabled=true;
-    // Animation de sortie
+    // Stocker l'utilisateur connecté et activer l'interface TOUT DE SUITE
+    // (avant même la fin de l'animation de fondu), pour que les clics fonctionnent sans délai.
+    window._currentUser=user;
+    const nameEl=document.getElementById('connectedUser');
+    if(nameEl)nameEl.textContent='👤 '+user.nom;
+    updateAdminUI();
+    updateNavVisibility();
+    const screen0=document.getElementById('loginScreen');
+    screen0.classList.add('fading'); // désactive les clics sur l'écran de connexion dès maintenant
+    // Animation de sortie (purement visuelle, ne bloque plus rien)
     setTimeout(()=>{
       const screen=document.getElementById('loginScreen');
       screen.style.transition='opacity .5s ease';
       screen.style.opacity='0';
       setTimeout(()=>{
         screen.classList.add('hidden');
-        // Afficher le nom dans la topbar
-        const nameEl=document.getElementById('connectedUser');
-        if(nameEl)nameEl.textContent='👤 '+user.nom;
-        // Stocker l'utilisateur connecté
-        window._currentUser=user;
-        updateAdminUI();
-        updateNavVisibility();
+        screen.classList.remove('fading');
+        screen.style.removeProperty('display'); // retire le display:flex!important forcé par une éventuelle déconnexion précédente
       },500);
-    },600);
+    },300);
   } else {
     // Échec
     loginAttempts++;
@@ -5339,6 +5367,8 @@ function doLogout(){
   window._currentUser=null;
   updateNavVisibility();
   const screen=document.getElementById('loginScreen');
+  screen.classList.remove('fading');
+  screen.style.setProperty('display','flex','important'); // écrase tout style en ligne hérité (ex: masquage précoce auto-login)
   screen.style.opacity='0';
   screen.classList.remove('hidden');
   screen.style.transition='opacity .3s ease';
@@ -6336,6 +6366,10 @@ function autoSave(){ /* no-op */ }
 
 
 window.addEventListener('load',()=>{
+  // Enregistrement du service worker (rend l'application installable comme une "app" depuis le navigateur)
+  if('serviceWorker' in navigator){
+    navigator.serviceWorker.register('sw.js').catch(e=>console.warn('SW non enregistré:', e));
+  }
   // Stocker le source HTML original AVANT toute modification du DOM
   // On utilise XMLHttpRequest synchrone sur le fichier local (fonctionne en file://)
   // Sinon fallback sur la sérialisation du document initial
