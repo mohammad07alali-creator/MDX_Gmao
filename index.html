@@ -349,11 +349,23 @@ body.dark-mode thead tr{background:#0d1520}
 
   .form-grid{grid-template-columns:1fr}
 
+  /* Rangées d'onglets (5 Pourquoi / Ishikawa / AMDEC / etc.) : scroll horizontal au doigt
+     plutôt que des onglets coupés hors écran */
+  .tab-row{
+    overflow-x:auto;-webkit-overflow-scrolling:touch;flex-wrap:nowrap;
+    scrollbar-width:thin;
+  }
+  .tab-btn{white-space:nowrap;flex-shrink:0;padding:8px 12px;font-size:11.5px}
+
   .card-hdr{padding:9px 12px;font-size:12px;flex-wrap:wrap}
   .card-body{padding:10px}
 
-  /* Tous les tableaux deviennent scrollables horizontalement, même sans .tbl-wrap explicite */
-  table{font-size:11px}
+  /* Tous les tableaux deviennent scrollables horizontalement, même sans .tbl-wrap explicite.
+     On force une largeur minimale par cellule pour empêcher le navigateur de compresser
+     le texte sur plusieurs lignes : le scroll prend le relais à la place. */
+  table{font-size:11px;width:auto;min-width:100%}
+  table th, table td{white-space:nowrap;min-width:70px}
+  table th:first-child, table td:first-child{min-width:50px}
   .card-body:has(table){overflow-x:auto}
   .tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
 
@@ -3828,11 +3840,13 @@ function drawBarChart(id,data){
 
 function drawGroupBar(id,labels,prev,real){
   const cv=document.getElementById(id);if(!cv)return;
-  const H=parseInt(cv.getAttribute('data-h')||cv.getAttribute('height'))||220;
-  cv.setAttribute('data-h',H);
+  const H0=parseInt(cv.getAttribute('data-h')||cv.getAttribute('height'))||220;
+  cv.setAttribute('data-h',H0);
   const par=cv.parentElement;
   cv.style.cssText='display:none';
   const W=Math.max(200, par.clientWidth - 2);
+  const compact = W < 340; // mobile étroit : légende sous le graphique plutôt qu'à droite
+  const H = compact ? H0 + 50 : H0;
   cv.style.cssText='display:block;width:'+W+'px;height:'+H+'px;max-width:100%';
   cv.width=Math.round(W*(window.devicePixelRatio||1));
   cv.height=Math.round(H*(window.devicePixelRatio||1));
@@ -3840,13 +3854,14 @@ function drawGroupBar(id,labels,prev,real){
   ctx.clearRect(0,0,W,H);
   const bg=ctx.createLinearGradient(0,0,0,H);bg.addColorStop(0,'#f8fafc');bg.addColorStop(1,'#f1f5f9');
   ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
-  const padL=50,padR=130,padT=36,padB=44;
-  const cW=W-padL-padR,cH=H-padT-padB;
+  const padL=compact?38:50, padR=compact?10:130, padT=36, padB=compact?94:44;
+  const cW=W-padL-padR,cH=H0-padT-padB+(compact?0:0);
+  const chartH = compact ? (H0-padT-padB) : cH;
   const n=labels.length;
   const max=Math.max(...prev,...real,1);
   // Grilles
   for(let i=0;i<=4;i++){
-    const y=padT+cH*(1-i/4);
+    const y=padT+chartH*(1-i/4);
     ctx.strokeStyle=i===0?'#cbd5e1':'#e2e8f0';ctx.lineWidth=i===0?1.5:1;
     ctx.setLineDash(i===0?[]:[4,4]);ctx.beginPath();ctx.moveTo(padL,y);ctx.lineTo(W-padR,y);ctx.stroke();
     ctx.setLineDash([]);
@@ -3858,25 +3873,46 @@ function drawGroupBar(id,labels,prev,real){
   labels.forEach((l,i)=>{
     const cx=padL+gap*i+gap/2;
     const xP=cx-bW-2,xR=cx+2;
-    const hp=Math.max(2,(prev[i]/max)*cH),hr=Math.max(2,(real[i]/max)*cH);
+    const hp=Math.max(2,(prev[i]/max)*chartH),hr=Math.max(2,(real[i]/max)*chartH);
     // Barre prév
-    const gP=ctx.createLinearGradient(0,padT+cH-hp,0,padT+cH);gP.addColorStop(0,'#3b82f6');gP.addColorStop(1,'#1d4ed8');
-    ctx.fillStyle=gP;ctx.beginPath();if(ctx.roundRect)ctx.roundRect(xP,padT+cH-hp,bW,hp,[3,3,0,0]);else ctx.rect(xP,padT+cH-hp,bW,hp);ctx.fill();
+    const gP=ctx.createLinearGradient(0,padT+chartH-hp,0,padT+chartH);gP.addColorStop(0,'#3b82f6');gP.addColorStop(1,'#1d4ed8');
+    ctx.fillStyle=gP;ctx.beginPath();if(ctx.roundRect)ctx.roundRect(xP,padT+chartH-hp,bW,hp,[3,3,0,0]);else ctx.rect(xP,padT+chartH-hp,bW,hp);ctx.fill();
     // Barre réal
     const over=real[i]>prev[i];
-    const gR=ctx.createLinearGradient(0,padT+cH-hr,0,padT+cH);
+    const gR=ctx.createLinearGradient(0,padT+chartH-hr,0,padT+chartH);
     gR.addColorStop(0,over?'#f87171':'#4ade80');gR.addColorStop(1,over?'#dc2626':'#16a34a');
-    ctx.fillStyle=gR;ctx.beginPath();if(ctx.roundRect)ctx.roundRect(xR,padT+cH-hr,bW,hr,[3,3,0,0]);else ctx.rect(xR,padT+cH-hr,bW,hr);ctx.fill();
-    // Label
+    ctx.fillStyle=gR;ctx.beginPath();if(ctx.roundRect)ctx.roundRect(xR,padT+chartH-hr,bW,hr,[3,3,0,0]);else ctx.rect(xR,padT+chartH-hr,bW,hr);ctx.fill();
+    // Label (pivoté en mode compact pour éviter le chevauchement)
     const lbl=l.split(' ')[0];
-    ctx.fillStyle='#64748b';ctx.font='10px system-ui';ctx.textAlign='center';ctx.fillText(lbl,cx,H-padB+14);
+    ctx.fillStyle='#64748b';ctx.font='10px system-ui';
+    if(compact && n>4){
+      ctx.save();
+      ctx.translate(cx, padT+chartH+14);
+      ctx.rotate(-Math.PI/4);
+      ctx.textAlign='right';
+      ctx.fillText(lbl,0,0);
+      ctx.restore();
+    } else {
+      ctx.textAlign='center';ctx.fillText(lbl,cx,padT+chartH+14);
+    }
   });
-  // Légende
-  const lx=W-padR+14,ly=padT;
-  [[`#3b82f6`,'Prévisionnel'],[`#16a34a`,'Réalisé OK'],[`#dc2626`,'Dépassement']].forEach(([c,lbl],i)=>{
-    ctx.fillStyle=c;ctx.beginPath();ctx.roundRect?ctx.roundRect(lx,ly+i*22,14,14,3):ctx.fillRect(lx,ly+i*22,14,14);ctx.fill();
-    ctx.fillStyle='#374151';ctx.font='11px system-ui';ctx.textAlign='left';ctx.fillText(lbl,lx+18,ly+i*22+11);
-  });
+  // Légende : à droite sur desktop, en dessous (en ligne) sur mobile étroit
+  if(compact){
+    const ly=H0+14;
+    const items=[[`#3b82f6`,'Prévisionnel'],[`#16a34a`,'Réalisé OK'],[`#dc2626`,'Dépassement']];
+    let lx=padL;
+    items.forEach(([c,lbl])=>{
+      ctx.fillStyle=c;ctx.beginPath();ctx.roundRect?ctx.roundRect(lx,ly,10,10,2):ctx.fillRect(lx,ly,10,10);ctx.fill();
+      ctx.fillStyle='#374151';ctx.font='10px system-ui';ctx.textAlign='left';ctx.fillText(lbl,lx+13,ly+9);
+      lx += ctx.measureText(lbl).width + 30;
+    });
+  } else {
+    const lx=W-padR+14,ly=padT;
+    [[`#3b82f6`,'Prévisionnel'],[`#16a34a`,'Réalisé OK'],[`#dc2626`,'Dépassement']].forEach(([c,lbl],i)=>{
+      ctx.fillStyle=c;ctx.beginPath();ctx.roundRect?ctx.roundRect(lx,ly+i*22,14,14,3):ctx.fillRect(lx,ly+i*22,14,14);ctx.fill();
+      ctx.fillStyle='#374151';ctx.font='11px system-ui';ctx.textAlign='left';ctx.fillText(lbl,lx+18,ly+i*22+11);
+    });
+  }
 }
 
 function drawDonut(id,data,total){
