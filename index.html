@@ -391,6 +391,22 @@ body.dark-mode thead tr{background:#0d1520}
 
 <!-- ══ ÉCRAN DE CONNEXION ══ -->
 <div id="loginScreen">
+  <script>
+    // Exécuté immédiatement, avant le rendu : si une session locale valide existe,
+    // on cache l'écran de connexion tout de suite pour éviter un flash visuel
+    // (la vraie vérification de validité se fait ensuite côté serveur dans tryAutoLogin()).
+    (function(){
+      try {
+        const raw = localStorage.getItem('gmao_local_session');
+        if(raw){
+          const s = JSON.parse(raw);
+          if(s && s.login && s.expiresAt && Date.now() < s.expiresAt){
+            document.write('<style>#loginScreen{display:none}</style>');
+          }
+        }
+      } catch(e){}
+    })();
+  </script>
   <div class="login-card">
     <div class="login-header">
       <div class="login-logo">⚙ G<span>MAO</span></div>
@@ -423,7 +439,7 @@ body.dark-mode thead tr{background:#0d1520}
         <button onclick="revealTempCredentials()" style="background:none;border:1px solid #4a6fa5;color:#94a3b8;border-radius:6px;padding:6px 14px;cursor:pointer;font-size:12px;width:100%">🔒 Afficher les identifiants temporaires</button>
       </div>
       <div id="credBox" style="display:none;margin-top:8px;background:rgba(255,255,255,0.07);border-radius:8px;padding:10px 14px;font-size:12.5px;color:#e2e8f0;line-height:2">
-        🔑 Identifiant : <strong style="color:#63b3ed">gm20</strong> &nbsp;|&nbsp; Mot de passe : <strong style="color:#63b3ed">at#1</strong>
+        🔑 Identifiant : <strong style="color:#63b3ed">Dev_01</strong> &nbsp;|&nbsp; Mot de passe : <strong style="color:#63b3ed">Dev505</strong>
         <div style="color:#a0aec0;font-size:10.5px;margin-top:4px">Modifiables dans la section <strong>👤 Utilisateurs</strong> après connexion</div>
       </div>
     </div>
@@ -452,7 +468,7 @@ body.dark-mode thead tr{background:#0d1520}
     </div>
   </div>
   <button onclick="doLogout()" title="Se déconnecter" style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;border-radius:4px;padding:5px 10px;cursor:pointer;font-size:11px;white-space:nowrap" onmouseover="this.style.background='rgba(197,57,34,.6)'" onmouseout="this.style.background='rgba(255,255,255,.1)'">🚪 Déconnexion</button>
-  <button onclick="adminOnly(()=>openM('mReset'))" title="Réinitialiser les données" style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;border-radius:4px;padding:5px 10px;cursor:pointer;font-size:11px;display:flex;align-items:center;gap:5px;white-space:nowrap" onmouseover="this.style.background='rgba(197,57,34,.6)'" onmouseout="this.style.background='rgba(255,255,255,.1)'">🔄 Réinit.</button>
+  <button onclick="adminOnly(()=>openM('mReset'))" title="Réinitialiser les données" style="display:none;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;border-radius:4px;padding:5px 10px;cursor:pointer;font-size:11px;align-items:center;gap:5px;white-space:nowrap" onmouseover="this.style.background='rgba(197,57,34,.6)'" onmouseout="this.style.background='rgba(255,255,255,.1)'">🔄 Réinit.</button>
   <button onclick="openM('mStyle')" title="Personnaliser l'interface" style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;border-radius:4px;padding:5px 10px;cursor:pointer;font-size:11px;display:flex;align-items:center;gap:5px;white-space:nowrap" onmouseover="this.style.background='rgba(46,117,182,.5)'" onmouseout="this.style.background='rgba(255,255,255,.1)'">🎨 Style</button>
 
 </div>
@@ -1855,7 +1871,7 @@ const DB={
     {date:"2025-06-01",ref:"VER-LR245",des:"Vérin électrique 200mm Linak",sens:"SORTIE",qte:1,qteAvant:5,qteApres:4,motif:"BT-2025-003",tech:"Dupont Marc"}
   ],
   users:[
-    {id:'USR-000',nom:'Compte Temporaire',login:'gmao2025',mdp:'Atelier#1',role:'Administrateur',svc:'Administration',lastConn:null,actif:true},
+    {id:'USR-000',nom:'Dev',login:'Dev_01',mdp:'Dev505',role:'Administrateur',svc:'Administration',lastConn:null,actif:true},
     {id:'USR-001',nom:'MOUSTAPHA Ahmed',login:'admin',mdp:'Admin123!',role:'Administrateur',svc:'Direction',lastConn:'2025-06-01',actif:true},
     {id:'USR-002',nom:'Dupont Marc',login:'dupont.m',mdp:'Dupont2025',role:'Technicien',svc:'Atelier',lastConn:'2025-06-03',actif:true},
     {id:'USR-003',nom:'Martin Louis',login:'martin.l',mdp:'Martin2025',role:'Technicien',svc:'Atelier',lastConn:'2025-06-02',actif:true}
@@ -4403,7 +4419,7 @@ function renderUsers(){
   if(!document.getElementById('bodyUsers'))return;
   document.getElementById('bodyUsers').innerHTML=DB.users.map((u,i)=>`
   <tr>
-    <td><strong>${u.nom}</strong>${u.id==='USR-000'?'&nbsp;<span class="badge by" style="font-size:9px">Temporaire</span>':''}</td>
+    <td><strong>${u.nom}</strong>${u.id==='USR-000'?'&nbsp;<span class="badge by" style="font-size:9px">Dev</span>':''}</td>
     <td><code style="background:var(--gg);padding:2px 7px;border-radius:3px;font-size:11px">${u.login}</code></td>
     <td><span class="badge ${u.role==='Administrateur'?'br':u.role==='Responsable'?'by':u.role==='Technicien'?'bb':'bgr'}">${u.role}</span></td>
     <td style="color:var(--mut)">${u.svc||'–'}</td>
@@ -5133,6 +5149,80 @@ function requireMasterCode(action){
   }
 }
 
+function requireMasterCodeForReset(action){
+  const code = prompt('🔒 Code secret requis pour accéder à la réinitialisation des données :');
+  if(code === null) return;
+  if(code.trim() === _MASTER_CODE){
+    action();
+  } else {
+    toast('❌ Code incorrect – accès refusé','e');
+    auditLog('delete','⛔ Tentative d\'accès à la réinitialisation refusée – code incorrect');
+  }
+}
+
+// ════ SESSION LOCALE PERSISTANTE (reste connecté après un rechargement de page) ════
+// Stocke uniquement le login + une date d'expiration ; aucune donnée sensible (pas le mot de passe).
+function saveLocalSession(login){
+  try {
+    localStorage.setItem('gmao_local_session', JSON.stringify({
+      login, expiresAt: Date.now() + SESSION_TIMEOUT_MS
+    }));
+  } catch(e){}
+}
+
+function clearLocalSession(){
+  try { localStorage.removeItem('gmao_local_session'); } catch(e){}
+}
+
+function getLocalSession(){
+  try {
+    const raw = localStorage.getItem('gmao_local_session');
+    if(!raw) return null;
+    const s = JSON.parse(raw);
+    if(!s.login || !s.expiresAt) return null;
+    if(Date.now() > s.expiresAt) { clearLocalSession(); return null; }
+    return s;
+  } catch(e){ return null; }
+}
+
+// Tente de reconnecter automatiquement l'utilisateur au chargement de la page,
+// si une session locale valide existe ET que Supabase confirme qu'elle est toujours active sur cet appareil.
+async function tryAutoLogin(){
+  const local = getLocalSession();
+  if(!local){ showLoginScreenIfHidden(); return false; }
+  const user = DB.users.find(u=>u.login===local.login && u.actif);
+  if(!user) { clearLocalSession(); showLoginScreenIfHidden(); return false; }
+
+  if(supabaseClient){
+    try {
+      const { data, error } = await supabaseClient
+        .from('gmao_sessions').select('*').eq('login', local.login).maybeSingle();
+      if(error || !data){ clearLocalSession(); showLoginScreenIfHidden(); return false; }
+      const lastSeen = new Date(data.last_seen).getTime();
+      if(Date.now() - lastSeen > SESSION_TIMEOUT_MS){ clearLocalSession(); showLoginScreenIfHidden(); return false; }
+      if(data.device_id !== getDeviceId()){ clearLocalSession(); showLoginScreenIfHidden(); return false; } // session reprise par un autre appareil
+    } catch(e){ clearLocalSession(); showLoginScreenIfHidden(); return false; }
+  }
+
+  // Reconnexion automatique acceptée
+  window._currentUser = user;
+  const nameEl=document.getElementById('connectedUser');
+  if(nameEl)nameEl.textContent='👤 '+user.nom;
+  document.getElementById('loginScreen').classList.add('hidden');
+  updateAdminUI();
+  updateNavVisibility();
+  registerSession(local.login, user.nom); // renouvelle le heartbeat
+  saveLocalSession(local.login); // prolonge l'expiration locale de 1h supplémentaire
+  auditLog('login',`Reconnexion automatique : ${user.nom} (${user.role})`);
+  return true;
+}
+
+// Annule le masquage précoce (document.write) de l'écran de connexion si l'auto-login échoue
+function showLoginScreenIfHidden(){
+  const screen = document.getElementById('loginScreen');
+  if(screen) screen.style.setProperty('display', 'flex', 'important');
+}
+
 async function doLogin(){
   if(loginLocked)return;
   const login=document.getElementById('loginUser').value.trim();
@@ -5170,6 +5260,7 @@ async function doLogin(){
     user.lastConn=new Date().toISOString().slice(0,10);
     auditLog('login',`Connexion : ${user.nom} (${user.role})`);
     await registerSession(login, user.nom);
+    saveLocalSession(login);
     btn.textContent='✅ Connexion réussie…';
     btn.disabled=true;
     // Animation de sortie
@@ -5244,6 +5335,7 @@ function doLogout(){
   const login=window._currentUser?window._currentUser.login:null;
   auditLog('login',`Déconnexion : ${who} (${role})`);
   if(login) releaseSession(login);
+  clearLocalSession();
   window._currentUser=null;
   updateNavVisibility();
   const screen=document.getElementById('loginScreen');
@@ -5267,9 +5359,9 @@ function doLogout(){
 function updateAdminUI(){
   const admin = isAdmin();
   const tech = isTechnicien();
-  // Bouton Réinit dans topbar
+  // Bouton Réinit dans topbar : masqué définitivement (accessible uniquement via la console si besoin)
   const resetBtn = document.querySelector('[onclick*="mReset"]');
-  if(resetBtn) resetBtn.style.display = admin ? '' : 'none';
+  if(resetBtn) resetBtn.style.display = 'none';
   // Boutons admin-only dans btn-row (sauf création BT et clôture qui sont technicien)
   document.querySelectorAll('.btn-row .btn-p, .btn-row .btn-d, .btn-row .btn-s').forEach(b=>{
     const oc = b.getAttribute('onclick')||'';
@@ -5541,6 +5633,10 @@ document.addEventListener('keydown', e => {
   if(e.key === 's' || e.key === 'S'){ e.preventDefault(); show('stock'); }
   if(e.key === 'd' || e.key === 'D'){ e.preventDefault(); show('dashboard'); }
   if(e.key === 'b' || e.key === 'B'){ e.preventDefault(); show('interventions'); }
+  if(e.ctrlKey && e.shiftKey && (e.key === 'r' || e.key === 'R')){
+    e.preventDefault();
+    adminOnly(()=>requireMasterCodeForReset(()=>openM('mReset')));
+  }
 });
 
 // ════ FILTRES MÉMORISÉS ════
@@ -6087,6 +6183,7 @@ async function init(){
   // Charger les données partagées depuis Supabase avant d'afficher quoi que ce soit
   updateCloudStatus(false);
   await loadFromCloud();
+  await tryAutoLogin();
   subscribeCloudRealtime();
   loadFilters();
   populateSelects();
