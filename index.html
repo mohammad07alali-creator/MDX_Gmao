@@ -1904,7 +1904,8 @@ function buildCloudSnapshot(){
     immob: DB.immob||[], conformite: DB.conformite||[], users: DB.users||[],
     mvtLog: DB.mvtLog||[], pareto: PARETO, budget: BUDGET,
     db_rondes: DB_RONDES, db_consignes: DB_CONSIGNES, db_bat_zones: DB_BAT_ZONES, db_devis: DB_DEVIS,
-    db_amdec: window.DB_AMDEC||[], db_pdca: window.DB_PDCA||[]
+    db_amdec: window.DB_AMDEC||[], db_pdca: window.DB_PDCA||[],
+    audit_log: AUDIT_LOG.slice(0, 500)
   };
 }
 
@@ -1922,6 +1923,16 @@ function applyCloudSnapshot(snap){
     if(snap.db_devis){ DB_DEVIS.length=0; snap.db_devis.forEach(x=>DB_DEVIS.push(x)); }
     if(snap.db_amdec){ window.DB_AMDEC=snap.db_amdec; }
     if(snap.db_pdca){ window.DB_PDCA=snap.db_pdca; }
+    if(snap.audit_log){
+      // Fusion par déduplication (ts+msg+user) pour ne perdre aucune entrée d'aucun appareil
+      const seen = new Set(AUDIT_LOG.map(e => e.ts+'|'+e.msg+'|'+e.user));
+      snap.audit_log.forEach(e=>{
+        const key = e.ts+'|'+e.msg+'|'+e.user;
+        if(!seen.has(key)){ AUDIT_LOG.push(e); seen.add(key); }
+      });
+      AUDIT_LOG.sort((a,b)=>b.ts-a.ts);
+      while(AUDIT_LOG.length > 500) AUDIT_LOG.pop();
+    }
   } finally {
     _applyingRemote = false;
   }
@@ -2014,6 +2025,8 @@ function subscribeCloudRealtime(){
       updateBadges();
       if(document.getElementById('page-dashboard') && document.getElementById('page-dashboard').classList.contains('active')) renderDashboard();
       updateDescList();updateCausePanneList();
+      const auditEl = document.getElementById('page-audit');
+      if(auditEl && auditEl.classList.contains('active')) renderAudit();
       toast('🔄 Données mises à jour par un autre utilisateur','s');
     })
     .subscribe();
@@ -5262,6 +5275,7 @@ function auditLog(type, msg){
   updateAuditStats();
   const cntEl=document.getElementById('auditCount');
   if(cntEl) cntEl.textContent=`${AUDIT_LOG.length} entrée${AUDIT_LOG.length>1?'s':''}`;
+  if(typeof syncToCloud === 'function') syncToCloud();
 }
 function renderAudit(list){
   list = list || AUDIT_LOG;
@@ -5341,10 +5355,11 @@ function updateAuditStats(){
 }
 function clearAuditLog(){
   if(!isAdmin()){toast('🔒 Accès réservé aux administrateurs','e');return;}
-  confirmDelete('Vider complètement le journal d\'audit ?', ()=>{
+  confirmDelete('Vider complètement le journal d\'audit pour TOUS les utilisateurs ?', ()=>{
     AUDIT_LOG.length = 0;
     renderAudit();
     toast('🗑️ Journal d\'audit vidé','w');
+    syncToCloud();
   });
 }
 
