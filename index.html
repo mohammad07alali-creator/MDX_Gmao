@@ -6,10 +6,6 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <title>GMAO v1_Vanilla – Atelier Matériels Roulants – GHRMSA</title>
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#1F4E79">
-<link rel="icon" href="icon-192.png">
-<link rel="apple-touch-icon" href="icon-192.png">
 <meta name="gmao-theme" id="gmaoThemeMeta" content="blue"><!--GMAO_STYLE_STATE_START--><!--GMAO_STYLE_STATE_END-->
 <style>
 :root{
@@ -2717,7 +2713,7 @@ function showQR(){
   if(!eq)return;
   const bts=DB.bt.filter(b=>b.eq===id).length;
   const coutTotal=DB.bt.filter(b=>b.eq===id).reduce((s,b)=>s+(b.cout||0),0);
-  const url=`GMAO://GHRMSA/EQ/${id}`;
+  const url=`${window.location.origin}${window.location.pathname}?eq=${id}`;
   document.getElementById('qrContent').innerHTML=`
     <div class="grid2">
       <div class="card">
@@ -2772,7 +2768,7 @@ function printQR(){
   const eq=DB.eq.find(e=>e.id===id);
   const bts=DB.bt.filter(b=>b.eq===id).length;
   const coutTotal=DB.bt.filter(b=>b.eq===id).reduce((s,b)=>s+(b.cout||0),0);
-  const url=`GMAO://GHRMSA/EQ/${eq.id}`;
+  const url=`${window.location.origin}${window.location.pathname}?eq=${eq.id}`;
 
   // Récupérer l'image QR depuis le canvas déjà affiché
   let qrImgSrc='';
@@ -2881,7 +2877,7 @@ function printAllQR(){
 
   const canvases={};
   const pending=DB.eq.map(eq=>{
-    const url=`GMAO://GHRMSA/EQ/${eq.id}`;
+    const url=`${window.location.origin}${window.location.pathname}?eq=${eq.id}`;
     const holder=document.createElement('div');
     holder.id='tmpqr_'+eq.id;
     tmp.appendChild(holder);
@@ -2904,7 +2900,7 @@ function printAllQR(){
     const fiches=DB.eq.map(eq=>{
       const bts=DB.bt.filter(b=>b.eq===eq.id).length;
       const cout=DB.bt.filter(b=>b.eq===eq.id).reduce((s,b)=>s+(b.cout||0),0);
-      const url=`GMAO://GHRMSA/EQ/${eq.id}`;
+      const url=`${window.location.origin}${window.location.pathname}?eq=${eq.id}`;
       const img=canvases[eq.id];
       const critColor=eq.crit==='Critique'?'background:#FFE0E0;color:#9B2C2C':eq.crit==='Élevée'?'background:#FFF2CC;color:#7B4F00':eq.crit==='Modérée'?'background:#D6E4F0;color:#1F4E79':'background:#E2EFDA;color:#1E6B3C';
       return `
@@ -4361,44 +4357,268 @@ function populateSelects(){
   const fcBT=document.getElementById('fc_bt');if(fcBT)fcBT.innerHTML=btOpts||'<option>Aucun BT ouvert</option>';
 }
 
-// ════ RAPPORT ════
+// ════ RAPPORT MENSUEL ════
 function rapport(){
-  const total=DB.eq.length,op=DB.eq.filter(e=>e.stat.includes('Opérationnel')).length;
-  const nbBT=DB.bt.length,prev=DB.bt.filter(b=>b.type==='Préventif').length;
-  const cout=DB.bt.reduce((s,b)=>s+(b.cout||0),0);
-  const al=DB.sk.filter(s=>alrt(s).txt!=='✅ OK').length;
-  const conf=DB.metro.filter(m=>m.verd.includes('Conforme')&&!m.verd.includes('Non')).length;
-  const mois=new Date().toLocaleString('fr-FR',{month:'long',year:'numeric'});
+  const now = new Date();
+  const moisLabel = now.toLocaleString('fr-FR',{month:'long',year:'numeric'});
+  const moisNum = now.getMonth(), anNum = now.getFullYear();
+
+  // BT du mois en cours (date d'ouverture dans le mois courant)
+  const btDuMois = DB.bt.filter(b=>{
+    const d = new Date(b.ouv);
+    return d.getMonth()===moisNum && d.getFullYear()===anNum;
+  });
+
+  const total=DB.eq.length, op=DB.eq.filter(e=>e.stat.includes('Opérationnel')).length;
+  const dispo = total ? Math.round(op/total*100) : 0;
+  const nbBT=btDuMois.length;
+  const prevCount = btDuMois.filter(b=>b.type==='Préventif').length;
+  const corrCount = btDuMois.filter(b=>b.type==='Correctif').length;
+  const tauxPrev = nbBT ? Math.round(prevCount/nbBT*100) : 0;
+  const cout = btDuMois.reduce((s,b)=>s+(b.cout||0),0);
+  const coutTotal = DB.bt.reduce((s,b)=>s+(b.cout||0),0);
+  const dureeTotale = btDuMois.reduce((s,b)=>s+(b.dur||0),0);
+  const mttr = (corrCount ? (btDuMois.filter(b=>b.type==='Correctif').reduce((s,b)=>s+(b.dur||0),0)/corrCount) : 0).toFixed(1);
+  const al = DB.sk.filter(s=>alrt(s).txt!=='✅ OK').length;
+  const conf = DB.metro.filter(m=>m.verd && m.verd.includes('Conforme') && !m.verd.includes('Non')).length;
+  const tauxConfMetro = DB.metro.length ? Math.round(conf/DB.metro.length*100) : 100;
+  const confHAS = DB.conformite.filter(c=>c.conf && c.conf.includes('✅')).length;
+  const heuresImmob = DB.immob ? DB.immob.reduce((s,i)=>s+(i.dur||0),0) : 0;
+
+  // Couleur selon seuil (vert/orange/rouge)
+  const seuil = (val,bon,moyen) => val>=bon?'#1E6B3C':val>=moyen?'#C55A11':'#9B2335';
+  const seuilBg = (val,bon,moyen) => val>=bon?'#E2EFDA':val>=moyen?'#FFF2CC':'#FFE0E0';
+
+  // Synthèse par service (nb BT, coût, durée)
+  const services = {};
+  btDuMois.forEach(b=>{
+    const s = b.svc || '–';
+    if(!services[s]) services[s] = {nb:0, cout:0, dur:0};
+    services[s].nb++; services[s].cout += (b.cout||0); services[s].dur += (b.dur||0);
+  });
+  const servicesSorted = Object.entries(services).sort((a,b)=>b[1].cout-a[1].cout);
+
+  // Top 5 équipements par coût (sur tout l'historique, vision structurelle)
+  const coutParEq = {};
+  DB.bt.forEach(b=>{ coutParEq[b.eq] = (coutParEq[b.eq]||0) + (b.cout||0); });
+  const topEq = Object.entries(coutParEq).sort((a,b)=>b[1]-a[1]).slice(0,5)
+    .map(([id,c])=>{ const e=DB.eq.find(x=>x.id===id); return {id, des: e?e.des:id, svc: e?e.svc:'–', cout:c}; });
+  const maxCoutEq = Math.max(...topEq.map(e=>e.cout), 1);
+
+  // ── Graphique SVG : répartition Préventif/Correctif (barres horizontales) ──
+  const barChartSvg = (() => {
+    const maxV = Math.max(prevCount, corrCount, 1);
+    const bw = (v) => Math.round((v/maxV)*260);
+    return `<svg width="380" height="90" viewBox="0 0 380 90" xmlns="http://www.w3.org/2000/svg">
+      <text x="0" y="16" font-size="11" fill="#374151" font-family="Arial">Préventif (${prevCount})</text>
+      <rect x="0" y="22" width="${bw(prevCount)}" height="18" rx="3" fill="#2E75B6"/>
+      <text x="${bw(prevCount)+8}" y="35" font-size="11" fill="#1F4E79" font-weight="bold" font-family="Arial">${nbBT?Math.round(prevCount/nbBT*100):0}%</text>
+      <text x="0" y="62" font-size="11" fill="#374151" font-family="Arial">Correctif (${corrCount})</text>
+      <rect x="0" y="68" width="${bw(corrCount)}" height="18" rx="3" fill="#C55A11"/>
+      <text x="${bw(corrCount)+8}" y="81" font-size="11" fill="#9B4A0E" font-weight="bold" font-family="Arial">${nbBT?Math.round(corrCount/nbBT*100):0}%</text>
+    </svg>`;
+  })();
+
+  // ── Graphique SVG : donut disponibilité du parc ──
+  const donutSvg = (() => {
+    const pct = dispo/100;
+    const r = 42, cx=55, cy=55, circ = 2*Math.PI*r;
+    const dash = circ*pct, gap = circ*(1-pct);
+    const color = seuil(dispo,90,75);
+    return `<svg width="110" height="110" viewBox="0 0 110 110" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#E8EBF0" stroke-width="13"/>
+      <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${color}" stroke-width="13"
+        stroke-dasharray="${dash} ${gap}" stroke-linecap="round"
+        transform="rotate(-90 ${cx} ${cy})"/>
+      <text x="${cx}" y="${cy+2}" text-anchor="middle" font-size="22" font-weight="bold" fill="${color}" font-family="Arial">${dispo}%</text>
+      <text x="${cx}" y="${cy+16}" text-anchor="middle" font-size="8" fill="#666" font-family="Arial">disponible</text>
+    </svg>`;
+  })();
+
   const w=window.open('','_blank');
-  w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Rapport GMAO – ${mois}</title><style>*{box-sizing:border-box}body{font-family:-apple-system,sans-serif;max-width:1000px;margin:40px auto;color:#1a2332;line-height:1.6;padding:0 20px}h1{color:#1F4E79;border-bottom:3px solid #2E75B6;padding-bottom:8px}h2{color:#2E75B6;margin-top:28px;font-size:16px}h3{color:#C55A11;font-size:14px}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:16px 0}.kpi{background:#F5F6FA;border-left:4px solid #2E75B6;padding:12px;border-radius:4px}.kpi strong{font-size:22px;display:block;color:#1F4E79}.kpi small{font-size:11px;color:#666}table{width:100%;border-collapse:collapse;font-size:12px;margin-top:10px}th{background:#1F4E79;color:#fff;padding:8px;text-align:left}td{padding:7px 8px;border-bottom:1px solid #E8EBF0}tr:nth-child(even)td{background:#F5F6FA}.badge{padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600}.bg{background:#E2EFDA;color:#1E6B3C}.br{background:#FFE0E0;color:#9B2335}.by{background:#FFF2CC;color:#7A5900}@media print{.no-print{display:none}}</style></head><body>
-    <h1>📊 Rapport Mensuel de Maintenance – ${mois}</h1>
-    <p><strong>Atelier Maintenance Matériels Roulants & Transport Automatique – GHRMSA Emile Muller</strong><br>
-    Généré le : ${new Date().toLocaleDateString('fr-FR',{weekday:'long',day:'2-digit',month:'long',year:'numeric'})} à ${new Date().toLocaleTimeString('fr-FR')}</p>
-    <h2>Indicateurs Clés de Performance</h2>
-    <div class="grid">
-      <div class="kpi"><strong>${Math.round(op/total*100)}%</strong><small>Disponibilité du parc</small></div>
-      <div class="kpi"><strong>${nbBT}</strong><small>Total interventions</small></div>
-      <div class="kpi"><strong>${Math.round(prev/nbBT*100)}%</strong><small>Taux préventif</small></div>
-      <div class="kpi"><strong>${cout.toLocaleString('fr-FR')}€</strong><small>Coût total</small></div>
+  w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Rapport GMAO – ${moisLabel}</title>
+  <style>
+    *{box-sizing:border-box}
+    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;max-width:1000px;margin:0 auto;color:#1a2332;line-height:1.55;padding:0}
+    .doc-header{background:linear-gradient(135deg,#0D1B2A 0%,#1F4E79 60%,#2E75B6 100%);color:#fff;padding:32px 40px 26px;border-radius:0 0 18px 18px;margin-bottom:28px}
+    .doc-header .brand{display:flex;align-items:center;gap:10px;font-size:13px;opacity:.85;margin-bottom:14px}
+    .doc-header h1{margin:0;font-size:26px;font-weight:800;letter-spacing:-0.3px}
+    .doc-header .sub{font-size:13px;opacity:.9;margin-top:4px}
+    .doc-header .meta{display:flex;gap:24px;margin-top:18px;font-size:11.5px;opacity:.85;flex-wrap:wrap}
+    .doc-header .meta b{color:#fff;font-weight:700}
+    .container{padding:0 40px 40px}
+    h2{color:#1F4E79;font-size:16px;margin:32px 0 14px;padding-bottom:8px;border-bottom:2px solid #E8EBF0;display:flex;align-items:center;gap:8px}
+    h3{color:#C55A11;font-size:13px;margin:18px 0 8px}
+    .kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:14px 0}
+    .kpi{border-radius:8px;padding:14px;border:1px solid #E8EBF0}
+    .kpi strong{font-size:24px;display:block;line-height:1.1}
+    .kpi small{font-size:10.5px;color:#666;display:block;margin-top:3px}
+    .exec-summary{background:#F5F8FC;border-radius:10px;padding:18px 22px;margin:16px 0;border-left:4px solid #2E75B6}
+    .exec-summary p{margin:0 0 8px;font-size:13px}
+    .exec-summary p:last-child{margin-bottom:0}
+    .charts-row{display:flex;gap:32px;align-items:center;margin:16px 0;flex-wrap:wrap}
+    table{width:100%;border-collapse:collapse;font-size:11.5px;margin-top:8px}
+    th{background:#1F4E79;color:#fff;padding:8px 10px;text-align:left;font-weight:600}
+    td{padding:7px 10px;border-bottom:1px solid #E8EBF0}
+    tr:nth-child(even) td{background:#FAFBFC}
+    .badge{padding:2px 8px;border-radius:10px;font-size:10.5px;font-weight:700;display:inline-block}
+    .bg{background:#E2EFDA;color:#1E6B3C}.br{background:#FFE0E0;color:#9B2335}.by{background:#FFF2CC;color:#7A5900}
+    .bar-mini{height:8px;border-radius:4px;background:#E8EBF0;overflow:hidden;margin-top:3px}
+    .bar-mini-fill{height:100%;border-radius:4px}
+    .doc-footer{margin-top:40px;padding:18px 40px;background:#F5F6FA;border-top:1px solid #E8EBF0;display:flex;justify-content:space-between;align-items:center;font-size:10.5px;color:#888}
+    .signature-block{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:30px}
+    .signature-box{border:1px solid #E8EBF0;border-radius:8px;padding:16px;min-height:80px}
+    .signature-box .label{font-size:11px;color:#666;font-weight:600;margin-bottom:30px}
+    .signature-box .line{border-top:1px solid #ccc;padding-top:6px;font-size:10px;color:#999}
+    @media print{
+      .no-print{display:none}
+      .doc-header{border-radius:0}
+      body{margin:0;max-width:100%}
+      h2{page-break-after:avoid}
+      tr{page-break-inside:avoid}
+    }
+  </style></head><body>
+
+  <div class="doc-header">
+    <div class="brand">⚙ GMAO · GHRMSA Hôpital Emile Muller</div>
+    <h1>Rapport Mensuel de Maintenance</h1>
+    <div class="sub">Atelier Maintenance Matériels Roulants & Transport Automatique</div>
+    <div class="meta">
+      <span>Période : <b>${moisLabel.charAt(0).toUpperCase()+moisLabel.slice(1)}</b></span>
+      <span>Généré le : <b>${now.toLocaleDateString('fr-FR',{day:'2-digit',month:'long',year:'numeric'})} à ${now.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})}</b></span>
+      <span>Par : <b>${window._currentUser?window._currentUser.nom:'Système'}</b></span>
     </div>
-    <div class="grid">
-      <div class="kpi"><strong>${al}</strong><small>Alertes stock</small></div>
-      <div class="kpi"><strong>${DB.immob.reduce((s,i)=>s+(i.dur||0),0)} h</strong><small>Heures d'immobilisation</small></div>
-      <div class="kpi"><strong>${Math.round(conf/DB.metro.length*100)}%</strong><small>Conformité métrologique</small></div>
-      <div class="kpi"><strong>${DB.conformite.filter(c=>c.conf.includes('✅')).length}/${DB.conformite.length}</strong><small>Conformité HAS</small></div>
+  </div>
+
+  <div class="container">
+
+    <h2>📋 Résumé exécutif</h2>
+    <div class="exec-summary">
+      <p>Sur la période <b>${moisLabel}</b>, l'atelier a traité <b>${nbBT} bon${nbBT>1?'s':''} de travail</b>
+      (${prevCount} préventif${prevCount>1?'s':''}, ${corrCount} correctif${corrCount>1?'s':''}),
+      pour un coût total de <b>${cout.toLocaleString('fr-FR')}€</b> et ${dureeTotale.toFixed(1)}h de main d'œuvre.</p>
+      <p>La disponibilité du parc s'établit à <b style="color:${seuil(dispo,90,75)}">${dispo}%</b>
+      (${op}/${total} équipements opérationnels), avec un taux de maintenance préventive de
+      <b style="color:${seuil(tauxPrev,60,40)}">${tauxPrev}%</b>.</p>
+      <p>${al>0?`⚠️ <b>${al} référence${al>1?'s':''}</b> de stock nécessite${al>1?'nt':''} un réapprovisionnement.`:'✅ Aucune alerte de stock active ce mois.'}
+      ${tauxConfMetro<100?` La conformité métrologique est de <b style="color:${seuil(tauxConfMetro,95,80)}">${tauxConfMetro}%</b>.`:' La conformité métrologique est de 100%.'}</p>
     </div>
-    <h2>Détail des interventions</h2>
-    <table><thead><tr><th>N° BT</th><th>Équipement</th><th>N° Svc</th><th>Service</th><th>Type</th><th>Priorité</th><th>Technicien</th><th>Coût €</th><th>Durée h</th><th>Statut</th></tr></thead>
-    <tbody>${DB.bt.map(b=>{const eq=DB.eq.find(e=>e.id===b.eq);return`<tr><td>${b.id}</td><td>${b.des}</td><td>${eq&&eq.numSvc?eq.numSvc:'–'}</td><td>${b.svc}</td><td>${b.type}</td><td>${b.prior}</td><td>${b.tech}</td><td>${b.cout||0}€</td><td>${b.dur||0}h</td><td>${b.stat}</td></tr>`;}).join('')}</tbody></table>
-    <h2>Alertes stock actives</h2>
-    <table><thead><tr><th>Référence</th><th>Désignation</th><th>Stock actuel</th><th>Mini</th><th>PC</th><th>Alerte</th></tr></thead>
-    <tbody>${DB.sk.filter(s=>alrt(s).txt!=='✅ OK').map(s=>`<tr><td>${s.ref}</td><td>${s.des}</td><td>${s.qte}</td><td>${s.mini}</td><td>${s.pc}</td><td>${alrt(s).txt}</td></tr>`).join('')||'<tr><td colspan="6" style="text-align:center;color:green">✅ Aucune alerte stock</td></tr>'}</tbody></table>
-    <h2>Contrôles de conformité HAS</h2>
-    <table><thead><tr><th>Référence</th><th>Exigence</th><th>Prochain contrôle</th><th>Statut</th></tr></thead>
-    <tbody>${DB.conformite.map(c=>`<tr><td>${c.ref}</td><td>${c.exig}</td><td>${c.prochain}</td><td>${c.conf}</td></tr>`).join('')}</tbody></table>
-    <p style="margin-top:36px;color:#999;font-size:11px;border-top:1px solid #eee;padding-top:10px">GMAO v1_Vanilla – Atelier Matériels Roulants – GHRMSA Emile Muller</p>
-    <button class="no-print" onclick="window.print()" style="margin-top:12px;padding:10px 20px;background:#1F4E79;color:#fff;border:none;border-radius:4px;cursor:pointer">🖨️ Imprimer / Exporter PDF</button>
-    </body></html>`);
+
+    <h2>📊 Indicateurs clés du mois</h2>
+    <div class="kpi-row">
+      <div class="kpi" style="border-left:4px solid ${seuil(dispo,90,75)};background:${seuilBg(dispo,90,75)}">
+        <strong style="color:${seuil(dispo,90,75)}">${dispo}%</strong><small>Disponibilité du parc</small>
+      </div>
+      <div class="kpi" style="border-left:4px solid #2E75B6">
+        <strong style="color:#1F4E79">${nbBT}</strong><small>Interventions ce mois</small>
+      </div>
+      <div class="kpi" style="border-left:4px solid ${seuil(tauxPrev,60,40)};background:${seuilBg(tauxPrev,60,40)}">
+        <strong style="color:${seuil(tauxPrev,60,40)}">${tauxPrev}%</strong><small>Taux préventif</small>
+      </div>
+      <div class="kpi" style="border-left:4px solid #C55A11">
+        <strong style="color:#9B4A0E">${cout.toLocaleString('fr-FR')}€</strong><small>Coût du mois</small>
+      </div>
+    </div>
+    <div class="kpi-row">
+      <div class="kpi" style="border-left:4px solid #2E75B6">
+        <strong style="color:#1F4E79">${mttr}h</strong><small>MTTR moyen (correctif)</small>
+      </div>
+      <div class="kpi" style="border-left:4px solid ${al>0?'#9B2335':'#1E6B3C'};background:${al>0?'#FFE0E0':'#E2EFDA'}">
+        <strong style="color:${al>0?'#9B2335':'#1E6B3C'}">${al}</strong><small>Alertes stock actives</small>
+      </div>
+      <div class="kpi" style="border-left:4px solid ${seuil(tauxConfMetro,95,80)};background:${seuilBg(tauxConfMetro,95,80)}">
+        <strong style="color:${seuil(tauxConfMetro,95,80)}">${tauxConfMetro}%</strong><small>Conformité métrologique</small>
+      </div>
+      <div class="kpi" style="border-left:4px solid #2E75B6">
+        <strong style="color:#1F4E79">${confHAS}/${DB.conformite.length}</strong><small>Conformité HAS</small>
+      </div>
+    </div>
+
+    <h2>📈 Répartition des interventions</h2>
+    <div class="charts-row">
+      <div>${donutSvg}</div>
+      <div>${barChartSvg}</div>
+    </div>
+
+    <h2>🏥 Synthèse par service</h2>
+    <table>
+      <thead><tr><th>Service</th><th>Interventions</th><th>Durée totale</th><th>Coût total</th><th>Coût moyen</th></tr></thead>
+      <tbody>
+        ${servicesSorted.length ? servicesSorted.map(([svc,d])=>`
+          <tr><td><b>${svc}</b></td><td>${d.nb}</td><td>${d.dur.toFixed(1)}h</td>
+          <td>${d.cout.toLocaleString('fr-FR')}€</td><td>${Math.round(d.cout/d.nb)}€</td></tr>
+        `).join('') : '<tr><td colspan="5" style="text-align:center;color:#999">Aucune intervention ce mois-ci</td></tr>'}
+      </tbody>
+    </table>
+
+    <h2>🏆 Top 5 équipements – Coût cumulé de maintenance</h2>
+    <table>
+      <thead><tr><th>Équipement</th><th>Service</th><th>Coût cumulé</th><th></th></tr></thead>
+      <tbody>
+        ${topEq.map(e=>`
+          <tr><td><b>${e.id}</b> – ${e.des}</td><td>${e.svc}</td><td><b>${e.cout.toLocaleString('fr-FR')}€</b></td>
+          <td style="width:140px"><div class="bar-mini"><div class="bar-mini-fill" style="width:${Math.round(e.cout/maxCoutEq*100)}%;background:#2E75B6"></div></div></td></tr>
+        `).join('')}
+      </tbody>
+    </table>
+
+    <h2>🔧 Détail des interventions du mois</h2>
+    <table>
+      <thead><tr><th>N° BT</th><th>Équipement</th><th>Service</th><th>Type</th><th>Priorité</th><th>Technicien</th><th>Coût</th><th>Durée</th><th>Statut</th></tr></thead>
+      <tbody>
+        ${btDuMois.length ? btDuMois.map(b=>{
+          const eqDes = (DB.eq.find(e=>e.id===b.eq)||{}).des || b.eq;
+          const statClass = b.stat.includes('Clôturé')?'bg':b.stat.includes('cours')?'by':'br';
+          return `<tr><td><b>${b.id}</b></td><td>${eqDes}</td><td>${b.svc}</td><td>${b.type}</td>
+          <td>${b.prior}</td><td>${b.tech}</td><td>${(b.cout||0).toLocaleString('fr-FR')}€</td>
+          <td>${b.dur||0}h</td><td><span class="badge ${statClass}">${b.stat}</span></td></tr>`;
+        }).join('') : '<tr><td colspan="9" style="text-align:center;color:#999">Aucune intervention enregistrée ce mois-ci</td></tr>'}
+      </tbody>
+    </table>
+
+    <h2>📦 Alertes stock actives</h2>
+    <table>
+      <thead><tr><th>Référence</th><th>Désignation</th><th>Stock actuel</th><th>Seuil mini</th><th>Point de commande</th><th>Alerte</th></tr></thead>
+      <tbody>
+        ${DB.sk.filter(s=>alrt(s).txt!=='✅ OK').map(s=>`
+          <tr><td><b>${s.ref}</b></td><td>${s.des}</td><td>${s.qte}</td><td>${s.mini}</td><td>${s.pc}</td>
+          <td><span class="badge br">${alrt(s).txt}</span></td></tr>
+        `).join('') || '<tr><td colspan="6" style="text-align:center;color:#1E6B3C">✅ Aucune alerte stock active</td></tr>'}
+      </tbody>
+    </table>
+
+    <h2>✅ Contrôles de conformité réglementaire (HAS)</h2>
+    <table>
+      <thead><tr><th>Référence</th><th>Exigence réglementaire</th><th>Prochain contrôle</th><th>Statut</th></tr></thead>
+      <tbody>
+        ${DB.conformite.map(c=>`
+          <tr><td><b>${c.ref}</b></td><td>${c.exig}</td><td>${c.prochain||'–'}</td>
+          <td><span class="badge ${c.conf && c.conf.includes('✅')?'bg':'br'}">${c.conf||'–'}</span></td></tr>
+        `).join('')}
+      </tbody>
+    </table>
+
+    <h2>✍️ Validation</h2>
+    <div class="signature-block">
+      <div class="signature-box">
+        <div class="label">Rédigé par</div>
+        <div class="line">${window._currentUser?window._currentUser.nom+' – '+window._currentUser.role:'_____________________'}</div>
+      </div>
+      <div class="signature-box">
+        <div class="label">Validé par (Responsable d'atelier)</div>
+        <div class="line">Date et signature : _____________________</div>
+      </div>
+    </div>
+
+    <button class="no-print" onclick="window.print()" style="margin-top:28px;padding:11px 24px;background:#1F4E79;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:13px;font-weight:600">🖨️ Imprimer / Exporter en PDF</button>
+  </div>
+
+  <div class="doc-footer">
+    <span>GMAO · Atelier Maintenance Matériels Roulants & Transport Automatique – GHRMSA Hôpital Emile Muller</span>
+    <span>Document généré automatiquement – ${now.toLocaleDateString('fr-FR')}</span>
+  </div>
+
+  </body></html>`);
   w.document.close();
 }
 
@@ -4569,6 +4789,62 @@ const THEMES={
   rose:  {bl:'#831843',lb:'#BE185D',vl:'#FCE7F3',dk:'#3D0B20',name:'Rose'},
   indigo:{bl:'#312E81',lb:'#4338CA',vl:'#E0E7FF',dk:'#1A1854',name:'Indigo Tech'}
 };
+// ════ PERSONNALISATION PAR APPAREIL (localStorage, jamais partagée/synchronisée) ════
+function savePersonalization(){
+  try {
+    const radSlider = document.getElementById('radSlider');
+    const prefs = {
+      theme: currentTheme,
+      fontSize: document.body.style.fontSize || null,
+      fontFamily: document.body.style.fontFamily || null,
+      density: document.documentElement.style.getPropertyValue('--td-pad') || null,
+      radius: document.documentElement.style.getPropertyValue('--rad') || null,
+      sidebarWidth: document.querySelector('.sidebar') ? document.querySelector('.sidebar').style.width : null,
+      shadow: document.documentElement.style.getPropertyValue('--sh') || null,
+      customColors: {
+        main: document.documentElement.style.getPropertyValue('--bl') || null,
+        sec: document.documentElement.style.getPropertyValue('--lb') || null,
+        side: document.documentElement.style.getPropertyValue('--dk') || null,
+        acc: document.documentElement.style.getPropertyValue('--vl') || null
+      }
+    };
+    localStorage.setItem('gmao_personalization', JSON.stringify(prefs));
+  } catch(e){}
+}
+
+function loadPersonalization(){
+  try {
+    const raw = localStorage.getItem('gmao_personalization');
+    if(!raw) return;
+    const p = JSON.parse(raw);
+    if(p.theme) applyTheme(p.theme);
+    if(p.fontSize) document.body.style.fontSize = p.fontSize;
+    if(p.fontFamily) document.body.style.fontFamily = p.fontFamily;
+    if(p.density) document.documentElement.style.setProperty('--td-pad', p.density);
+    if(p.radius) document.documentElement.style.setProperty('--rad', p.radius);
+    if(p.sidebarWidth && document.querySelector('.sidebar')) document.querySelector('.sidebar').style.width = p.sidebarWidth;
+    if(p.shadow) document.documentElement.style.setProperty('--sh', p.shadow);
+    if(p.customColors){
+      const c = p.customColors;
+      if(c.main) document.documentElement.style.setProperty('--bl', c.main);
+      if(c.sec) document.documentElement.style.setProperty('--lb', c.sec);
+      if(c.side) document.documentElement.style.setProperty('--dk', c.side);
+      if(c.acc) document.documentElement.style.setProperty('--vl', c.acc);
+      const tb = document.querySelector('.topbar');
+      if(tb && c.main) tb.style.background = c.main;
+    }
+    // Resynchroniser les indicateurs visuels (boutons actifs) avec l'état restauré
+    if(p.fontSize){
+      const sizeNum = parseInt(p.fontSize);
+      document.querySelectorAll('.font-chip').forEach(b=>{
+        const active=parseInt(b.dataset.size)===sizeNum;
+        b.style.background=active?'var(--lb)':'transparent';
+        b.style.color=active?'#fff':'var(--lb)';
+      });
+    }
+  } catch(e){ console.error('Erreur restauration personnalisation:', e); }
+}
+
 let currentTheme='blue';
 
 function applyTheme(name){
@@ -4603,6 +4879,7 @@ function applyTheme(name){
   const el=document.getElementById('currentThemeName');
   if(el)el.textContent=t.name;
   toast('🎨 Thème '+t.name+' appliqué','s');
+  savePersonalization();
 }
 function applyFont(size){
   document.body.style.fontSize=size+'px';
@@ -4612,6 +4889,7 @@ function applyFont(size){
     b.style.color=active?'#fff':'var(--lb)';
     b.style.borderColor=active?'var(--lb)':'var(--lb)';
   });
+  savePersonalization();
 }
 function applyFontFamily(fam){
   const families={system:'-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif',mono:'"Courier New",monospace',serif:'Georgia,serif',rounded:'"Trebuchet MS",sans-serif'};
@@ -4622,6 +4900,7 @@ function applyFontFamily(fam){
     b.style.color=active?'#fff':'var(--lb)';
   });
   toast('🔤 Police modifiée','s');
+  savePersonalization();
 }
 function applyDensity(d){
   const densities={compact:{pad:'4px 8px',lh:'1.2'},normal:{pad:'8px 10px',lh:'1.4'},spacieux:{pad:'12px 14px',lh:'1.6'}};
@@ -4634,10 +4913,12 @@ function applyDensity(d){
     b.style.color=active?'#fff':'var(--lb)';
   });
   toast('📐 Densité modifiée','s');
+  savePersonalization();
 }
 function applyRadius(val){
   document.documentElement.style.setProperty('--rad',val+'px');
   const rv=document.getElementById('radVal');if(rv)rv.textContent=val+'px';
+  savePersonalization();
 }
 function applySidebar(w){
   document.querySelector('.sidebar').style.width=w+'px';
@@ -4646,6 +4927,7 @@ function applySidebar(w){
     b.style.background=active?'var(--lb)':'transparent';
     b.style.color=active?'#fff':'var(--lb)';
   });
+  savePersonalization();
 }
 function applyShadow(s){
   const shadows={none:'none',normal:'0 2px 12px rgba(31,78,121,.12)',forte:'0 4px 24px rgba(31,78,121,.25)'};
@@ -4655,6 +4937,7 @@ function applyShadow(s){
     b.style.background=active?'var(--lb)':'transparent';
     b.style.color=active?'#fff':'var(--lb)';
   });
+  savePersonalization();
 }
 function syncColor(inputId,hex){
   if(/^#[0-9A-Fa-f]{6}$/.test(hex))document.getElementById(inputId).value=hex;
@@ -4685,6 +4968,7 @@ function applyCustomColors(){
   document.querySelector('.topbar').style.background=main;
   previewPalette();
   toast('🎨 Couleurs personnalisées appliquées','s');
+  savePersonalization();
 }
 function resetStyle(){
   ['--bl','--lb','--vl','--dk','--rad','--sh'].forEach(v=>document.documentElement.style.removeProperty(v));
@@ -4699,6 +4983,7 @@ function resetStyle(){
   currentTheme='blue';
   const tn=document.getElementById('currentThemeName');if(tn)tn.textContent='Bleu (Défaut)';
   toast('↩️ Style réinitialisé','s');
+  try { localStorage.removeItem('gmao_personalization'); } catch(e){}
 }
 // sync color pickers with text inputs
 document.addEventListener('input',function(e){
@@ -5294,6 +5579,7 @@ async function doLogin(){
     if(nameEl)nameEl.textContent='👤 '+user.nom;
     updateAdminUI();
     updateNavVisibility();
+    handleQrRedirect();
     const screen0=document.getElementById('loginScreen');
     screen0.classList.add('fading'); // désactive les clics sur l'écran de connexion dès maintenant
     // Animation de sortie (purement visuelle, ne bloque plus rien)
@@ -6227,6 +6513,33 @@ async function init(){
   generateNotifications();
   auditLog('login','Initialisation de la GMAO');
   document.querySelectorAll('.modal-bg').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('open');}));
+
+  // Si la page a été ouverte via un QR code d'équipement (?eq=EQ-001),
+  // et que l'utilisateur est déjà connecté (auto-login), on ouvre directement son historique.
+  if(window._currentUser) handleQrRedirect();
+}
+
+// Lit le paramètre ?eq= de l'URL et ouvre directement l'historique de l'équipement correspondant.
+// Appelée soit juste après l'auto-login (dans init), soit juste après une connexion manuelle réussie (dans doLogin).
+function handleQrRedirect(){
+  const params = new URLSearchParams(window.location.search);
+  const eqId = params.get('eq');
+  if(!eqId) return;
+  const eq = DB.eq.find(e=>e.id===eqId);
+  if(!eq){
+    toast('⚠️ Équipement '+eqId+' introuvable','e');
+  } else {
+    show('historique');
+    const sel = document.getElementById('histEqSel');
+    if(sel){
+      sel.value = eqId;
+      renderHistorique();
+      toast('📜 Historique de '+eq.id+' – '+eq.des,'s');
+    }
+  }
+  // Nettoyer l'URL pour éviter de rouvrir le même équipement à chaque rechargement futur
+  const cleanUrl = window.location.origin + window.location.pathname;
+  window.history.replaceState({}, document.title, cleanUrl);
 }
 
 // ════ SYSTÈME DE SAUVEGARDE – FICHIER HTML ════
@@ -6366,10 +6679,6 @@ function autoSave(){ /* no-op */ }
 
 
 window.addEventListener('load',()=>{
-  // Enregistrement du service worker (rend l'application installable comme une "app" depuis le navigateur)
-  if('serviceWorker' in navigator){
-    navigator.serviceWorker.register('sw.js').catch(e=>console.warn('SW non enregistré:', e));
-  }
   // Stocker le source HTML original AVANT toute modification du DOM
   // On utilise XMLHttpRequest synchrone sur le fichier local (fonctionne en file://)
   // Sinon fallback sur la sérialisation du document initial
@@ -6384,12 +6693,8 @@ window.addEventListener('load',()=>{
     // Fallback: sérialiser le document AVANT que init() ne modifie le DOM
     window._originalHTMLSource = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
   }
-  // Restaurer le thème sauvegardé si présent
-  if(window._gmaoSavedStyle && window._gmaoSavedStyle.theme){
-    currentTheme = window._gmaoSavedStyle.theme;
-    // Appliquer immédiatement (loginScreen visible au chargement)
-    setTimeout(()=>applyTheme(currentTheme), 10);
-  }
+  // Restaurer la personnalisation propre à cet appareil (thème, police, densité, etc.)
+  setTimeout(()=>loadPersonalization(), 10);
   init();
   setTimeout(()=>{const el=document.getElementById('loginUser');if(el)el.focus();},100);
 });
