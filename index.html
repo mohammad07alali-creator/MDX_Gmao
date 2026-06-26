@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/lucide@latest/dist/umd/lucide.js"></script>
 <title>GMAO v1_Vanilla – Atelier Matériels Roulants – GHRMSA</title>
 <meta name="gmao-theme" id="gmaoThemeMeta" content="blue"><!--GMAO_STYLE_STATE_START--><!--GMAO_STYLE_STATE_END-->
 <style>
@@ -24,22 +23,20 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .topbar-sub{font-size:11px;color:#9BBDD4;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .topbar-date{font-size:11px;color:#9BBDD4;white-space:nowrap;font-variant-numeric:tabular-nums}
 .layout{display:flex;flex:1;min-height:0}
-.sidebar{width:210px;background:var(--dk);display:flex;flex-direction:column;overflow-y:auto;flex-shrink:0;transition:width .15s ease;contain:layout style}
+.sidebar{width:210px;background:var(--dk);display:flex;flex-direction:column;overflow-y:auto;flex-shrink:0}
 .sid-sec{padding:14px 14px 4px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:#4A6B85}
 .nav-item{display:flex;align-items:center;gap:10px;padding:9px 16px;cursor:pointer;color:#8BAFC8;font-size:12.5px;transition:all .15s;border-left:3px solid transparent;user-select:none;white-space:nowrap;overflow:hidden}
 .nav-item:hover{background:rgba(255,255,255,.06);color:#fff}
 .nav-item.active{background:rgba(46,117,182,.22);color:#7BC8F6;border-left-color:#7BC8F6}
-.nav-ico{width:17px;height:17px;flex-shrink:0;stroke-width:2}
+.nav-ico{font-size:14px;width:16px;text-align:center;flex-shrink:0}
 .nav-badge{margin-left:auto;background:var(--or);color:#fff;border-radius:10px;padding:1px 7px;font-size:10px;font-weight:700}
 .sid-foot{margin-top:auto;padding:12px 16px;font-size:10px;color:#3A5A6A;border-top:1px solid #1A3344;line-height:1.7}
 .main{flex:1;overflow-y:auto;padding:20px}
 .page{display:none}.page.active{display:block}
-.pg-title{font-size:20px;font-weight:700;color:var(--bl);margin-bottom:3px;display:flex;align-items:center;gap:10px}
-.pg-title-ico{width:24px;height:24px;flex-shrink:0;stroke-width:2.2}
+.pg-title{font-size:20px;font-weight:700;color:var(--bl);margin-bottom:3px}
 .pg-sub{font-size:12px;color:var(--mut);margin-bottom:18px}
 .card{background:var(--wh);border-radius:var(--rad);box-shadow:var(--sh);border:1px solid var(--brd);margin-bottom:16px;overflow:hidden}
 .card-hdr{padding:11px 16px;font-weight:700;font-size:13px;color:var(--bl);background:var(--gr);border-bottom:1px solid var(--brd);display:flex;align-items:center;gap:8px}
-.card-hdr-ico{width:16px;height:16px;flex-shrink:0;stroke-width:2.2}
 .card-body{padding:16px;min-width:0;overflow:hidden}
 .kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:20px}
 .kpi{background:var(--wh);border-radius:var(--rad);padding:14px 16px;border:1px solid var(--brd);box-shadow:var(--sh);position:relative;overflow:hidden}
@@ -47,7 +44,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .kpi.bl::before{background:var(--lb)}.kpi.gn::before{background:var(--gn)}.kpi.or::before{background:var(--or)}.kpi.rd::before{background:#E53E3E}
 .kpi-val{font-size:24px;font-weight:700;color:var(--bl);font-variant-numeric:tabular-nums;line-height:1.1}
 .kpi-lbl{font-size:10.5px;color:var(--mut);margin-top:4px;line-height:1.3}
-.kpi-ico{position:absolute;top:12px;right:12px;width:20px;height:20px;opacity:.55;stroke-width:2}
+.kpi-ico{position:absolute;top:12px;right:12px;font-size:18px;opacity:.5}
 .tbl-wrap{overflow-x:auto}
 table{width:100%;border-collapse:collapse;font-size:12px}
 thead tr{background:var(--bl)}
@@ -66,7 +63,6 @@ input,select,textarea{border:1px solid var(--brd);border-radius:4px;padding:7px 
 input:focus,select:focus,textarea:focus{border-color:var(--lb);box-shadow:0 0 0 3px rgba(46,117,182,.12)}
 textarea{resize:vertical;min-height:60px}
 .btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:4px;border:none;cursor:pointer;font-size:12.5px;font-weight:600;font-family:inherit;transition:all .15s;white-space:nowrap}
-.btn-ico{width:15px;height:15px;flex-shrink:0;stroke-width:2.3}
 .btn-p{background:var(--lb);color:#fff}.btn-p:hover{background:var(--bl)}
 .btn-s{background:var(--gn);color:#fff}.btn-s:hover{background:#155A2E}
 .btn-w{background:var(--or);color:#fff}.btn-w:hover{background:#9E4810}
@@ -78,8 +74,7 @@ textarea{resize:vertical;min-height:60px}
 .modal-bg.open{display:flex}
 .modal{background:var(--wh);border-radius:8px;box-shadow:0 8px 40px rgba(0,0,0,.22);width:100%;max-width:700px;max-height:90vh;overflow-y:auto;animation:su .2s ease}
 @keyframes su{from{transform:translateY(24px);opacity:0}to{transform:translateY(0);opacity:1}}
-.modal-hdr{padding:14px 20px;background:var(--bl);color:#fff;display:flex;align-items:center;justify-content:space-between;font-weight:700;font-size:14px;border-radius:8px 8px 0 0;gap:10px}
-.modal-hdr-ico{width:18px;height:18px;flex-shrink:0;stroke-width:2.2;margin-right:-2px}
+.modal-hdr{padding:14px 20px;background:var(--bl);color:#fff;display:flex;align-items:center;justify-content:space-between;font-weight:700;font-size:14px;border-radius:8px 8px 0 0}
 .modal-x{background:none;border:none;color:#fff;font-size:22px;cursor:pointer;line-height:1;padding:0 2px}
 .modal-body{padding:20px}
 .modal-footer{padding:12px 20px;background:var(--gr);border-top:1px solid var(--brd);display:flex;gap:8px;justify-content:flex-end;border-radius:0 0 8px 8px}
@@ -150,13 +145,14 @@ body.dark-mode .login-footer{background:#1e2533;border-top-color:#2d3748;color:#
 body.dark-mode thead tr{background:#0d1520}
 
 /* ══ SIDEBAR COLLAPSIBLE ══ */
-.sidebar.collapsed{width:52px;overflow:hidden}
+.sidebar{transition:width .25s ease;overflow:hidden}
+.sidebar.collapsed{width:52px}
 .sidebar.collapsed .sid-sec{display:none!important}
 .sidebar.collapsed .nav-lbl{display:none!important}
 .sidebar.collapsed .nav-badge{display:none!important}
 .sidebar.collapsed .sid-foot{display:none!important}
 .sidebar.collapsed .nav-item{padding:10px 0;justify-content:center;gap:0}
-.sidebar.collapsed .nav-ico{width:20px;height:20px;min-width:52px}
+.sidebar.collapsed .nav-ico{font-size:20px;min-width:52px;text-align:center}
 .sidebar.collapsed .nav-item:hover{position:relative}
 .sidebar.collapsed .nav-item:hover::after{content:attr(data-label);position:fixed;left:58px;background:#1F4E79;color:#fff;padding:5px 12px;border-radius:5px;font-size:12px;white-space:nowrap;z-index:9999;pointer-events:none;box-shadow:0 2px 10px rgba(0,0,0,.4);border:1px solid rgba(123,200,246,.2)}
 .hamburger-btn{background:none;border:none;color:#8BAFC8;cursor:pointer;font-size:18px;padding:4px 8px;line-height:1;transition:color .15s}
@@ -335,7 +331,7 @@ body.dark-mode thead tr{background:#0d1520}
   .sidebar .nav-badge{display:none!important}
   .sidebar .sid-foot{display:none!important}
   .sidebar .nav-item{padding:10px 0;justify-content:center;gap:0}
-  .sidebar .nav-ico{width:20px;height:20px;min-width:52px}
+  .sidebar .nav-ico{font-size:20px;min-width:52px;text-align:center}
   .sidebar .nav-item:hover{position:relative}
   .sidebar .nav-item:hover::after{
     content:attr(data-label);position:fixed;left:58px;background:#1F4E79;color:#fff;
@@ -432,16 +428,16 @@ body.dark-mode thead tr{background:#0d1520}
             onkeydown="if(event.key==='Enter')doLogin()"
             onkeyup="checkCapsLock(event)">
           <button onclick="togglePwd()" tabindex="-1"
-            style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:16px;color:#94a3b8;padding:4px" title="Afficher/masquer"><i data-lucide="eye" style="width:13px;height:13px"></i></button>
+            style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:16px;color:#94a3b8;padding:4px" title="Afficher/masquer">👁️</button>
         </div>
         <div class="login-capslock" id="capsWarn">⚠️ Verr. Maj activé</div>
       </div>
-      <button class="login-btn" id="loginBtn" onclick="doLogin()"><i data-lucide="log-in" class="btn-ico"></i>Se connecter</button>
+      <button class="login-btn" id="loginBtn" onclick="doLogin()">🔐 Se connecter</button>
       <div class="login-attempts" id="loginAttempts"></div>
     </div>
     <div class="login-footer">
       <div id="credRevealWrap">
-        <button onclick="revealTempCredentials()" style="background:none;border:1px solid #4a6fa5;color:#94a3b8;border-radius:6px;padding:6px 14px;cursor:pointer;font-size:12px;width:100%"><i data-lucide="lock" class="btn-ico"></i>Afficher les identifiants temporaires</button>
+        <button onclick="revealTempCredentials()" style="background:none;border:1px solid #4a6fa5;color:#94a3b8;border-radius:6px;padding:6px 14px;cursor:pointer;font-size:12px;width:100%">🔒 Afficher les identifiants temporaires</button>
       </div>
       <div id="credBox" style="display:none;margin-top:8px;background:rgba(255,255,255,0.07);border-radius:8px;padding:10px 14px;font-size:12.5px;color:#e2e8f0;line-height:2">
         🔑 Identifiant : <strong style="color:#63b3ed">Dev_01</strong> &nbsp;|&nbsp; Mot de passe : <strong style="color:#63b3ed">Dev505</strong>
@@ -452,8 +448,8 @@ body.dark-mode thead tr{background:#0d1520}
 </div>
 
 <div class="topbar">
-  <button class="hamburger-btn" onclick="toggleSidebar()" title="Réduire/développer le menu"><i data-lucide="menu" style="width:18px;height:18px"></i></button>
-  <div class="topbar-logo" style="display:flex;align-items:center;gap:6px"><i data-lucide="settings" style="width:16px;height:16px"></i>G<span>MAO</span></div>
+  <button class="hamburger-btn" onclick="toggleSidebar()" title="Réduire/développer le menu">☰</button>
+  <div class="topbar-logo">⚙ G<span>MAO</span></div>
   <div class="topbar-sub">Atelier Maintenance Matériels Roulants &amp; Transport Automatique – GHRMSA Emile Muller</div>
   <div class="topbar-date" id="topDate"></div>
   <div id="cloudSyncStatus" style="font-size:11px;font-weight:600;white-space:nowrap;margin-right:8px" title="État de la synchronisation avec la base partagée">☁️ Connexion…</div>
@@ -461,68 +457,68 @@ body.dark-mode thead tr{background:#0d1520}
   <!-- CLOCHE NOTIFICATIONS -->
   <div class="notif-wrap" id="notifWrap">
     <button class="notif-bell" onclick="toggleNotifPanel()" title="Notifications">
-      <i data-lucide="bell" style="width:16px;height:16px"></i> <span class="notif-count" id="notifCount">0</span>
+      🔔 <span class="notif-count" id="notifCount">0</span>
     </button>
     <div class="notif-panel" id="notifPanel">
       <div class="notif-hdr">
-        <span style="display:flex;align-items:center;gap:6px"><i data-lucide="bell" style="width:14px;height:14px"></i>Notifications</span>
+        <span>🔔 Notifications</span>
         <button onclick="markAllRead()" style="background:none;border:none;cursor:pointer;font-size:11px;color:var(--lb);font-weight:600">Tout marquer lu</button>
       </div>
       <div class="notif-list" id="notifList"></div>
-      <div class="notif-footer" style="display:flex;justify-content:space-between;align-items:center"><button onclick="toggleNotifPanel()" style="background:none;border:none;cursor:pointer;font-size:11.5px;color:var(--mut)">Fermer</button><button onclick="clearNotifs()" style="background:none;border:none;cursor:pointer;font-size:11px;color:#E53E3E;font-weight:600"><i data-lucide="trash-2" class="btn-ico"></i>Tout effacer</button></div>
+      <div class="notif-footer" style="display:flex;justify-content:space-between;align-items:center"><button onclick="toggleNotifPanel()" style="background:none;border:none;cursor:pointer;font-size:11.5px;color:var(--mut)">Fermer</button><button onclick="clearNotifs()" style="background:none;border:none;cursor:pointer;font-size:11px;color:#E53E3E;font-weight:600">🗑️ Tout effacer</button></div>
     </div>
   </div>
-  <button onclick="doLogout()" title="Se déconnecter" style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;border-radius:4px;padding:5px 10px;cursor:pointer;font-size:11px;white-space:nowrap" onmouseover="this.style.background='rgba(197,57,34,.6)'" onmouseout="this.style.background='rgba(255,255,255,.1)'"><i data-lucide="log-out" class="btn-ico"></i>Déconnexion</button>
-  <button onclick="adminOnly(()=>openM('mReset'))" title="Réinitialiser les données" style="display:none;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;border-radius:4px;padding:5px 10px;cursor:pointer;font-size:11px;align-items:center;gap:5px;white-space:nowrap" onmouseover="this.style.background='rgba(197,57,34,.6)'" onmouseout="this.style.background='rgba(255,255,255,.1)'"><i data-lucide="rotate-ccw" class="btn-ico"></i>Réinit.</button>
-  <button onclick="openM('mStyle')" title="Personnaliser l'interface" style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;border-radius:4px;padding:5px 10px;cursor:pointer;font-size:11px;display:flex;align-items:center;gap:5px;white-space:nowrap" onmouseover="this.style.background='rgba(46,117,182,.5)'" onmouseout="this.style.background='rgba(255,255,255,.1)'"><i data-lucide="palette" class="btn-ico"></i>Style</button>
+  <button onclick="doLogout()" title="Se déconnecter" style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;border-radius:4px;padding:5px 10px;cursor:pointer;font-size:11px;white-space:nowrap" onmouseover="this.style.background='rgba(197,57,34,.6)'" onmouseout="this.style.background='rgba(255,255,255,.1)'">🚪 Déconnexion</button>
+  <button onclick="adminOnly(()=>openM('mReset'))" title="Réinitialiser les données" style="display:none;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;border-radius:4px;padding:5px 10px;cursor:pointer;font-size:11px;align-items:center;gap:5px;white-space:nowrap" onmouseover="this.style.background='rgba(197,57,34,.6)'" onmouseout="this.style.background='rgba(255,255,255,.1)'">🔄 Réinit.</button>
+  <button onclick="openM('mStyle')" title="Personnaliser l'interface" style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;border-radius:4px;padding:5px 10px;cursor:pointer;font-size:11px;display:flex;align-items:center;gap:5px;white-space:nowrap" onmouseover="this.style.background='rgba(46,117,182,.5)'" onmouseout="this.style.background='rgba(255,255,255,.1)'">🎨 Style</button>
 
 </div>
 
 <div class="layout">
 <nav class="sidebar">
   <div class="sid-sec">Principal</div>
-  <div class="nav-item active" onclick="show('dashboard')"><i data-lucide="layout-dashboard" class="nav-ico"></i><span class="nav-lbl">Tableau de bord</span></div>
-  <div class="nav-item nav-restricted" onclick="show('direction')"><i data-lucide="target" class="nav-ico"></i><span class="nav-lbl">Vue direction</span></div>
+  <div class="nav-item active" onclick="show('dashboard')"><span class="nav-ico">📊</span><span class="nav-lbl">Tableau de bord</span></div>
+  <div class="nav-item nav-restricted" onclick="show('direction')"><span class="nav-ico">🎯</span><span class="nav-lbl">Vue direction</span></div>
   <div class="sid-sec">Parc</div>
-  <div class="nav-item" onclick="show('equipements')"><i data-lucide="boxes" class="nav-ico"></i><span class="nav-lbl">Équipements</span></div>
-  <div class="nav-item" onclick="show('historique')"><i data-lucide="history" class="nav-ico"></i><span class="nav-lbl">Historique technique</span></div>
-  <div class="nav-item nav-restricted" onclick="show('criticite')"><i data-lucide="zap" class="nav-ico"></i><span class="nav-lbl">Criticité auto</span></div>
-  <div class="nav-item" onclick="show('qrcode')"><i data-lucide="qr-code" class="nav-ico"></i><span class="nav-lbl">QR Codes</span></div>
+  <div class="nav-item" onclick="show('equipements')"><span class="nav-ico">🏥</span><span class="nav-lbl">Équipements</span></div>
+  <div class="nav-item" onclick="show('historique')"><span class="nav-ico">📜</span><span class="nav-lbl">Historique technique</span></div>
+  <div class="nav-item nav-restricted" onclick="show('criticite')"><span class="nav-ico">⚡</span><span class="nav-lbl">Criticité auto</span></div>
+  <div class="nav-item" onclick="show('qrcode')"><span class="nav-ico">📱</span><span class="nav-lbl">QR Codes</span></div>
   <div class="sid-sec">Maintenance</div>
-  <div class="nav-item" onclick="show('interventions')"><i data-lucide="wrench" class="nav-ico"></i><span class="nav-lbl">Interventions</span><span class="nav-badge" id="bBT">0</span></div>
-  <div class="nav-item" onclick="show('planning')"><i data-lucide="calendar-days" class="nav-ico"></i><span class="nav-lbl">Planning</span></div>
-  <div class="nav-item nav-restricted" onclick="show('fiabilite')"><i data-lucide="trending-up" class="nav-ico"></i><span class="nav-lbl">Fiabilité MTBF/MTTR</span></div>
-  <div class="nav-item nav-restricted" onclick="show('immobilisations')"><i data-lucide="timer" class="nav-ico"></i><span class="nav-lbl">Immobilisations</span></div>
-  <div class="nav-item nav-restricted" onclick="show('predictif')"><i data-lucide="brain-circuit" class="nav-ico"></i><span class="nav-lbl">Maintenance prédictive</span></div>
-  <div class="nav-item" onclick="show('causesracines')"><i data-lucide="search" class="nav-ico"></i><span class="nav-lbl">Causes racines</span></div>
+  <div class="nav-item" onclick="show('interventions')"><span class="nav-ico">🔨</span><span class="nav-lbl">Interventions</span><span class="nav-badge" id="bBT">0</span></div>
+  <div class="nav-item" onclick="show('planning')"><span class="nav-ico">📅</span><span class="nav-lbl">Planning</span></div>
+  <div class="nav-item nav-restricted" onclick="show('fiabilite')"><span class="nav-ico">📈</span><span class="nav-lbl">Fiabilité MTBF/MTTR</span></div>
+  <div class="nav-item nav-restricted" onclick="show('immobilisations')"><span class="nav-ico">⏱</span><span class="nav-lbl">Immobilisations</span></div>
+  <div class="nav-item nav-restricted" onclick="show('predictif')"><span class="nav-ico">🔮</span><span class="nav-lbl">Maintenance prédictive</span></div>
+  <div class="nav-item" onclick="show('causesracines')"><span class="nav-ico">🔍</span><span class="nav-lbl">Causes racines</span></div>
   <div class="sid-sec">Gestion</div>
-  <div class="nav-item" onclick="show('stock')"><i data-lucide="package" class="nav-ico"></i><span class="nav-lbl">Stock pièces</span><span class="nav-badge" id="bSK">0</span></div>
-  <div class="nav-item nav-restricted" onclick="show('budget')"><i data-lucide="euro" class="nav-ico"></i><span class="nav-lbl">Budget</span></div>
-  <div class="nav-item" onclick="show('contrats')"><i data-lucide="file-text" class="nav-ico"></i><span class="nav-lbl">Contrats &amp; garanties</span></div>
-  <div class="nav-item" onclick="show('devis')"><i data-lucide="file-signature" class="nav-ico"></i><span class="nav-lbl">Devis</span></div>
-  <div class="nav-item" onclick="show('documents')"><i data-lucide="folder-open" class="nav-ico"></i><span class="nav-lbl">Documentation</span></div>
+  <div class="nav-item" onclick="show('stock')"><span class="nav-ico">📦</span><span class="nav-lbl">Stock pièces</span><span class="nav-badge" id="bSK">0</span></div>
+  <div class="nav-item nav-restricted" onclick="show('budget')"><span class="nav-ico">💶</span><span class="nav-lbl">Budget</span></div>
+  <div class="nav-item" onclick="show('contrats')"><span class="nav-ico">📋</span><span class="nav-lbl">Contrats &amp; garanties</span></div>
+  <div class="nav-item" onclick="show('devis')"><span class="nav-ico">📝</span><span class="nav-lbl">Devis</span></div>
+  <div class="nav-item" onclick="show('documents')"><span class="nav-ico">📁</span><span class="nav-lbl">Documentation</span></div>
   <div class="sid-sec">Équipe &amp; Qualité</div>
-  <div class="nav-item nav-restricted" onclick="show('techniciens')"><i data-lucide="users" class="nav-ico"></i><span class="nav-lbl">Techniciens</span></div>
-  <div class="nav-item" onclick="show('metrologie')"><i data-lucide="ruler" class="nav-ico"></i><span class="nav-lbl">Métrologie</span></div>
+  <div class="nav-item nav-restricted" onclick="show('techniciens')"><span class="nav-ico">👥</span><span class="nav-lbl">Techniciens</span></div>
+  <div class="nav-item" onclick="show('metrologie')"><span class="nav-ico">📐</span><span class="nav-lbl">Métrologie</span></div>
   <div class="sid-sec">Système</div>
-  <div class="nav-item" onclick="show('utilisateurs')"><i data-lucide="user-circle" class="nav-ico"></i><span class="nav-lbl">Utilisateurs</span></div>
-  <div class="nav-item nav-restricted" onclick="show('conformite')"><i data-lucide="shield-check" class="nav-ico"></i><span class="nav-lbl">Conformité HAS</span></div>
-  <div class="nav-item" onclick="show('rondes')"><i data-lucide="footprints" class="nav-ico"></i><span class="nav-lbl">Tournées de ronde</span></div>
-  <div class="nav-item" onclick="show('batiment')"><i data-lucide="map" class="nav-ico"></i><span class="nav-lbl">Plan bâtiment</span></div>
-  <div class="nav-item" onclick="show('consignes')"><i data-lucide="message-square" class="nav-ico"></i><span class="nav-lbl">Consignes équipe</span></div>
-  <div class="nav-item nav-restricted" onclick="show('audit')"><i data-lucide="scroll-text" class="nav-ico"></i><span class="nav-lbl">Journal audit</span></div>
+  <div class="nav-item" onclick="show('utilisateurs')"><span class="nav-ico">👤</span><span class="nav-lbl">Utilisateurs</span></div>
+  <div class="nav-item nav-restricted" onclick="show('conformite')"><span class="nav-ico">✅</span><span class="nav-lbl">Conformité HAS</span></div>
+  <div class="nav-item" onclick="show('rondes')"><span class="nav-ico">🔁</span><span class="nav-lbl">Tournées de ronde</span></div>
+  <div class="nav-item" onclick="show('batiment')"><span class="nav-ico">🗺️</span><span class="nav-lbl">Plan bâtiment</span></div>
+  <div class="nav-item" onclick="show('consignes')"><span class="nav-ico">💬</span><span class="nav-lbl">Consignes équipe</span></div>
+  <div class="nav-item nav-restricted" onclick="show('audit')"><span class="nav-ico">🔏</span><span class="nav-lbl">Journal audit</span></div>
   <div class="sid-sec">Actions rapides</div>
-  <div class="nav-item" onclick="openM('mInterv')"><i data-lucide="plus-circle" class="nav-ico"></i><span class="nav-lbl">Nouveau BT</span></div>
-  <div class="nav-item" onclick="openM('mMvt')"><i data-lucide="repeat" class="nav-ico"></i><span class="nav-lbl">Mouvement stock</span></div>
-  <div class="nav-item" onclick="rapport()"><i data-lucide="file-bar-chart" class="nav-ico"></i><span class="nav-lbl">Rapport mensuel</span></div>
+  <div class="nav-item" onclick="openM('mInterv')"><span class="nav-ico">➕</span><span class="nav-lbl">Nouveau BT</span></div>
+  <div class="nav-item" onclick="openM('mMvt')"><span class="nav-ico">🔄</span><span class="nav-lbl">Mouvement stock</span></div>
+  <div class="nav-item" onclick="rapport()"><span class="nav-ico">📄</span><span class="nav-lbl">Rapport mensuel</span></div>
   <div class="sid-foot">
     GMAO v1_Vanilla<br>GHRMSA © 2025<br>Atelier MR &amp; TA
     <div style="margin-top:10px;padding-top:10px;border-top:1px solid #1A3344">
-      <div style="font-size:10px;color:#4A6B85;margin-bottom:6px;display:flex;align-items:center;gap:5px" id="saveStatus"><i data-lucide="save" style="width:11px;height:11px"></i>Aucune sauvegarde</div>
-      <button onclick="saveManual()" style="width:100%;background:rgba(30,107,60,.5);border:1px solid rgba(30,107,60,.7);color:#7BC8F6;border-radius:4px;padding:5px 8px;cursor:pointer;font-size:11px;margin-bottom:4px"><i data-lucide="save" class="btn-ico"></i>Sauvegarder</button>
+      <div style="font-size:10px;color:#4A6B85;margin-bottom:6px" id="saveStatus">💾 Aucune sauvegarde</div>
+      <button onclick="saveManual()" style="width:100%;background:rgba(30,107,60,.5);border:1px solid rgba(30,107,60,.7);color:#7BC8F6;border-radius:4px;padding:5px 8px;cursor:pointer;font-size:11px;margin-bottom:4px">💾 Sauvegarder</button>
       <div style="display:flex;gap:4px">
-        <button onclick="exportJSON()" style="flex:1;background:rgba(255,255,255,.06);border:1px solid #1A3344;color:#8BAFC8;border-radius:4px;padding:4px 6px;cursor:pointer;font-size:10px" title="Exporter fichier backup"><i data-lucide="download" class="btn-ico"></i>Export</button>
-        <button onclick="document.getElementById('importFile').click()" style="flex:1;background:rgba(255,255,255,.06);border:1px solid #1A3344;color:#8BAFC8;border-radius:4px;padding:4px 6px;cursor:pointer;font-size:10px" title="Importer une sauvegarde"><i data-lucide="upload" class="btn-ico"></i>Import</button>
+        <button onclick="exportJSON()" style="flex:1;background:rgba(255,255,255,.06);border:1px solid #1A3344;color:#8BAFC8;border-radius:4px;padding:4px 6px;cursor:pointer;font-size:10px" title="Exporter fichier backup">⬇️ Export</button>
+        <button onclick="document.getElementById('importFile').click()" style="flex:1;background:rgba(255,255,255,.06);border:1px solid #1A3344;color:#8BAFC8;border-radius:4px;padding:4px 6px;cursor:pointer;font-size:10px" title="Importer une sauvegarde">⬆️ Import</button>
       </div>
       <input type="file" id="importFile" accept=".json" style="display:none" onchange="importJSON(this)">
     </div>
@@ -534,47 +530,47 @@ body.dark-mode thead tr{background:#0d1520}
 <!-- DASHBOARD -->
 <div class="page active" id="page-dashboard">
   <div id="userBanner" style="margin-bottom:0"></div>
-  <div class="pg-title"><i data-lucide="layout-dashboard" class="pg-title-ico"></i>Tableau de bord opérationnel</div>
+  <div class="pg-title">📊 Tableau de bord opérationnel</div>
   <div class="pg-sub">Indicateurs temps réel – Atelier Matériels Roulants &amp; Transport Automatique</div>
   <div class="kpi-grid" id="kpiGrid"></div>
   <div class="grid2">
-    <div class="card" style="overflow:hidden;min-width:0"><div class="card-hdr"><i data-lucide="trending-up" class="card-hdr-ico"></i>Interventions par type</div><div class="card-body" style="overflow:hidden"><canvas id="cvInterv" height="200"></canvas></div></div>
-    <div class="card" style="overflow:hidden;min-width:0"><div class="card-hdr"><i data-lucide="building-2" class="card-hdr-ico"></i>Statut du parc</div><div class="card-body" style="overflow:hidden"><canvas id="cvStatut" height="200"></canvas></div></div>
+    <div class="card" style="overflow:hidden;min-width:0"><div class="card-hdr">📈 Interventions par type</div><div class="card-body" style="overflow:hidden"><canvas id="cvInterv" height="200"></canvas></div></div>
+    <div class="card" style="overflow:hidden;min-width:0"><div class="card-hdr">🏥 Statut du parc</div><div class="card-body" style="overflow:hidden"><canvas id="cvStatut" height="200"></canvas></div></div>
   </div>
-  <div class="card" style="overflow:hidden;min-width:0"><div class="card-hdr"><i data-lucide="bar-chart-3" class="card-hdr-ico"></i>Analyse Pareto – Causes des pannes (12 mois)</div><div class="card-body" id="paretoDiv" style="overflow-x:auto"></div></div>
+  <div class="card" style="overflow:hidden;min-width:0"><div class="card-hdr">📊 Analyse Pareto – Causes des pannes (12 mois)</div><div class="card-body" id="paretoDiv" style="overflow-x:auto"></div></div>
   <div class="grid2">
-    <div class="card"><div class="card-hdr"><i data-lucide="alert-triangle" class="card-hdr-ico"></i>Alertes stock</div><div class="card-body" id="alertStock"></div></div>
-    <div class="card"><div class="card-hdr"><i data-lucide="calendar-clock" class="card-hdr-ico"></i>Prochaines visites préventives</div><div class="card-body" id="alertVisites"></div></div>
+    <div class="card"><div class="card-hdr">⚠️ Alertes stock</div><div class="card-body" id="alertStock"></div></div>
+    <div class="card"><div class="card-hdr">📅 Prochaines visites préventives</div><div class="card-body" id="alertVisites"></div></div>
   </div>
 </div>
 
 <!-- VUE DIRECTION -->
 <div class="page" id="page-direction">
-  <div class="pg-title"><i data-lucide="target" class="pg-title-ico"></i>Vue direction – Indicateurs stratégiques</div>
+  <div class="pg-title">🎯 Vue direction – Indicateurs stratégiques</div>
   <div class="pg-sub">Synthèse des performances pour le pilotage de l'activité maintenance</div>
   <div class="kpi-grid" id="kpiDir"></div>
   <div class="grid2">
-    <div class="card"><div class="card-hdr"><i data-lucide="line-chart" class="card-hdr-ico"></i>Évolution mensuelle des coûts</div><div class="card-body"><canvas id="cvCouts" height="210"></canvas></div></div>
-    <div class="card"><div class="card-hdr"><i data-lucide="target" class="card-hdr-ico"></i>Taux par catégorie</div><div class="card-body"><canvas id="cvRates" height="210"></canvas></div></div>
+    <div class="card"><div class="card-hdr">📉 Évolution mensuelle des coûts</div><div class="card-body"><canvas id="cvCouts" height="210"></canvas></div></div>
+    <div class="card"><div class="card-hdr">🎯 Taux par catégorie</div><div class="card-body"><canvas id="cvRates" height="210"></canvas></div></div>
   </div>
   <div class="card">
-    <div class="card-hdr"><i data-lucide="trophy" class="card-hdr-ico"></i>Classement équipements – Coût de maintenance</div>
+    <div class="card-hdr">🏆 Classement équipements – Coût de maintenance</div>
     <div class="card-body" id="rankingEq"></div>
   </div>
 </div>
 
 <!-- EQUIPEMENTS -->
 <div class="page" id="page-equipements">
-  <div class="pg-title"><i data-lucide="boxes" class="pg-title-ico"></i>Registre des équipements</div>
+  <div class="pg-title">🏥 Registre des équipements</div>
   <div class="pg-sub">Parc complet – lits, chariots, fauteuils, brancards, AGV, tables opératoires</div>
   <div class="btn-row">
-    <button class="btn btn-p" onclick="openM('mEq')><i data-lucide="plus" class="btn-ico"></i>Nouvel équipement</button>
+    <button class="btn btn-p" onclick="openM('mEq')">➕ Nouvel équipement</button>
     <input id="eqSearchInput" placeholder="🔍 N° service, nom service, désignation..." style="width:300px" oninput="fltEqSearch(this.value)">
   </div>
   <div class="tab-row" id="eqTabRow">
-    <button class="tab-btn active" onclick="switchEqTab('all')" id="eqTabAll"><i data-lucide="boxes" class="btn-ico"></i>Tous les équipements</button>
-    <button class="tab-btn" onclick="switchEqTab('lits')" id="eqTabLits"><i data-lucide="bed" class="btn-ico"></i>Lits &amp; Matériels roulants</button>
-    <button class="tab-btn" onclick="switchEqTab('agv')" id="eqTabAGV"><i data-lucide="bot" class="btn-ico"></i>AGV &amp; Transport automatique</button>
+    <button class="tab-btn active" onclick="switchEqTab('all')" id="eqTabAll">🏥 Tous les équipements</button>
+    <button class="tab-btn" onclick="switchEqTab('lits')" id="eqTabLits">🛏️ Lits &amp; Matériels roulants</button>
+    <button class="tab-btn" onclick="switchEqTab('agv')" id="eqTabAGV">🤖 AGV &amp; Transport automatique</button>
   </div>
   <div class="card"><div class="tbl-wrap"><table id="tEq">
     <thead><tr><th>N° EQ</th><th>Désignation</th><th>Marque/Modèle</th><th>N° Série</th><th>N° Inventaire</th><th>N° Service</th><th>Service</th><th>Bât.</th><th>Date MES</th><th>Âge</th><th>Criticité</th><th>Statut</th><th>Nb BT</th><th>Coût total</th><th>MTTR cible</th><th>Prochain entretien</th><th>Actions</th></tr></thead>
@@ -584,7 +580,7 @@ body.dark-mode thead tr{background:#0d1520}
 
 <!-- HISTORIQUE TECHNIQUE -->
 <div class="page" id="page-historique">
-  <div class="pg-title"><i data-lucide="history" class="pg-title-ico"></i>Historique technique complet</div>
+  <div class="pg-title">📜 Historique technique complet</div>
   <div class="pg-sub">Dossier technique individuel – traçabilité totale de chaque équipement</div>
   <div class="btn-row">
     <select id="histEqSel" onchange="renderHistorique()" style="width:320px"><option value="">-- Sélectionner un équipement --</option></select>
@@ -594,30 +590,30 @@ body.dark-mode thead tr{background:#0d1520}
 
 <!-- CRITICITÉ AUTO -->
 <div class="page" id="page-criticite">
-  <div class="pg-title"><i data-lucide="zap" class="pg-title-ico"></i>Indice de criticité calculé</div>
+  <div class="pg-title">⚡ Indice de criticité calculé</div>
   <div class="pg-sub">Hiérarchisation automatique basée sur impact sécurité, impact patient, coût d'arrêt et fréquence de panne</div>
   <div class="card"><div class="card-hdr">Matrice de criticité – Classement automatique</div><div class="card-body" id="critDiv"></div></div>
 </div>
 
 <!-- QR CODE -->
 <div class="page" id="page-qrcode">
-  <div class="pg-title"><i data-lucide="qr-code" class="pg-title-ico"></i>Identification par QR Code</div>
+  <div class="pg-title">📱 Identification par QR Code</div>
   <div class="pg-sub">Accès instantané à la fiche équipement depuis un terminal mobile – Création et impression</div>
   <div class="btn-row">
     <select id="qrEqSel" onchange="showQR()" style="width:320px"><option value="">-- Sélectionner un équipement --</option></select>
-    <button class="btn btn-p" onclick="printQR()><i data-lucide="printer" class="btn-ico"></i>Imprimer la fiche QR</button>
-    <button class="btn btn-g" onclick="printAllQR()><i data-lucide="printer" class="btn-ico"></i>Imprimer tous les QR</button>
+    <button class="btn btn-p" onclick="printQR()">🖨️ Imprimer la fiche QR</button>
+    <button class="btn btn-g" onclick="printAllQR()">🖨️ Imprimer tous les QR</button>
   </div>
   <div id="qrContent"></div>
 </div>
 
 <!-- INTERVENTIONS -->
 <div class="page" id="page-interventions">
-  <div class="pg-title"><i data-lucide="wrench" class="pg-title-ico"></i>Bons de travail – Interventions</div>
+  <div class="pg-title">🔨 Bons de travail – Interventions</div>
   <div class="pg-sub">Préventives et correctives – Création, suivi et clôture</div>
   <div class="btn-row">
-    <button class="btn btn-p" onclick="openM('mInterv')><i data-lucide="plus" class="btn-ico"></i>Nouveau BT</button>
-    <button class="btn btn-w" onclick="openM('mCloture')"><i data-lucide="check-circle-2" class="btn-ico"></i>Clôturer un BT</button>
+    <button class="btn btn-p" onclick="openM('mInterv')">➕ Nouveau BT</button>
+    <button class="btn btn-w" onclick="openM('mCloture')">✅ Clôturer un BT</button>
     <input placeholder="🔍 Rechercher..." style="width:200px" oninput="fltTbl('tBT',this.value)">
     <select onchange="fltCol('tBT',4,this.value)" style="width:130px"><option value="">Tous types</option><option>Préventif</option><option>Correctif</option><option>Métrologie</option></select>
     <select onchange="fltCol('tBT',13,this.value)" style="width:140px"><option value="">Tous statuts</option><option>✅ Clôturé</option><option>🔄 En cours</option><option>📋 Planifié</option></select>
@@ -630,10 +626,10 @@ body.dark-mode thead tr{background:#0d1520}
 
 <!-- PLANNING -->
 <div class="page" id="page-planning">
-  <div class="pg-title"><i data-lucide="calendar-days" class="pg-title-ico"></i>Planning annuel de maintenance préventive</div>
+  <div class="pg-title">📅 Planning annuel de maintenance préventive</div>
   <div class="pg-sub">Calendrier 2025 – Visites planifiées, effectuées et en retard</div>
   <div class="btn-row">
-    <button class="btn btn-p" onclick="newPlanLine()><i data-lucide="plus" class="btn-ico"></i>Nouvelle ligne</button>
+    <button class="btn btn-p" onclick="newPlanLine()">➕ Nouvelle ligne</button>
     <span style="font-size:11px;color:var(--mut);background:var(--vl);padding:4px 10px;border-radius:4px;display:inline-flex;align-items:center;gap:5px">🔒 Réservé Responsable / Admin</span>
     <span style="margin-left:auto;display:flex;gap:14px;font-size:11.5px;align-items:center">
       <span class="p-plan" style="padding:2px 8px">P</span> Planifiée
@@ -693,16 +689,16 @@ body.dark-mode thead tr{background:#0d1520}
 
 <!-- FIABILITE -->
 <div class="page" id="page-fiabilite">
-  <div class="pg-title"><i data-lucide="trending-up" class="pg-title-ico"></i>Analyse de fiabilité – MTBF / MTTR</div>
+  <div class="pg-title">📈 Analyse de fiabilité – MTBF / MTTR</div>
   <div class="pg-sub">Mesure la performance réelle du parc et identifie les équipements les plus défaillants</div>
   <div class="kpi-grid" id="kpiFiab"></div>
-  <div class="card"><div class="card-hdr"><i data-lucide="trophy" class="card-hdr-ico"></i>Classement fiabilité par équipement</div><div class="card-body" id="fiabDiv"></div></div>
-  <div class="card"><div class="card-hdr"><i data-lucide="coins" class="card-hdr-ico"></i>Coût de maintenance par équipement (Top 8)</div><div class="card-body"><canvas id="cvFiab" height="210"></canvas></div></div>
+  <div class="card"><div class="card-hdr">🏆 Classement fiabilité par équipement</div><div class="card-body" id="fiabDiv"></div></div>
+  <div class="card"><div class="card-hdr">💰 Coût de maintenance par équipement (Top 8)</div><div class="card-body"><canvas id="cvFiab" height="210"></canvas></div></div>
 </div>
 
 <!-- IMMOBILISATIONS -->
 <div class="page" id="page-immobilisations">
-  <div class="pg-title"><i data-lucide="timer" class="pg-title-ico"></i>Suivi des immobilisations</div>
+  <div class="pg-title">⏱ Suivi des immobilisations</div>
   <div class="pg-sub">Mesure des temps d'arrêt et analyse des conséquences opérationnelles sur le parc</div>
   <div class="kpi-grid" id="kpiImmo"></div>
   <div class="card"><div class="card-hdr">Liste des immobilisations</div>
@@ -715,16 +711,16 @@ body.dark-mode thead tr{background:#0d1520}
 
 <!-- MAINTENANCE PRÉDICTIVE -->
 <div class="page" id="page-predictif">
-  <div class="pg-title"><i data-lucide="brain-circuit" class="pg-title-ico"></i>Maintenance prédictive</div>
+  <div class="pg-title">🔮 Maintenance prédictive</div>
   <div class="pg-sub">Analyse des historiques pour anticiper les défaillances et réduire les arrêts imprévus</div>
   <div class="kpi-grid" id="kpiPred"></div>
-  <div class="card"><div class="card-hdr"><i data-lucide="siren" class="card-hdr-ico"></i>Équipements à risque – Prédictions basées sur l'historique</div><div class="card-body" id="predDiv"></div></div>
-  <div class="card"><div class="card-hdr"><i data-lucide="bar-chart-3" class="card-hdr-ico"></i>Évolution MTBF sur 12 mois</div><div class="card-body"><canvas id="cvMTBF" height="200"></canvas></div></div>
+  <div class="card"><div class="card-hdr">🚨 Équipements à risque – Prédictions basées sur l'historique</div><div class="card-body" id="predDiv"></div></div>
+  <div class="card"><div class="card-hdr">📊 Évolution MTBF sur 12 mois</div><div class="card-body"><canvas id="cvMTBF" height="200"></canvas></div></div>
 </div>
 
 <!-- CAUSES RACINES -->
 <div class="page" id="page-causesracines">
-  <div class="pg-title"><i data-lucide="search" class="pg-title-ico"></i>Analyse des causes racines</div>
+  <div class="pg-title">🔍 Analyse des causes racines</div>
   <div class="pg-sub">Outils de diagnostic et d'amélioration continue – Programme BTS ATI Organisation Industrielle</div>
   <div class="tab-row">
     <button class="tab-btn active" onclick="switchTab('cr','t5P')">5 Pourquoi</button>
@@ -740,14 +736,14 @@ body.dark-mode thead tr{background:#0d1520}
 
   <!-- AMDEC -->
   <div class="tab-pane" id="cr-tAMDEC">
-    <div class="card"><div class="card-hdr"><i data-lucide="clipboard-list" class="card-hdr-ico"></i>AMDEC – Analyse des Modes de Défaillance, de leurs Effets et de leur Criticité</div>
+    <div class="card"><div class="card-hdr">📋 AMDEC – Analyse des Modes de Défaillance, de leurs Effets et de leur Criticité</div>
     <div class="card-body">
       <div style="font-size:12px;color:var(--mut);margin-bottom:14px">
         Criticité = <strong>F × G × D</strong> &nbsp;|&nbsp; F : Fréquence (1–4) &nbsp;· G : Gravité (1–4) &nbsp;· D : Détectabilité (1–4) &nbsp;· Seuil critique : C ≥ <strong>12</strong>
       </div>
       <div class="btn-row" style="margin-bottom:10px">
-        <button class="btn btn-p btn-sm" onclick="amdecAddRow()><i data-lucide="plus" class="btn-ico"></i>Ajouter une ligne</button>
-        <button class="btn btn-g btn-sm" onclick="amdecExport()"><i data-lucide="file-down" class="btn-ico"></i>Exporter tableau</button>
+        <button class="btn btn-p btn-sm" onclick="amdecAddRow()">➕ Ajouter une ligne</button>
+        <button class="btn btn-g btn-sm" onclick="amdecExport()">📄 Exporter tableau</button>
       </div>
       <div class="tbl-wrap"><table id="tAMDEC">
         <thead><tr>
@@ -770,7 +766,7 @@ body.dark-mode thead tr{background:#0d1520}
 
   <!-- ARBRE DES DÉFAILLANCES -->
   <div class="tab-pane" id="cr-tFTA">
-    <div class="card"><div class="card-hdr"><i data-lucide="git-branch" class="card-hdr-ico"></i>Arbre des défaillances – Fault Tree Analysis (FTA)</div>
+    <div class="card"><div class="card-hdr">🌳 Arbre des défaillances – Fault Tree Analysis (FTA)</div>
     <div class="card-body">
       <div style="font-size:12px;color:var(--mut);margin-bottom:14px">
         Décomposition top-down des causes d'un événement redouté. Portes logiques : <strong>ET (∧)</strong> = toutes les causes simultanées · <strong>OU (∨)</strong> = au moins une cause suffit.
@@ -778,7 +774,7 @@ body.dark-mode thead tr{background:#0d1520}
       <div style="margin-bottom:12px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
         <label style="font-size:12px;font-weight:600">Événement redouté :</label>
         <input id="ftaTop" style="flex:1;min-width:200px;max-width:400px;font-size:12px" placeholder="Ex: Arrêt inopiné d'un lit motorisé" value="Arrêt inopiné d'un lit motorisé en cours de transport">
-        <button class="btn btn-p btn-sm" onclick="renderFTA()"><i data-lucide="git-branch" class="btn-ico"></i>Générer l'arbre</button>
+        <button class="btn btn-p btn-sm" onclick="renderFTA()">🔄 Générer l'arbre</button>
       </div>
       <div id="ftaDiv" style="overflow-x:auto"></div>
     </div></div>
@@ -786,11 +782,11 @@ body.dark-mode thead tr{background:#0d1520}
 
   <!-- PDCA -->
   <div class="tab-pane" id="cr-tPDCA">
-    <div class="card"><div class="card-hdr"><i data-lucide="refresh-cw" class="card-hdr-ico"></i>Roue de Deming – Cycle PDCA</div>
+    <div class="card"><div class="card-hdr">🔄 Roue de Deming – Cycle PDCA</div>
     <div class="card-body" id="pdcaDiv"></div></div>
     <div class="card" style="margin-top:14px">
-      <div class="card-hdr"><i data-lucide="clipboard-list" class="card-hdr-ico"></i>Plan d'actions PDCA
-        <button class="btn btn-p btn-sm" style="margin-left:auto" onclick="pdcaAddRow()><i data-lucide="plus" class="btn-ico"></i>Ajouter</button>
+      <div class="card-hdr">📋 Plan d'actions PDCA
+        <button class="btn btn-p btn-sm" style="margin-left:auto" onclick="pdcaAddRow()">➕ Ajouter</button>
       </div>
       <div class="tbl-wrap"><table id="tPDCA">
         <thead><tr>
@@ -803,7 +799,7 @@ body.dark-mode thead tr{background:#0d1520}
 
   <!-- ABC PANNES -->
   <div class="tab-pane" id="cr-tABC">
-    <div class="card"><div class="card-hdr"><i data-lucide="bar-chart-3" class="card-hdr-ico"></i>Analyse ABC des pannes – Loi de Pareto 80/20</div>
+    <div class="card"><div class="card-hdr">📊 Analyse ABC des pannes – Loi de Pareto 80/20</div>
     <div class="card-body">
       <div style="font-size:12px;color:var(--mut);margin-bottom:14px">
         Classement des causes de pannes par fréquence cumulée. <strong>Zone A</strong> : 80% des pannes (≈20% des causes) · <strong>Zone B</strong> : 80–95% · <strong>Zone C</strong> : 95–100%
@@ -834,7 +830,7 @@ body.dark-mode thead tr{background:#0d1520}
 
   <!-- ACTIONS CORRECTIVES -->
   <div class="tab-pane" id="cr-tActions">
-    <div class="btn-row"><button class="btn btn-p" onclick="openM('mAction')><i data-lucide="plus" class="btn-ico"></i>Nouvelle action</button></div>
+    <div class="btn-row"><button class="btn btn-p" onclick="openM('mAction')">➕ Nouvelle action</button></div>
     <div class="card"><div class="tbl-wrap"><table id="tActions">
       <thead><tr><th>Réf.</th><th>Cause racine</th><th>Action corrective</th><th>Action préventive</th><th>Responsable</th><th>Échéance</th><th>Statut</th></tr></thead>
       <tbody id="bodyActions"></tbody>
@@ -844,11 +840,11 @@ body.dark-mode thead tr{background:#0d1520}
 
 <!-- STOCK -->
 <div class="page" id="page-stock">
-  <div class="pg-title"><i data-lucide="package" class="pg-title-ico"></i>Gestion du stock de pièces détachées</div>
+  <div class="pg-title">📦 Gestion du stock de pièces détachées</div>
   <div class="pg-sub">Méthode ABC – Point de commande – Alertes automatiques de réapprovisionnement</div>
   <div class="btn-row">
-    <button class="btn btn-p" onclick="openM('mArt')><i data-lucide="plus" class="btn-ico"></i>Nouvel article</button>
-    <button class="btn btn-s" onclick="openM('mMvt')"><i data-lucide="repeat" class="btn-ico"></i>Mouvement</button>
+    <button class="btn btn-p" onclick="openM('mArt')">➕ Nouvel article</button>
+    <button class="btn btn-s" onclick="openM('mMvt')">🔄 Mouvement</button>
     <input placeholder="🔍 Rechercher..." style="width:200px" oninput="fltTbl('tSk',this.value)">
     <select onchange="fltCol('tSk',3,this.value)" style="width:110px"><option value="">Toutes cl.</option><option>A</option><option>B</option><option>C</option></select>
     <select onchange="fltCol('tSk',13,this.value)" style="width:160px"><option value="">Toutes alertes</option><option>🚨 RUPTURE</option><option>⚠️ COMMANDER</option><option>✅ OK</option></select>
@@ -859,10 +855,10 @@ body.dark-mode thead tr{background:#0d1520}
     <tbody id="bodySk"></tbody>
   </table></div></div>
   <div class="card">
-    <div class="card-hdr"><i data-lucide="clipboard-list" class="card-hdr-ico"></i>Journal des mouvements de stock
+    <div class="card-hdr">📋 Journal des mouvements de stock
       <button onclick="fltMvtSens('')" class="btn btn-g btn-sm" style="margin-left:auto">Tous</button>
-      <button onclick="fltMvtSens('ENTREE')" class="btn btn-s btn-sm" style="margin-left:4px"><i data-lucide="arrow-up" class="btn-ico"></i>Entrées</button>
-      <button onclick="fltMvtSens('SORTIE')" class="btn btn-w btn-sm" style="margin-left:4px"><i data-lucide="arrow-down" class="btn-ico"></i>Sorties</button>
+      <button onclick="fltMvtSens('ENTREE')" class="btn btn-s btn-sm" style="margin-left:4px">🔺 Entrées</button>
+      <button onclick="fltMvtSens('SORTIE')" class="btn btn-w btn-sm" style="margin-left:4px">🔻 Sorties</button>
     </div>
     <div class="tbl-wrap"><table id="tMvtLog">
       <thead><tr><th>Date</th><th>Référence</th><th>Désignation</th><th>Sens</th><th>Qté</th><th>Avant</th><th>Après</th><th>Motif / BT</th><th>Technicien</th></tr></thead>
@@ -873,26 +869,26 @@ body.dark-mode thead tr{background:#0d1520}
 
 <!-- BUDGET -->
 <div class="page" id="page-budget">
-  <div class="pg-title"><i data-lucide="euro" class="pg-title-ico"></i>Suivi budgétaire maintenance</div>
+  <div class="pg-title">💶 Suivi budgétaire maintenance</div>
   <div class="pg-sub">Comparaison budget prévisionnel / dépenses réelles – Pilotage économique de l'activité</div>
   <div class="btn-row">
-    <button class="btn btn-p" onclick="openBudgetPoste()><i data-lucide="plus" class="btn-ico"></i>Ajouter un poste</button>
-    <button class="btn btn-g" onclick="openBudgetAnnee()"><i data-lucide="settings" class="btn-ico"></i>Paramètres annuels</button>
+    <button class="btn btn-p" onclick="openBudgetPoste()">➕ Ajouter un poste</button>
+    <button class="btn btn-g" onclick="openBudgetAnnee()">⚙️ Paramètres annuels</button>
   </div>
   <div class="kpi-grid" id="kpiBudg"></div>
   <div class="grid2">
-    <div class="card"><div class="card-hdr"><i data-lucide="bar-chart-3" class="card-hdr-ico"></i>Budget vs Réalisé par poste</div><div class="card-body"><canvas id="cvBudg" height="230"></canvas></div></div>
-    <div class="card"><div class="card-hdr"><i data-lucide="pie-chart" class="card-hdr-ico"></i>Répartition des dépenses</div><div class="card-body"><canvas id="cvPie" height="230"></canvas></div></div>
+    <div class="card"><div class="card-hdr">📊 Budget vs Réalisé par poste</div><div class="card-body"><canvas id="cvBudg" height="230"></canvas></div></div>
+    <div class="card"><div class="card-hdr">🥧 Répartition des dépenses</div><div class="card-body"><canvas id="cvPie" height="230"></canvas></div></div>
   </div>
   <div class="card"><div class="card-body" id="budgetDetail"></div></div>
 </div>
 
 <!-- UTILISATEURS -->
 <div class="page" id="page-utilisateurs">
-  <div class="pg-title"><i data-lucide="user-circle" class="pg-title-ico"></i>Gestion des utilisateurs</div>
+  <div class="pg-title">👤 Gestion des utilisateurs</div>
   <div class="pg-sub">Comptes d'accès, rôles et mots de passe – Administration de la GMAO</div>
   <div class="btn-row">
-    <button class="btn btn-p" onclick="openUserModal()><i data-lucide="plus" class="btn-ico"></i>Ajouter un utilisateur</button>
+    <button class="btn btn-p" onclick="openUserModal()">➕ Ajouter un utilisateur</button>
   </div>
   <div class="card"><div class="tbl-wrap"><table id="tUsers">
     <thead><tr><th>Nom complet</th><th>Login</th><th>Rôle</th><th>Service</th><th>Dernière connexion</th><th>Statut</th><th>Actions</th></tr></thead>
@@ -902,10 +898,10 @@ body.dark-mode thead tr{background:#0d1520}
 
 <!-- CONTRATS -->
 <div class="page" id="page-contrats">
-  <div class="pg-title"><i data-lucide="file-text" class="pg-title-ico"></i>Contrats &amp; garanties</div>
+  <div class="pg-title">📋 Contrats &amp; garanties</div>
   <div class="pg-sub">Suivi des garanties constructeurs et contrats de maintenance – Alertes d'échéance</div>
   <div class="btn-row">
-    <button class="btn btn-p" onclick="openNewContrat()><i data-lucide="plus" class="btn-ico"></i>Nouveau contrat</button>
+    <button class="btn btn-p" onclick="openNewContrat()">➕ Nouveau contrat</button>
     <input placeholder="🔍 Rechercher..." style="width:200px" oninput="fltTbl('tCtrat',this.value)">
   </div>
   <div class="card"><div class="tbl-wrap"><table id="tCtrat">
@@ -916,10 +912,10 @@ body.dark-mode thead tr{background:#0d1520}
 
 <!-- DOCUMENTATION -->
 <div class="page" id="page-documents">
-  <div class="pg-title"><i data-lucide="folder-open" class="pg-title-ico"></i>Documentation technique</div>
+  <div class="pg-title">📁 Documentation technique</div>
   <div class="pg-sub">Bibliothèque documentaire – Notices, schémas, procédures, certificats, rapports de contrôle</div>
   <div class="btn-row">
-    <button class="btn btn-p" onclick="openM('mDoc')><i data-lucide="plus" class="btn-ico"></i>Ajouter un document</button>
+    <button class="btn btn-p" onclick="openM('mDoc')">➕ Ajouter un document</button>
     <input placeholder="🔍 Rechercher..." style="width:220px" oninput="fltTbl('tDoc',this.value)">
     <select onchange="fltCol('tDoc',2,this.value)" style="width:160px"><option value="">Tous types</option><option>Notice technique</option><option>Schéma électrique</option><option>Procédure</option><option>Certificat CE</option><option>Rapport contrôle</option></select>
   </div>
@@ -931,12 +927,12 @@ body.dark-mode thead tr{background:#0d1520}
 
 <!-- TECHNICIENS -->
 <div class="page" id="page-techniciens">
-  <div class="pg-title"><i data-lucide="users" class="pg-title-ico"></i>Équipe – Habilitations &amp; compétences</div>
+  <div class="pg-title">👥 Équipe – Habilitations &amp; compétences</div>
   <div class="pg-sub">Gestion des habilitations, formations et renouvellements</div>
   <div class="btn-row">
-    <button class="btn btn-p" onclick="openM('mTech')><i data-lucide="plus" class="btn-ico"></i>Ajouter</button>
+    <button class="btn btn-p" onclick="openM('mTech')">➕ Ajouter</button>
     <select id="techRapportSel" style="width:240px"><option value="">-- Choisir un salarié --</option></select>
-    <button class="btn btn-g" onclick="rapportSalarie()"><i data-lucide="file-bar-chart" class="btn-ico"></i>Rapport mensuel du salarié</button>
+    <button class="btn btn-g" onclick="rapportSalarie()">📄 Rapport mensuel du salarié</button>
   </div>
   <div class="card"><div class="tbl-wrap"><table id="tTech">
     <thead><tr><th>Nom Prénom</th><th>Poste</th><th>Habilit. élec.</th><th>Gestes postures</th><th>Risques bio.</th><th>SST</th><th>CACES</th><th>Métrologie</th><th>Astreinte</th><th>BT ouverts</th><th>BT clôturés</th><th>Charge</th><th>Prochaine form.</th><th>Actions</th></tr></thead>
@@ -946,9 +942,9 @@ body.dark-mode thead tr{background:#0d1520}
 
 <!-- METROLOGIE -->
 <div class="page" id="page-metrologie">
-  <div class="pg-title"><i data-lucide="ruler" class="pg-title-ico"></i>Métrologie – Contrôles réglementaires</div>
+  <div class="pg-title">📐 Métrologie – Contrôles réglementaires</div>
   <div class="pg-sub">Étalonnage des balances pèse-personnes – Masses étalons COFRAC</div>
-  <div class="btn-row"><button class="btn btn-p" onclick="openM('mMetro')><i data-lucide="plus" class="btn-ico"></i>Nouveau contrôle</button></div>
+  <div class="btn-row"><button class="btn btn-p" onclick="openM('mMetro')">➕ Nouveau contrôle</button></div>
   <div class="kpi-grid" id="kpiMetro"></div>
   <div class="card"><div class="tbl-wrap"><table id="tMetro">
     <thead><tr><th>N° EQ</th><th>Désignation</th><th>N° Svc</th><th>Service</th><th>Tolérance</th><th>Erreur mesurée</th><th>Verdict</th><th>Date contrôle</th><th>Prochain contrôle</th><th>Technicien</th><th>Observations</th><th>Actions</th></tr></thead>
@@ -958,7 +954,7 @@ body.dark-mode thead tr{background:#0d1520}
 
 <!-- CONFORMITE HAS -->
 <div class="page" id="page-conformite">
-  <div class="pg-title"><i data-lucide="shield-check" class="pg-title-ico"></i>Conformité réglementaire &amp; Audit HAS</div>
+  <div class="pg-title">✅ Conformité réglementaire &amp; Audit HAS</div>
   <div class="pg-sub">Suivi des exigences réglementaires, contrôles périodiques et préparation des audits</div>
   <div class="kpi-grid" id="kpiConf"></div>
   <div class="card"><div class="card-hdr">Liste des contrôles réglementaires obligatoires</div>
@@ -971,10 +967,10 @@ body.dark-mode thead tr{background:#0d1520}
 
 <!-- TOURNÉES DE RONDE -->
 <div class="page" id="page-rondes">
-  <div class="pg-title"><i data-lucide="footprints" class="pg-title-ico"></i>Tournées de ronde</div>
+  <div class="pg-title">🔁 Tournées de ronde</div>
   <div class="pg-sub">Check-list quotidienne et hebdomadaire – Contrôle terrain avec signature et horodatage</div>
   <div class="btn-row">
-    <button class="btn btn-p" onclick="newRonde()><i data-lucide="plus" class="btn-ico"></i>Nouvelle ronde</button>
+    <button class="btn btn-p" onclick="newRonde()">➕ Nouvelle ronde</button>
     <select id="rondeTypeFilter" onchange="renderRondes()" style="width:180px">
       <option value="">Tous types</option>
       <option value="Quotidienne">Quotidienne</option>
@@ -983,11 +979,11 @@ body.dark-mode thead tr{background:#0d1520}
   </div>
   <div class="grid2">
     <div class="card">
-      <div class="card-hdr"><i data-lucide="clipboard-list" class="card-hdr-ico"></i>Ronde en cours</div>
+      <div class="card-hdr">📋 Ronde en cours</div>
       <div class="card-body" id="rondeEnCours"></div>
     </div>
     <div class="card">
-      <div class="card-hdr"><i data-lucide="history" class="card-hdr-ico"></i>Historique des rondes</div>
+      <div class="card-hdr">📜 Historique des rondes</div>
       <div class="card-body" id="rondeHistorique"></div>
     </div>
   </div>
@@ -995,7 +991,7 @@ body.dark-mode thead tr{background:#0d1520}
 
 <!-- PLAN BÂTIMENT -->
 <div class="page" id="page-batiment">
-  <div class="pg-title"><i data-lucide="map" class="pg-title-ico"></i>Plan du bâtiment – Localisation des équipements</div>
+  <div class="pg-title">🗺️ Plan du bâtiment – Localisation des équipements</div>
   <div class="pg-sub">Vue synthétique des équipements par service – Code couleur selon statut opérationnel</div>
   <div class="btn-row">
     <div style="display:flex;align-items:center;gap:12px;font-size:12px">
@@ -1009,10 +1005,10 @@ body.dark-mode thead tr{background:#0d1520}
 
 <!-- CONSIGNES ÉQUIPE -->
 <div class="page" id="page-consignes">
-  <div class="pg-title"><i data-lucide="message-square" class="pg-title-ico"></i>Passation de consignes – Communication équipe</div>
+  <div class="pg-title">💬 Passation de consignes – Communication équipe</div>
   <div class="pg-sub">Consignes inter-équipes, notes de quart et informations importantes</div>
   <div class="btn-row">
-    <button class="btn btn-p" onclick="openM('mConsigne')><i data-lucide="plus" class="btn-ico"></i>Nouvelle consigne</button>
+    <button class="btn btn-p" onclick="openM('mConsigne')">➕ Nouvelle consigne</button>
     <select onchange="fltConsignes(this.value)" style="width:160px">
       <option value="">Tous types</option>
       <option value="urgent">🔴 Urgent</option>
@@ -1031,17 +1027,17 @@ body.dark-mode thead tr{background:#0d1520}
     </div>
   </div>
   <div class="card" style="margin-top:8px">
-    <div class="card-hdr"><i data-lucide="clipboard-list" class="card-hdr-ico"></i>Toutes les consignes</div>
+    <div class="card-hdr">📋 Toutes les consignes</div>
     <div class="card-body" id="consignesToutes"></div>
   </div>
 </div>
 
 <!-- DEVIS -->
 <div class="page" id="page-devis">
-  <div class="pg-title"><i data-lucide="file-signature" class="pg-title-ico"></i>Gestion des devis</div>
+  <div class="pg-title">📝 Gestion des devis</div>
   <div class="pg-sub">Demandes de devis, suivi et validation – Maintenances et équipements</div>
   <div class="btn-row">
-    <button class="btn btn-p" onclick="openNewDevis()><i data-lucide="plus" class="btn-ico"></i>Nouveau devis</button>
+    <button class="btn btn-p" onclick="openNewDevis()">➕ Nouveau devis</button>
     <input placeholder="🔍 Rechercher..." style="width:220px" oninput="fltTbl('tDevis',this.value)">
     <select onchange="fltDevisStatut(this.value)" style="width:160px">
       <option value="">Tous statuts</option>
@@ -1060,7 +1056,7 @@ body.dark-mode thead tr{background:#0d1520}
 
 <!-- MODALE DEVIS -->
 <div class="modal-bg" id="mDevis"><div class="modal" style="max-width:620px">
-  <div class="modal-hdr" id="mDevisTitle"><span style="display:flex;align-items:center;gap:8px"><i data-lucide="file-signature" class="modal-hdr-ico"></i>Nouveau devis</span> <button class="modal-x" onclick="closeM('mDevis')">✕</button></div>
+  <div class="modal-hdr" id="mDevisTitle">📝 Nouveau devis <button class="modal-x" onclick="closeM('mDevis')">✕</button></div>
   <div class="modal-body"><div class="form-grid">
     <input type="hidden" id="dv_idx">
     <div class="fg-full ac-wrap">
@@ -1088,13 +1084,13 @@ body.dark-mode thead tr{background:#0d1520}
   </div></div>
   <div class="modal-footer">
     <button class="btn btn-g" onclick="closeM('mDevis')">Annuler</button>
-    <button class="btn btn-p" onclick="saveDevis()><i data-lucide="save" class="btn-ico"></i>Enregistrer</button>
+    <button class="btn btn-p" onclick="saveDevis()">💾 Enregistrer</button>
   </div>
 </div></div>
 
 <!-- JOURNAL AUDIT -->
 <div class="page" id="page-audit">
-  <div class="pg-title"><i data-lucide="scroll-text" class="pg-title-ico"></i>Journal d'audit – Traçabilité des actions</div>
+  <div class="pg-title">🔏 Journal d'audit – Traçabilité des actions</div>
   <div class="pg-sub">Historique complet de toutes les actions effectuées dans la GMAO – Administrateurs uniquement</div>
   <div class="btn-row">
     <input placeholder="🔍 Rechercher..." style="width:220px" oninput="filterAudit(this.value)">
@@ -1108,8 +1104,8 @@ body.dark-mode thead tr{background:#0d1520}
       <option value="export">⬇️ Exports</option>
       <option value="import">⬆️ Imports</option>
     </select>
-    <button class="btn btn-g" onclick="renderAudit()"><i data-lucide="rotate-ccw" class="btn-ico"></i>Réinitialiser filtres</button>
-    <button class="btn btn-d" onclick="clearAuditLog()"><i data-lucide="trash-2" class="btn-ico"></i>Vider le journal</button>
+    <button class="btn btn-g" onclick="renderAudit()">🔄 Réinitialiser filtres</button>
+    <button class="btn btn-d" onclick="clearAuditLog()">🗑️ Vider le journal</button>
   </div>
   <div class="kpi-grid" id="auditStats" style="margin-bottom:12px"></div>
   <div class="card">
@@ -1117,12 +1113,12 @@ body.dark-mode thead tr{background:#0d1520}
       Entrées récentes
       <span id="auditCount" style="margin-left:6px;font-size:11px;font-weight:400;color:var(--mut)"></span>
       <div style="margin-left:auto;display:flex;gap:5px;flex-wrap:wrap">
-        <button class="btn btn-g btn-sm" onclick="filterAuditKeyword('BT')"><i data-lucide="wrench" class="btn-ico"></i>BT</button>
-        <button class="btn btn-g btn-sm" onclick="filterAuditKeyword('EQ-')"><i data-lucide="boxes" class="btn-ico"></i>Équip.</button>
-        <button class="btn btn-g btn-sm" onclick="filterAuditKeyword('stock')"><i data-lucide="package" class="btn-ico"></i>Stock</button>
-        <button class="btn btn-g btn-sm" onclick="filterAuditKeyword('planning')"><i data-lucide="calendar-days" class="btn-ico"></i>Planning</button>
-        <button class="btn btn-g btn-sm" onclick="filterAuditKeyword('connexion')"><i data-lucide="lock" class="btn-ico"></i>Auth</button>
-        <button class="btn btn-g btn-sm" onclick="filterAuditKeyword('budget')"><i data-lucide="coins" class="btn-ico"></i>Budget</button>
+        <button class="btn btn-g btn-sm" onclick="filterAuditKeyword('BT')">🔧 BT</button>
+        <button class="btn btn-g btn-sm" onclick="filterAuditKeyword('EQ-')">🏥 Équip.</button>
+        <button class="btn btn-g btn-sm" onclick="filterAuditKeyword('stock')">📦 Stock</button>
+        <button class="btn btn-g btn-sm" onclick="filterAuditKeyword('planning')">📅 Planning</button>
+        <button class="btn btn-g btn-sm" onclick="filterAuditKeyword('connexion')">🔐 Auth</button>
+        <button class="btn btn-g btn-sm" onclick="filterAuditKeyword('budget')">💰 Budget</button>
       </div>
     </div>
     <div class="card-body" id="auditLog" style="max-height:600px;overflow-y:auto"></div>
@@ -1134,7 +1130,7 @@ body.dark-mode thead tr{background:#0d1520}
 
 <!-- ══ MODALS ══ -->
 <div class="modal-bg" id="mInterv"><div class="modal">
-  <div class="modal-hdr"><span style="display:flex;align-items:center;gap:8px"><i data-lucide="wrench" class="modal-hdr-ico"></i>Nouvelle intervention</span> <button class="modal-x" onclick="closeM('mInterv')">✕</button></div>
+  <div class="modal-hdr">🔨 Nouvelle intervention <button class="modal-x" onclick="closeM('mInterv')">✕</button></div>
   <div class="modal-body"><div class="form-grid">
     <div><label>Équipement</label><select id="fi_eq" onchange="fillSvc()"><option value="">-- Sélectionner --</option></select></div>
     <div><label>Service</label><input id="fi_svc" readonly placeholder="Auto-rempli" style="background:var(--gr);color:var(--mut)"></div>
@@ -1156,11 +1152,11 @@ body.dark-mode thead tr{background:#0d1520}
       <div style="margin-top:4px;font-size:10.5px;color:var(--mut)">💡 Les causes les plus fréquentes s'affichent en premier</div>
     </div>
   </div></div>
-  <div class="modal-footer"><button class="btn btn-g" onclick="closeM('mInterv')">Annuler</button><button class="btn btn-p" onclick="saveInterv()><i data-lucide="save" class="btn-ico"></i>Créer le BT</button></div>
+  <div class="modal-footer"><button class="btn btn-g" onclick="closeM('mInterv')">Annuler</button><button class="btn btn-p" onclick="saveInterv()">💾 Créer le BT</button></div>
 </div></div>
 
 <div class="modal-bg" id="mCloture"><div class="modal" style="max-width:780px">
-  <div class="modal-hdr"><span style="display:flex;align-items:center;gap:8px"><i data-lucide="check-circle-2" class="modal-hdr-ico"></i>Clôturer une intervention</span> <button class="modal-x" onclick="closeM('mCloture')">✕</button></div>
+  <div class="modal-hdr">✅ Clôturer une intervention <button class="modal-x" onclick="closeM('mCloture')">✕</button></div>
   <div class="modal-body"><div class="form-grid">
     <div><label>N° BT</label><select id="fc_bt" onchange="fillClotureInfo()"></select></div>
     <div><label>Date clôture</label><input id="fc_date" type="date"></div>
@@ -1175,13 +1171,13 @@ body.dark-mode thead tr{background:#0d1520}
       <div style="display:flex;gap:8px;margin-bottom:6px">
         <select id="fc_piece_ref" style="flex:1"></select>
         <input id="fc_piece_qte" type="number" min="1" value="1" style="width:70px" placeholder="Qté">
-        <button class="btn btn-g btn-sm" onclick="addPieceToClose()><i data-lucide="plus" class="btn-ico"></i>Ajouter</button>
+        <button class="btn btn-g btn-sm" onclick="addPieceToClose()">➕ Ajouter</button>
       </div>
       <div id="fc_pieces_tags" style="display:flex;flex-wrap:wrap;gap:4px;min-height:28px;padding:4px;background:var(--gr);border-radius:4px;border:1px solid var(--brd)"></div>
     </div>
     <div class="fg-full"><label>Observations</label><textarea id="fc_obs" rows="2"></textarea></div>
     <div class="fg-full">
-      <label style="display:flex;align-items:center;gap:5px"><i data-lucide="camera" style="width:13px;height:13px"></i>Photo de l'intervention (optionnel)</label>
+      <label>📷 Photo de l'intervention (optionnel)</label>
       <input type="file" id="fc_photo" accept="image/*" capture="environment" onchange="previewPhoto(this)">
       <img id="fc_photo_preview" class="photo-preview">
     </div>
@@ -1189,16 +1185,16 @@ body.dark-mode thead tr{background:#0d1520}
       <label>✍️ Signature du technicien</label>
       <canvas id="fc_sigpad" class="sig-pad" width="680" height="120"></canvas>
       <div style="display:flex;gap:8px;margin-top:6px">
-        <button class="btn btn-g btn-sm" onclick="clearSig()"><i data-lucide="trash-2" class="btn-ico"></i>Effacer</button>
+        <button class="btn btn-g btn-sm" onclick="clearSig()">🗑️ Effacer</button>
         <span id="fc_sigStatus" style="font-size:11px;color:var(--mut);align-self:center">Dessinez votre signature ci-dessus</span>
       </div>
     </div>
   </div></div>
-  <div class="modal-footer"><button class="btn btn-g" onclick="closeM('mCloture')">Annuler</button><button class="btn btn-s" onclick="saveCloture()"><i data-lucide="check-circle-2" class="btn-ico"></i>Clôturer</button></div>
+  <div class="modal-footer"><button class="btn btn-g" onclick="closeM('mCloture')">Annuler</button><button class="btn btn-s" onclick="saveCloture()">✅ Clôturer</button></div>
 </div></div>
 
 <div class="modal-bg" id="mMvt"><div class="modal">
-  <div class="modal-hdr"><span style="display:flex;align-items:center;gap:8px"><i data-lucide="repeat" class="modal-hdr-ico"></i>Mouvement de stock</span> <button class="modal-x" onclick="closeM('mMvt')">✕</button></div>
+  <div class="modal-hdr">🔄 Mouvement de stock <button class="modal-x" onclick="closeM('mMvt')">✕</button></div>
   <div class="modal-body"><div class="form-grid">
     <div><label>Référence</label><select id="fm_ref" onchange="showStkInfo()"></select></div>
     <div><label>Type</label><select id="fm_type"><option value="SORTIE">🔻 SORTIE</option><option value="ENTREE">🔺 ENTRÉE</option></select></div>
@@ -1206,11 +1202,11 @@ body.dark-mode thead tr{background:#0d1520}
     <div><label>Motif</label><select id="fm_motif"><option>Intervention maintenance</option><option>Réapprovisionnement</option><option>Réforme pièce</option><option>Inventaire</option></select></div>
     <div class="fg-full" id="stkInfoWrap" style="display:none"><div id="stkInfo"></div></div>
   </div></div>
-  <div class="modal-footer"><button class="btn btn-g" onclick="closeM('mMvt')">Annuler</button><button class="btn btn-s" onclick="saveMvt()><i data-lucide="save" class="btn-ico"></i>Enregistrer</button></div>
+  <div class="modal-footer"><button class="btn btn-g" onclick="closeM('mMvt')">Annuler</button><button class="btn btn-s" onclick="saveMvt()">💾 Enregistrer</button></div>
 </div></div>
 
 <div class="modal-bg" id="mEq"><div class="modal">
-  <div class="modal-hdr"><span style="display:flex;align-items:center;gap:8px"><i data-lucide="boxes" class="modal-hdr-ico"></i>Nouvel équipement</span> <button class="modal-x" onclick="closeM('mEq')">✕</button></div>
+  <div class="modal-hdr">🏥 Nouvel équipement <button class="modal-x" onclick="closeM('mEq')">✕</button></div>
   <div class="modal-body"><div class="form-grid">
     <div>
       <label>Catégorie <span style="color:var(--lb);font-size:10px">(détermine le N° EQ)</span></label>
@@ -1251,11 +1247,11 @@ body.dark-mode thead tr{background:#0d1520}
     <div><label>Prochain entretien</label><input id="feq_next" type="date"></div>
     <div><label>MTTR cible (heures)</label><input id="feq_mttr" type="number" min="0" step="0.5" placeholder="Ex: 4"></div>
   </div></div>
-  <div class="modal-footer"><button class="btn btn-g" onclick="closeM('mEq')">Annuler</button><button class="btn btn-p" onclick="saveEq()><i data-lucide="save" class="btn-ico"></i>Enregistrer</button></div>
+  <div class="modal-footer"><button class="btn btn-g" onclick="closeM('mEq')">Annuler</button><button class="btn btn-p" onclick="saveEq()">💾 Enregistrer</button></div>
 </div></div>
 
 <div class="modal-bg" id="mContrat"><div class="modal">
-  <div class="modal-hdr" id="mContratTitle"><span style="display:flex;align-items:center;gap:8px"><i data-lucide="file-text" class="modal-hdr-ico"></i>Nouveau contrat / garantie</span> <button class="modal-x" onclick="closeM('mContrat')">✕</button></div>
+  <div class="modal-hdr" id="mContratTitle">📋 Nouveau contrat / garantie <button class="modal-x" onclick="closeM('mContrat')">✕</button></div>
   <div class="modal-body"><div class="form-grid">
     <input type="hidden" id="fct_idx">
     <div><label>Équipement</label><select id="fct_eq"></select></div>
@@ -1274,11 +1270,11 @@ body.dark-mode thead tr{background:#0d1520}
     <div><label>Montant annuel (€)</label><input id="fct_mont" type="number" min="0" value="0"></div>
     <div class="fg-full"><label>Couverture / Prestations incluses</label><textarea id="fct_couv" rows="2" placeholder="Ex: Pièces + main d'œuvre + déplacements..."></textarea></div>
   </div></div>
-  <div class="modal-footer"><button class="btn btn-g" onclick="closeM('mContrat')">Annuler</button><button class="btn btn-p" onclick="saveContrat()><i data-lucide="save" class="btn-ico"></i>Enregistrer</button></div>
+  <div class="modal-footer"><button class="btn btn-g" onclick="closeM('mContrat')">Annuler</button><button class="btn btn-p" onclick="saveContrat()">💾 Enregistrer</button></div>
 </div></div>
 
 <div class="modal-bg" id="mDoc"><div class="modal">
-  <div class="modal-hdr"><span style="display:flex;align-items:center;gap:8px"><i data-lucide="folder-open" class="modal-hdr-ico"></i>Ajouter un document</span> <button class="modal-x" onclick="closeM('mDoc')">✕</button></div>
+  <div class="modal-hdr">📁 Ajouter un document <button class="modal-x" onclick="closeM('mDoc')">✕</button></div>
   <div class="modal-body"><div class="form-grid">
     <div><label>Équipement concerné</label><select id="fd_eq"></select></div>
     <div class="ac-wrap">
@@ -1292,11 +1288,11 @@ body.dark-mode thead tr{background:#0d1520}
     <div class="fg-full"><label>Observations</label><input id="fd_obs" placeholder="Notes sur ce document"></div>
     <div class="fg-full"><label>Fichier (optionnel)</label><input id="fd_file" type="file" accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.zip"></div>
   </div></div>
-  <div class="modal-footer"><button class="btn btn-g" onclick="closeM('mDoc')">Annuler</button><button class="btn btn-p" onclick="saveDoc()><i data-lucide="save" class="btn-ico"></i>Enregistrer</button></div>
+  <div class="modal-footer"><button class="btn btn-g" onclick="closeM('mDoc')">Annuler</button><button class="btn btn-p" onclick="saveDoc()">💾 Enregistrer</button></div>
 </div></div>
 
 <div class="modal-bg" id="mAction"><div class="modal">
-  <div class="modal-hdr"><span style="display:flex;align-items:center;gap:8px"><i data-lucide="search" class="modal-hdr-ico"></i>Nouvelle action corrective / préventive</span> <button class="modal-x" onclick="closeM('mAction')">✕</button></div>
+  <div class="modal-hdr">🔍 Nouvelle action corrective / préventive <button class="modal-x" onclick="closeM('mAction')">✕</button></div>
   <div class="modal-body"><div class="form-grid">
     <div class="fg-full"><label>Cause racine identifiée</label><input id="fa_cause" placeholder="Ex: Roulettes non remplacées préventivement"></div>
     <div class="fg-full"><label>Action corrective</label><textarea id="fa_corr" rows="2" placeholder="Action immédiate pour corriger le problème..."></textarea></div>
@@ -1304,11 +1300,11 @@ body.dark-mode thead tr{background:#0d1520}
     <div><label>Responsable</label><select id="fa_resp"><option>Dupont Marc</option><option>Martin Louis</option><option>Bernard Karim</option><option>Responsable atelier</option></select></div>
     <div><label>Échéance</label><input id="fa_ech" type="date"></div>
   </div></div>
-  <div class="modal-footer"><button class="btn btn-g" onclick="closeM('mAction')">Annuler</button><button class="btn btn-p" onclick="saveAction()><i data-lucide="save" class="btn-ico"></i>Enregistrer</button></div>
+  <div class="modal-footer"><button class="btn btn-g" onclick="closeM('mAction')">Annuler</button><button class="btn btn-p" onclick="saveAction()">💾 Enregistrer</button></div>
 </div></div>
 
 <div class="modal-bg" id="mMetro"><div class="modal">
-  <div class="modal-hdr"><span style="display:flex;align-items:center;gap:8px"><i data-lucide="ruler" class="modal-hdr-ico"></i>Nouveau contrôle métrologique</span> <button class="modal-x" onclick="closeM('mMetro')">✕</button></div>
+  <div class="modal-hdr">📐 Nouveau contrôle métrologique <button class="modal-x" onclick="closeM('mMetro')">✕</button></div>
   <div class="modal-body"><div class="form-grid">
     <div><label>Équipement</label><select id="fm2_eq"></select></div>
     <div><label>Tolérance admise</label><select id="fm2_tol"><option>± 500 g</option><option>± 1 kg</option><option>± 2 kg</option></select></div>
@@ -1317,13 +1313,13 @@ body.dark-mode thead tr{background:#0d1520}
     <div><label>Technicien</label><select id="fm2_tech"><option>Bernard Karim</option><option>Dupont Marc</option><option>Martin Louis</option></select></div>
     <div class="fg-full"><label>Observations</label><textarea id="fm2_obs" rows="2"></textarea></div>
   </div></div>
-  <div class="modal-footer"><button class="btn btn-g" onclick="closeM('mMetro')">Annuler</button><button class="btn btn-p" onclick="saveMetro()><i data-lucide="save" class="btn-ico"></i>Enregistrer</button></div>
+  <div class="modal-footer"><button class="btn btn-g" onclick="closeM('mMetro')">Annuler</button><button class="btn btn-p" onclick="saveMetro()">💾 Enregistrer</button></div>
 </div></div>
 
 <!-- MODALE RÉINITIALISATION -->
 <div class="modal-bg" id="mReset">
   <div class="modal" style="max-width:460px">
-    <div class="modal-hdr" style="background:#9B2335"><span style="display:flex;align-items:center;gap:8px"><i data-lucide="rotate-ccw" class="modal-hdr-ico"></i>Réinitialisation des données</span> <button class="modal-x" onclick="closeM('mReset')">✕</button></div>
+    <div class="modal-hdr" style="background:#9B2335">🔄 Réinitialisation des données <button class="modal-x" onclick="closeM('mReset')">✕</button></div>
     <div class="modal-body">
       <div style="display:flex;gap:14px;align-items:flex-start;margin-bottom:16px">
         <span style="font-size:36px;flex-shrink:0">⚠️</span>
@@ -1338,7 +1334,7 @@ body.dark-mode thead tr{background:#0d1520}
     </div>
     <div class="modal-footer">
       <button class="btn btn-g" onclick="closeM('mReset')">Annuler</button>
-      <button class="btn btn-d" onclick="resetAll()"><i data-lucide="rotate-ccw" class="btn-ico"></i>Réinitialiser tout</button>
+      <button class="btn btn-d" onclick="resetAll()">🔄 Réinitialiser tout</button>
     </div>
   </div>
 </div>
@@ -1346,14 +1342,14 @@ body.dark-mode thead tr{background:#0d1520}
 <!-- MODALE STYLE -->
 <div class="modal-bg" id="mStyle">
   <div class="modal" style="max-width:640px">
-    <div class="modal-hdr"><span style="display:flex;align-items:center;gap:8px"><i data-lucide="palette" class="modal-hdr-ico"></i>Personnalisation de l'interface</span> <button class="modal-x" onclick="closeM('mStyle')">✕</button></div>
+    <div class="modal-hdr">🎨 Personnalisation de l'interface <button class="modal-x" onclick="closeM('mStyle')">✕</button></div>
     <div class="modal-body" style="padding:0">
       <div class="tab-row" style="padding:0 20px;margin-bottom:0">
-        <button class="tab-btn active" onclick="switchTab('style','themes')"><i data-lucide="palette" class="btn-ico"></i>Thèmes</button>
-        <button class="tab-btn" onclick="switchTab('style','typo')"><i data-lucide="type" class="btn-ico"></i>Typographie</button>
-        <button class="tab-btn" onclick="switchTab('style','layout')"><i data-lucide="layout" class="btn-ico"></i>Mise en page</button>
-        <button class="tab-btn" onclick="switchTab('style','custom')"><i data-lucide="palette" class="btn-ico"></i>Couleur perso</button>
-        <button class="tab-btn" onclick="switchTab('style','identite');openIdentiteTab()"><i data-lucide="tag" class="btn-ico"></i>Identité</button>
+        <button class="tab-btn active" onclick="switchTab('style','themes')">🎨 Thèmes</button>
+        <button class="tab-btn" onclick="switchTab('style','typo')">🔤 Typographie</button>
+        <button class="tab-btn" onclick="switchTab('style','layout')">📐 Mise en page</button>
+        <button class="tab-btn" onclick="switchTab('style','custom')">✏️ Couleur perso</button>
+        <button class="tab-btn" onclick="switchTab('style','identite');openIdentiteTab()">🏷️ Identité</button>
       </div>
       <!-- THEMES -->
       <div class="tab-pane active" id="style-themes" style="padding:16px 20px">
@@ -1400,9 +1396,9 @@ body.dark-mode thead tr{background:#0d1520}
         <div>
           <label style="display:block;font-size:11px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Densité du contenu</label>
           <div style="display:flex;gap:8px">
-            <button class="btn btn-g btn-sm density-chip" onclick="applyDensity('compact')" data-d="compact"><i data-lucide="minimize-2" class="btn-ico"></i>Compact</button>
+            <button class="btn btn-g btn-sm density-chip" onclick="applyDensity('compact')" data-d="compact">⬛ Compact</button>
             <button class="btn btn-g btn-sm density-chip active" onclick="applyDensity('normal')" data-d="normal">▬ Normal</button>
-            <button class="btn btn-g btn-sm density-chip" onclick="applyDensity('spacieux')" data-d="spacieux"><i data-lucide="maximize-2" class="btn-ico"></i>Spacieux</button>
+            <button class="btn btn-g btn-sm density-chip" onclick="applyDensity('spacieux')" data-d="spacieux">⬜ Spacieux</button>
           </div>
         </div>
       </div>
@@ -1440,7 +1436,7 @@ body.dark-mode thead tr{background:#0d1520}
         <div style="font-size:12px;color:var(--mut);margin-bottom:14px">Personnalisez le nom, les textes et les icônes de votre GMAO.</div>
 
         <div style="margin-bottom:18px">
-          <label style="display:flex;align-items:center;gap:6px;font-size:11px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px"><i data-lucide="layout-panel-top" style="width:13px;height:13px"></i>Barre du haut</label>
+          <label style="display:block;font-size:11px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">🔝 Barre du haut</label>
           <div class="form-grid">
             <div>
               <label>Icône + Nom (ex: ⚙ GMAO)</label>
@@ -1454,19 +1450,31 @@ body.dark-mode thead tr{background:#0d1520}
         </div>
 
         <div style="margin-bottom:18px">
-          <label style="display:flex;align-items:center;gap:6px;font-size:11px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px"><i data-lucide="pin" style="width:13px;height:13px"></i>Pied de sidebar</label>
+          <label style="display:block;font-size:11px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">📌 Pied de sidebar</label>
           <input type="text" id="id_foot" placeholder="GMAO v1_Vanilla – Votre établissement © 2025">
         </div>
 
         <div style="margin-bottom:18px">
-          <label style="display:block;font-size:11px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Titres du menu &amp; des pages</label>
-          <div style="font-size:11px;color:var(--mut);margin-bottom:10px">Personnalisez le libellé affiché dans le menu et le titre en haut de chaque page. Laissez vide pour garder le nom par défaut.</div>
-          <div id="titlesEditorGrid" style="max-height:320px;overflow-y:auto;border:1px solid var(--brd);border-radius:6px;padding:10px"></div>
+          <label style="display:block;font-size:11px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">🗂️ Icônes du menu (emoji)</label>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+            <div><label>Tableau de bord</label><input type="text" id="ico_dashboard" placeholder="📊" maxlength="4"></div>
+            <div><label>Équipements</label><input type="text" id="ico_equipements" placeholder="🏥" maxlength="4"></div>
+            <div><label>Interventions (BT)</label><input type="text" id="ico_interventions" placeholder="🔨" maxlength="4"></div>
+            <div><label>Planning</label><input type="text" id="ico_planning" placeholder="📅" maxlength="4"></div>
+            <div><label>Stock pièces</label><input type="text" id="ico_stock" placeholder="📦" maxlength="4"></div>
+            <div><label>Budget</label><input type="text" id="ico_budget" placeholder="💶" maxlength="4"></div>
+            <div><label>Contrats</label><input type="text" id="ico_contrats" placeholder="📋" maxlength="4"></div>
+            <div><label>Documentation</label><input type="text" id="ico_documents" placeholder="📁" maxlength="4"></div>
+            <div><label>Techniciens</label><input type="text" id="ico_techniciens" placeholder="👥" maxlength="4"></div>
+            <div><label>Métrologie</label><input type="text" id="ico_metrologie" placeholder="📐" maxlength="4"></div>
+            <div><label>QR Codes</label><input type="text" id="ico_qrcode" placeholder="📱" maxlength="4"></div>
+            <div><label>Historique</label><input type="text" id="ico_historique" placeholder="📜" maxlength="4"></div>
+          </div>
         </div>
 
         <div style="display:flex;gap:8px;margin-top:4px">
-          <button class="btn btn-p" onclick="applyIdentite()"><i data-lucide="check" class="btn-ico"></i>Appliquer</button>
-          <button class="btn btn-g" onclick="resetIdentite()"><i data-lucide="rotate-ccw" class="btn-ico"></i>Réinitialiser</button>
+          <button class="btn btn-p" onclick="applyIdentite()">✅ Appliquer</button>
+          <button class="btn btn-g" onclick="resetIdentite()">↩️ Réinitialiser</button>
         </div>
       </div>
 
@@ -1504,8 +1512,8 @@ body.dark-mode thead tr{background:#0d1520}
           </div>
         </div>
         <div style="margin-top:14px;display:flex;gap:8px">
-          <button class="btn btn-p" onclick="applyCustomColors()"><i data-lucide="palette" class="btn-ico"></i>Appliquer</button>
-          <button class="btn btn-g" onclick="previewPalette()"><i data-lucide="eye" class="btn-ico"></i>Aperçu live</button>
+          <button class="btn btn-p" onclick="applyCustomColors()">🎨 Appliquer</button>
+          <button class="btn btn-g" onclick="previewPalette()">👁️ Aperçu live</button>
         </div>
         <div id="palettePreview" style="margin-top:12px;display:none;border-radius:var(--rad);overflow:hidden;border:1px solid var(--brd)">
           <div id="prevTopbar" style="padding:10px 14px;color:#fff;font-weight:700;font-size:13px">⚙ GMAO – Aperçu topbar</div>
@@ -1519,8 +1527,8 @@ body.dark-mode thead tr{background:#0d1520}
       </div>
     </div>
     <div class="modal-footer">
-      <button class="btn btn-g" onclick="resetStyle()"><i data-lucide="rotate-ccw" class="btn-ico"></i>Réinitialiser tout</button>
-      <button class="btn btn-p" onclick="closeM('mStyle')"><i data-lucide="check" class="btn-ico"></i>Fermer</button>
+      <button class="btn btn-g" onclick="resetStyle()">↩️ Réinitialiser tout</button>
+      <button class="btn btn-p" onclick="closeM('mStyle')">✅ Fermer</button>
     </div>
   </div>
 </div>
@@ -1528,7 +1536,7 @@ body.dark-mode thead tr{background:#0d1520}
 <!-- MODALE BUDGET POSTE -->
 <div class="modal-bg" id="mBudgetPoste">
   <div class="modal" style="max-width:480px">
-    <div class="modal-hdr" id="mBudgetPosteTitle"><span style="display:flex;align-items:center;gap:8px"><i data-lucide="euro" class="modal-hdr-ico"></i>Poste budgétaire</span> <button class="modal-x" onclick="closeM('mBudgetPoste')">✕</button></div>
+    <div class="modal-hdr" id="mBudgetPosteTitle">💶 Poste budgétaire <button class="modal-x" onclick="closeM('mBudgetPoste')">✕</button></div>
     <div class="modal-body">
       <input type="hidden" id="bpIdx">
       <div class="form-grid">
@@ -1546,7 +1554,7 @@ body.dark-mode thead tr{background:#0d1520}
     </div>
     <div class="modal-footer">
       <button class="btn btn-g" onclick="closeM('mBudgetPoste')">Annuler</button>
-      <button class="btn btn-p" onclick="saveBudgetPoste()><i data-lucide="save" class="btn-ico"></i>Enregistrer</button>
+      <button class="btn btn-p" onclick="saveBudgetPoste()">💾 Enregistrer</button>
     </div>
   </div>
 </div>
@@ -1554,7 +1562,7 @@ body.dark-mode thead tr{background:#0d1520}
 <!-- MODALE BUDGET ANNEE -->
 <div class="modal-bg" id="mBudgetAnnee">
   <div class="modal" style="max-width:420px">
-    <div class="modal-hdr"><span style="display:flex;align-items:center;gap:8px"><i data-lucide="settings" class="modal-hdr-ico"></i>Paramètres budgétaires</span> <button class="modal-x" onclick="closeM('mBudgetAnnee')">✕</button></div>
+    <div class="modal-hdr">⚙️ Paramètres budgétaires <button class="modal-x" onclick="closeM('mBudgetAnnee')">✕</button></div>
     <div class="modal-body">
       <div class="form-grid">
         <div><label>Année budgétaire</label><input type="number" id="baAnnee" min="2020" max="2040"></div>
@@ -1564,7 +1572,7 @@ body.dark-mode thead tr{background:#0d1520}
     </div>
     <div class="modal-footer">
       <button class="btn btn-g" onclick="closeM('mBudgetAnnee')">Annuler</button>
-      <button class="btn btn-p" onclick="saveBudgetAnnee()><i data-lucide="save" class="btn-ico"></i>Enregistrer</button>
+      <button class="btn btn-p" onclick="saveBudgetAnnee()">💾 Enregistrer</button>
     </div>
   </div>
 </div>
@@ -1572,7 +1580,7 @@ body.dark-mode thead tr{background:#0d1520}
 <!-- MODALE UTILISATEUR -->
 <div class="modal-bg" id="mUser">
   <div class="modal" style="max-width:500px">
-    <div class="modal-hdr" id="mUserTitle"><span style="display:flex;align-items:center;gap:8px"><i data-lucide="user-circle" class="modal-hdr-ico"></i>Utilisateur</span> <button class="modal-x" onclick="closeM('mUser')">✕</button></div>
+    <div class="modal-hdr" id="mUserTitle">👤 Utilisateur <button class="modal-x" onclick="closeM('mUser')">✕</button></div>
     <div class="modal-body">
       <input type="hidden" id="uIdx">
       <div class="form-grid">
@@ -1599,7 +1607,7 @@ body.dark-mode thead tr{background:#0d1520}
     </div>
     <div class="modal-footer">
       <button class="btn btn-g" onclick="closeM('mUser')">Annuler</button>
-      <button class="btn btn-p" onclick="saveUser()><i data-lucide="save" class="btn-ico"></i>Enregistrer</button>
+      <button class="btn btn-p" onclick="saveUser()">💾 Enregistrer</button>
     </div>
   </div>
 </div>
@@ -1607,7 +1615,7 @@ body.dark-mode thead tr{background:#0d1520}
 <!-- MODALE RESET MOT DE PASSE -->
 <div class="modal-bg" id="mResetMdp">
   <div class="modal" style="max-width:400px">
-    <div class="modal-hdr"><span style="display:flex;align-items:center;gap:8px"><i data-lucide="key" class="modal-hdr-ico"></i>Modifier le mot de passe</span> <button class="modal-x" onclick="closeM('mResetMdp')">✕</button></div>
+    <div class="modal-hdr">🔑 Modifier le mot de passe <button class="modal-x" onclick="closeM('mResetMdp')">✕</button></div>
     <div class="modal-body">
       <div style="font-size:12px;color:var(--mut);margin-bottom:14px">Utilisateur : <strong id="rpNom"></strong></div>
       <input type="hidden" id="rpIdx">
@@ -1618,14 +1626,14 @@ body.dark-mode thead tr{background:#0d1520}
     </div>
     <div class="modal-footer">
       <button class="btn btn-g" onclick="closeM('mResetMdp')">Annuler</button>
-      <button class="btn btn-p" onclick="saveNewMdp()"><i data-lucide="key" class="btn-ico"></i>Mettre à jour</button>
+      <button class="btn btn-p" onclick="saveNewMdp()">🔑 Mettre à jour</button>
     </div>
   </div>
 </div>
 
 <!-- MODALE CONFIRMATION SUPPRESSION -->
 <div class="modal-bg" id="mPlan"><div class="modal" style="max-width:760px">
-  <div class="modal-hdr"><span style="display:flex;align-items:center;gap:8px"><i data-lucide="calendar-days" class="modal-hdr-ico"></i>Modifier le planning préventif</span> <button class="modal-x" onclick="closeM('mPlan')">✕</button></div>
+  <div class="modal-hdr">📅 Modifier le planning préventif <button class="modal-x" onclick="closeM('mPlan')">✕</button></div>
   <div class="modal-body">
     <div style="background:var(--vl);border-radius:4px;padding:7px 12px;font-size:11.5px;color:var(--bl);margin-bottom:12px;display:flex;align-items:center;gap:8px">
       🔒 <span>Accès réservé au <strong>Responsable</strong> et aux <strong>Administrateurs</strong></span>
@@ -1654,11 +1662,11 @@ body.dark-mode thead tr{background:#0d1520}
       <div><label>Déc</label><select id="fpl_m11"><option value="">–</option><option value="P">P Planifié</option><option value="✓">✓ Effectué</option><option value="!">! En retard</option></select></div>
     </div>
   </div>
-  <div class="modal-footer"><button class="btn btn-g" onclick="closeM('mPlan')">Annuler</button><button class="btn btn-p" onclick="savePlan()><i data-lucide="save" class="btn-ico"></i>Enregistrer</button></div>
+  <div class="modal-footer"><button class="btn btn-g" onclick="closeM('mPlan')">Annuler</button><button class="btn btn-p" onclick="savePlan()">💾 Enregistrer</button></div>
 </div></div>
 
 <div class="modal-bg" id="mTech"><div class="modal">
-  <div class="modal-hdr"><span style="display:flex;align-items:center;gap:8px"><i data-lucide="user-plus" class="modal-hdr-ico"></i>Ajouter un technicien</span> <button class="modal-x" onclick="closeM('mTech')">✕</button></div>
+  <div class="modal-hdr">👤 Ajouter un technicien <button class="modal-x" onclick="closeM('mTech')">✕</button></div>
   <div class="modal-body"><div class="form-grid">
     <div><label>Nom Prénom</label><input id="ft_nom" placeholder="Ex: Dupont Marc"></div>
     <div><label>Poste</label><input id="ft_poste" placeholder="Ex: Technicien préventif"></div>
@@ -1671,11 +1679,11 @@ body.dark-mode thead tr{background:#0d1520}
     <div><label>Astreinte</label><select id="ft_astr"><option value="Oui">Oui</option><option value="Non">Non</option></select></div>
     <div class="fg-full"><label>Prochaine formation / action</label><input id="ft_next" placeholder="Ex: Habilit. élec. 2027"></div>
   </div></div>
-  <div class="modal-footer"><button class="btn btn-g" onclick="closeM('mTech')">Annuler</button><button class="btn btn-p" onclick="saveTech()><i data-lucide="save" class="btn-ico"></i>Enregistrer</button></div>
+  <div class="modal-footer"><button class="btn btn-g" onclick="closeM('mTech')">Annuler</button><button class="btn btn-p" onclick="saveTech()">💾 Enregistrer</button></div>
 </div></div>
 
 <div class="modal-bg" id="mArt"><div class="modal">
-  <div class="modal-hdr"><span style="display:flex;align-items:center;gap:8px"><i data-lucide="package" class="modal-hdr-ico"></i>Nouvel article en stock</span> <button class="modal-x" onclick="closeM('mArt')">✕</button></div>
+  <div class="modal-hdr">📦 Nouvel article en stock <button class="modal-x" onclick="closeM('mArt')">✕</button></div>
   <div class="modal-body"><div class="form-grid">
     <div><label>Référence</label><input id="fart_ref" placeholder="Ex: RO-200-F"></div>
     <div class="ac-wrap">
@@ -1701,13 +1709,13 @@ body.dark-mode thead tr{background:#0d1520}
     </div>
     <div><label>Délai livraison (j)</label><input id="fart_del" type="number" min="1" value="10"></div>
   </div></div>
-  <div class="modal-footer"><button class="btn btn-g" onclick="closeM('mArt')">Annuler</button><button class="btn btn-p" onclick="saveArt()><i data-lucide="save" class="btn-ico"></i>Enregistrer</button></div>
+  <div class="modal-footer"><button class="btn btn-g" onclick="closeM('mArt')">Annuler</button><button class="btn btn-p" onclick="saveArt()">💾 Enregistrer</button></div>
 </div></div>
 
 
 <div class="modal-bg" id="mDel">
   <div class="modal" style="max-width:420px">
-    <div class="modal-hdr"><span style="display:flex;align-items:center;gap:8px"><i data-lucide="trash-2" class="modal-hdr-ico"></i>Confirmer la suppression</span> <button class="modal-x" onclick="cancelDelete()">✕</button></div>
+    <div class="modal-hdr">🗑️ Confirmer la suppression <button class="modal-x" onclick="cancelDelete()">✕</button></div>
     <div class="modal-body">
       <div style="display:flex;gap:14px;align-items:flex-start">
         <span style="font-size:32px;flex-shrink:0">⚠️</span>
@@ -1719,14 +1727,14 @@ body.dark-mode thead tr{background:#0d1520}
     </div>
     <div class="modal-footer">
       <button class="btn btn-g" onclick="cancelDelete()">Annuler</button>
-      <button class="btn btn-d" onclick="execDelete()"><i data-lucide="trash-2" class="btn-ico"></i>Supprimer</button>
+      <button class="btn btn-d" onclick="execDelete()">🗑️ Supprimer</button>
     </div>
   </div>
 </div>
 
 <!-- MODALE CONSIGNE -->
 <div class="modal-bg" id="mConsigne"><div class="modal" style="max-width:520px">
-  <div class="modal-hdr"><span style="display:flex;align-items:center;gap:8px"><i data-lucide="message-square" class="modal-hdr-ico"></i>Nouvelle consigne</span> <button class="modal-x" onclick="closeM('mConsigne')">✕</button></div>
+  <div class="modal-hdr">💬 Nouvelle consigne <button class="modal-x" onclick="closeM('mConsigne')">✕</button></div>
   <div class="modal-body"><div class="form-grid">
     <div><label>Type</label>
       <select id="cons_type">
@@ -1749,12 +1757,12 @@ body.dark-mode thead tr{background:#0d1520}
     <div class="fg-full"><label>Titre / Objet</label><input id="cons_titre" placeholder="Résumé de la consigne"></div>
     <div class="fg-full"><label>Contenu détaillé</label><textarea id="cons_contenu" rows="4" placeholder="Détail de la consigne, actions à prendre…"></textarea></div>
   </div></div>
-  <div class="modal-footer"><button class="btn btn-g" onclick="closeM('mConsigne')">Annuler</button><button class="btn btn-p" onclick="saveConsigne()><i data-lucide="save" class="btn-ico"></i>Enregistrer</button></div>
+  <div class="modal-footer"><button class="btn btn-g" onclick="closeM('mConsigne')">Annuler</button><button class="btn btn-p" onclick="saveConsigne()">💾 Enregistrer</button></div>
 </div></div>
 
 <!-- MODALE RONDE -->
 <div class="modal-bg" id="mRonde"><div class="modal" style="max-width:560px">
-  <div class="modal-hdr"><span style="display:flex;align-items:center;gap:8px"><i data-lucide="footprints" class="modal-hdr-ico"></i>Démarrer une ronde</span> <button class="modal-x" onclick="closeM('mRonde')">✕</button></div>
+  <div class="modal-hdr">🔁 Démarrer une ronde <button class="modal-x" onclick="closeM('mRonde')">✕</button></div>
   <div class="modal-body"><div class="form-grid">
     <div><label>Type de ronde</label>
       <select id="ronde_type">
@@ -1768,7 +1776,7 @@ body.dark-mode thead tr{background:#0d1520}
       <div style="font-size:10.5px;color:var(--mut);margin-top:4px">Maintenir Ctrl/Cmd pour sélectionner plusieurs équipements</div>
     </div>
   </div></div>
-  <div class="modal-footer"><button class="btn btn-g" onclick="closeM('mRonde')">Annuler</button><button class="btn btn-p" onclick="demarrerRonde()"><i data-lucide="play" class="btn-ico"></i>Démarrer la ronde</button></div>
+  <div class="modal-footer"><button class="btn btn-g" onclick="closeM('mRonde')">Annuler</button><button class="btn btn-p" onclick="demarrerRonde()">▶️ Démarrer la ronde</button></div>
 </div></div>
 
 <div class="toast" id="toast"></div>
@@ -2267,7 +2275,7 @@ function renderBT(){
       <td style="text-align:center">${b.dur||'–'} h</td>
       <td style="text-align:center">${delaiCell}</td>
       <td>${statBTBadge(b.stat)}</td>
-      <td>${b.stat!=='✅ Clôturé'?`<button class="btn btn-s btn-sm" onclick="quickClo('${b.id}')"><i data-lucide="check" style="width:13px;height:13px"></i></button>`:''}</td>
+      <td>${b.stat!=='✅ Clôturé'?`<button class="btn btn-s btn-sm" onclick="quickClo('${b.id}')">✅</button>`:''}</td>
     </tr>`}).join('');
 }
 
@@ -2280,10 +2288,10 @@ function renderSk(){
   const nbOK=DB.sk.filter(s=>alrt(s).txt==='✅ OK').length;
   const kpiEl=document.getElementById('kpiStock');
   if(kpiEl) kpiEl.innerHTML=`
-    <div class="kpi bl"><div class="kpi-val">${fmtE(valTotale)}</div><div class="kpi-lbl">Valeur totale du stock</div><i data-lucide="coins" class="kpi-ico"></i></div>
-    <div class="kpi rd"><div class="kpi-val">${nbRupture}</div><div class="kpi-lbl">Articles en rupture</div><i data-lucide="siren" class="kpi-ico"></i></div>
-    <div class="kpi or"><div class="kpi-val">${nbCommander}</div><div class="kpi-lbl">À commander</div><i data-lucide="alert-triangle" class="kpi-ico"></i></div>
-    <div class="kpi gn"><div class="kpi-val">${nbOK}</div><div class="kpi-lbl">Articles OK</div><i data-lucide="check-circle-2" class="kpi-ico"></i></div>`;
+    <div class="kpi bl"><div class="kpi-val">${fmtE(valTotale)}</div><div class="kpi-lbl">Valeur totale du stock</div><div class="kpi-ico">💰</div></div>
+    <div class="kpi rd"><div class="kpi-val">${nbRupture}</div><div class="kpi-lbl">Articles en rupture</div><div class="kpi-ico">🚨</div></div>
+    <div class="kpi or"><div class="kpi-val">${nbCommander}</div><div class="kpi-lbl">À commander</div><div class="kpi-ico">⚠️</div></div>
+    <div class="kpi gn"><div class="kpi-val">${nbOK}</div><div class="kpi-lbl">Articles OK</div><div class="kpi-ico">✅</div></div>`;
   document.getElementById('bodySk').innerHTML=DB.sk.map(s=>{
     const al=alrt(s);
     return`<tr>
@@ -2300,9 +2308,9 @@ function renderSk(){
       <td>${fmtD(s.mvt)}</td>
       <td><span class="badge ${al.cls}">${al.txt}</span></td>
       <td>
-        <button class="btn btn-g btn-sm" onclick="qMvt('${s.ref}','SORTIE')"><i data-lucide="arrow-down" style="width:13px;height:13px"></i></button>
-        <button class="btn btn-g btn-sm" onclick="qMvt('${s.ref}','ENTREE')"><i data-lucide="arrow-up" style="width:13px;height:13px"></i></button>
-        ${isAdmin()?'<button class="btn btn-d btn-sm" onclick="deleteSk(\''+s.ref+'\')"><i data-lucide="trash-2" style="width:13px;height:13px"></i></button>':''}
+        <button class="btn btn-g btn-sm" onclick="qMvt('${s.ref}','SORTIE')">🔻</button>
+        <button class="btn btn-g btn-sm" onclick="qMvt('${s.ref}','ENTREE')">🔺</button>
+        ${isAdmin()?'<button class="btn btn-d btn-sm" onclick="deleteSk(\''+s.ref+'\')">🗑️</button>':''}
       </td>
     </tr>`;}).join('');
   renderMvtLog();
@@ -2355,7 +2363,7 @@ function renderPlan(){
         <div class="progress-wrap" style="margin-bottom:3px"><div class="progress-fill" style="width:${pct}%;background:${barColor}"></div></div>
         <div style="font-size:10px;color:var(--mut);text-align:center">${done}/${total} – ${pct}%${late>0?` <span style="color:#E53E3E">⚠️${late}</span>`:''}</div>
       </td>
-      <td style="text-align:center;padding:5px;white-space:nowrap">${isResponsable()?`<button class="btn btn-g btn-sm" onclick="editPlan(${pi})"><i data-lucide="pencil" style="width:13px;height:13px"></i></button> `:''}${isAdmin()?`<button class="btn btn-d btn-sm" onclick="deletePlan(${pi})"><i data-lucide="trash-2" style="width:13px;height:13px"></i></button>`:''}</td>
+      <td style="text-align:center;padding:5px;white-space:nowrap">${isResponsable()?`<button class="btn btn-g btn-sm" onclick="editPlan(${pi})">✏️</button> `:''}${isAdmin()?`<button class="btn btn-d btn-sm" onclick="deletePlan(${pi})">🗑️</button>`:''}</td>
     </tr>`;
   };
 
@@ -2479,7 +2487,7 @@ function renderTech(){
         </div>
       </td>
       <td style="font-weight:600;color:${t.next.includes('⚠️')||t.next.includes('ÉCHUE')?'#E53E3E':'var(--mut)'}">${t.next}</td>
-      <td>${isAdmin()?'<button class="btn btn-d btn-sm" onclick="deleteTech('+DB.tech.indexOf(t)+')"><i data-lucide="trash-2" style="width:13px;height:13px"></i></button>':''}</td>
+      <td>${isAdmin()?'<button class="btn btn-d btn-sm" onclick="deleteTech('+DB.tech.indexOf(t)+')">🗑️</button>':''}</td>
     </tr>`}).join('');
 }
 
@@ -2503,7 +2511,7 @@ function renderMetro(){
       <td>${m.verd.includes('Conforme')&&!m.verd.includes('Non')?`<span class="badge bg">${m.verd}</span>`:`<span class="badge br">${m.verd}</span>`}</td>
       <td>${fmtD(m.date)}</td><td>${fmtD(m.next)}</td><td>${m.tech}</td>
       <td style="font-size:11px;color:var(--mut)">${m.obs}</td>
-      <td>${isAdmin()?'<button class="btn btn-d btn-sm" onclick="deleteMetro('+DB.metro.indexOf(m)+')"><i data-lucide="trash-2" style="width:13px;height:13px"></i></button>':''}</td>
+      <td>${isAdmin()?'<button class="btn btn-d btn-sm" onclick="deleteMetro('+DB.metro.indexOf(m)+')">🗑️</button>':''}</td>
     </tr>`;
   }).join('');
 }
@@ -2524,7 +2532,7 @@ function renderContrats(){
       <td style="text-align:right;font-variant-numeric:tabular-nums">${c.mont>0?fmtE(c.mont):'Gratuit'}</td>
       <td style="font-size:11px">${c.couv}</td>
       <td>${al}</td>
-      <td style="white-space:nowrap">${isAdmin()?'<button class="btn btn-g btn-sm" onclick="editContrat('+ci+')"><i data-lucide="pencil" class="btn-ico"></i>Modifier</button> <button class="btn btn-d btn-sm" onclick="deleteContrat('+ci+')"><i data-lucide="trash-2" style="width:13px;height:13px"></i></button>':'<span style="color:var(--mut);font-size:11px">—</span>'}</td>
+      <td style="white-space:nowrap">${isAdmin()?'<button class="btn btn-g btn-sm" onclick="editContrat('+ci+')">✏️ Modifier</button> <button class="btn btn-d btn-sm" onclick="deleteContrat('+ci+')">🗑️</button>':'<span style="color:var(--mut);font-size:11px">—</span>'}</td>
     </tr>`;}).join('');
 }
 
@@ -2543,13 +2551,13 @@ function renderDocs(){
       <td style="color:var(--mut);font-size:11px">${d.taille}</td>
       <td style="white-space:nowrap;display:flex;gap:4px;align-items:center">
         ${d.fileData
-          ? `<button class="btn btn-g btn-sm" onclick="openDoc(${i})"><i data-lucide="file" class="btn-ico"></i>Ouvrir</button>
-             <button class="btn btn-p btn-sm" onclick="downloadDoc(${i})"><i data-lucide="download" style="width:13px;height:13px"></i></button>`
+          ? `<button class="btn btn-g btn-sm" onclick="openDoc(${i})">📄 Ouvrir</button>
+             <button class="btn btn-p btn-sm" onclick="downloadDoc(${i})">⬇️</button>`
           : `<label class="btn btn-g btn-sm" style="cursor:pointer;margin:0" title="Attacher un fichier">
                📎 Attacher
                <input type="file" style="display:none" accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.zip" onchange="attachFile(${i},this)">
              </label>`}
-        ${isAdmin()?'<button class="btn btn-d btn-sm" onclick="deleteDoc(null,'+i+')"><i data-lucide="trash-2" style="width:13px;height:13px"></i></button>':''}
+        ${isAdmin()?'<button class="btn btn-d btn-sm" onclick="deleteDoc(null,'+i+')">🗑️</button>':''}
       </td>
     </tr>`;
   }).join('');
@@ -2628,7 +2636,7 @@ function renderHistorique(){
       <div class="kpi gn"><div class="kpi-val">${fmtE(coutTotal)}</div><div class="kpi-lbl">Coût total</div></div>
     </div>
     <div class="card">
-      <div class="card-hdr"><i data-lucide="clipboard-list" class="card-hdr-ico"></i>Fiche équipement – ${eq.id}</div>
+      <div class="card-hdr">📋 Fiche équipement – ${eq.id}</div>
       <div class="card-body">
         <div class="grid2" style="gap:8px;font-size:12.5px;margin-bottom:12px">
           <div><strong>Désignation :</strong> ${eq.des}</div>
@@ -2647,7 +2655,7 @@ function renderHistorique(){
       </div>
     </div>
     <div class="card">
-      <div class="card-hdr"><i data-lucide="wrench" class="card-hdr-ico"></i>Historique des interventions (${bts.length})</div>
+      <div class="card-hdr">🔨 Historique des interventions (${bts.length})</div>
       <div class="card-body">
         <div class="timeline">
           ${bts.length===0?'<p style="color:var(--mut);font-size:12px">Aucune intervention enregistrée.</p>':bts.map(b=>`
@@ -2658,15 +2666,15 @@ function renderHistorique(){
                 <div class="tl-date">${fmtD(b.ouv)} ${b.clo?'→ '+fmtD(b.clo):''} – ${b.tech} – ${typeBadge(b.type)} ${priorBadge(b.prior)}</div>
                 <div class="tl-desc">${b.desc} <span style="color:var(--mut)">${(b.causePanne||b.cause)&&(b.causePanne||b.cause)!=='N/A'?'• Cause: '+(b.causePanne||b.cause):''}</span> ${b.cout>0?`<strong>${fmtE(b.cout)}</strong>`:''}</div>
               </div>
-              ${isAdmin()?'<button class="btn btn-d btn-sm" style="flex-shrink:0;margin-top:2px" onclick="deleteBT(\''+b.id+'\',\''+id+'\')"><i data-lucide="trash-2" style="width:13px;height:13px"></i></button>':'' }
+              ${isAdmin()?'<button class="btn btn-d btn-sm" style="flex-shrink:0;margin-top:2px" onclick="deleteBT(\''+b.id+'\',\''+id+'\')">🗑️</button>':'' }
             </div>
           </div>`).join('')}
         </div>
       </div>
     </div>
-    ${metros.length>0?`<div class="card"><div class="card-hdr"><i data-lucide="ruler" class="card-hdr-ico"></i>Contrôles métrologiques (${metros.length})</div><div class="card-body"><div class="timeline">${metros.map((m,mi)=>`<div class="tl-item metro" id="tl-metro-${id}-${mi}"><div class="tl-dot"></div><div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px"><div style="flex:1"><div class="tl-date">${fmtD(m.date)} – ${m.tech}</div><div class="tl-desc">Erreur mesurée : ${m.err} | Tolérance : ${m.tol} | ${m.verd.includes('Non')?`<span class="badge br">${m.verd}</span>`:`<span class="badge bg">${m.verd}</span>`} ${m.obs?'• '+m.obs:''}</div></div>${isAdmin()?'<button class="btn btn-d btn-sm" style="flex-shrink:0;margin-top:2px" onclick="deleteMetro(\''+id+'\','+mi+')"><i data-lucide="trash-2" style="width:13px;height:13px"></i></button>':''}</div></div>`).join('')}</div></div></div>`:''}
-    ${ctrats.length>0?`<div class="card"><div class="card-hdr"><i data-lucide="file-text" class="card-hdr-ico"></i>Contrats et garanties (${ctrats.length})</div><div class="card-body" style="font-size:12.5px">${ctrats.map(c=>`<div style="border-left:3px solid var(--lb);padding:6px 12px;margin-bottom:8px;background:var(--gr);border-radius:0 4px 4px 0"><strong>${c.type}</strong> – ${c.fourn}<br>Du ${fmtD(c.deb)} au ${fmtD(c.fin)} | ${c.mont>0?fmtE(c.mont)+'/an':'Gratuit'}<br><span style="color:var(--mut)">${c.couv}</span></div>`).join('')}</div></div>`:''}
-    ${docs.length>0?`<div class="card"><div class="card-hdr"><i data-lucide="folder-open" class="card-hdr-ico"></i>Documents associés (${docs.length})</div><div class="card-body">${docs.map((d)=>{const gi=DB.docs.indexOf(d);return`<div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--gg);font-size:12px"><span class="badge bb">${d.type}</span><span>${d.titre}</span><span style="color:var(--mut);margin-left:auto">${d.ver} – ${fmtD(d.date)}</span>${d.fileData?`<button class="btn btn-g btn-sm" onclick="openDoc(${gi})"><i data-lucide="file" style="width:13px;height:13px"></i></button><button class="btn btn-g btn-sm" onclick="downloadDoc(${gi})"><i data-lucide="download" style="width:13px;height:13px"></i></button>`:'<button class="btn btn-g btn-sm" style="opacity:.4;cursor:not-allowed" title="Pas de fichier"><i data-lucide="file" style="width:13px;height:13px"></i></button>'}${isAdmin()?'<button class="btn btn-d btn-sm" onclick="deleteDoc(null,'+gi+')"><i data-lucide="trash-2" style="width:13px;height:13px"></i></button>':''}</div>`;}).join('')}</div></div>`:''}
+    ${metros.length>0?`<div class="card"><div class="card-hdr">📐 Contrôles métrologiques (${metros.length})</div><div class="card-body"><div class="timeline">${metros.map((m,mi)=>`<div class="tl-item metro" id="tl-metro-${id}-${mi}"><div class="tl-dot"></div><div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px"><div style="flex:1"><div class="tl-date">${fmtD(m.date)} – ${m.tech}</div><div class="tl-desc">Erreur mesurée : ${m.err} | Tolérance : ${m.tol} | ${m.verd.includes('Non')?`<span class="badge br">${m.verd}</span>`:`<span class="badge bg">${m.verd}</span>`} ${m.obs?'• '+m.obs:''}</div></div>${isAdmin()?'<button class="btn btn-d btn-sm" style="flex-shrink:0;margin-top:2px" onclick="deleteMetro(\''+id+'\','+mi+')">🗑️</button>':''}</div></div>`).join('')}</div></div></div>`:''}
+    ${ctrats.length>0?`<div class="card"><div class="card-hdr">📋 Contrats et garanties (${ctrats.length})</div><div class="card-body" style="font-size:12.5px">${ctrats.map(c=>`<div style="border-left:3px solid var(--lb);padding:6px 12px;margin-bottom:8px;background:var(--gr);border-radius:0 4px 4px 0"><strong>${c.type}</strong> – ${c.fourn}<br>Du ${fmtD(c.deb)} au ${fmtD(c.fin)} | ${c.mont>0?fmtE(c.mont)+'/an':'Gratuit'}<br><span style="color:var(--mut)">${c.couv}</span></div>`).join('')}</div></div>`:''}
+    ${docs.length>0?`<div class="card"><div class="card-hdr">📁 Documents associés (${docs.length})</div><div class="card-body">${docs.map((d)=>{const gi=DB.docs.indexOf(d);return`<div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--gg);font-size:12px"><span class="badge bb">${d.type}</span><span>${d.titre}</span><span style="color:var(--mut);margin-left:auto">${d.ver} – ${fmtD(d.date)}</span>${d.fileData?`<button class="btn btn-g btn-sm" onclick="openDoc(${gi})">📄</button><button class="btn btn-g btn-sm" onclick="downloadDoc(${gi})">⬇️</button>`:'<button class="btn btn-g btn-sm" style="opacity:.4;cursor:not-allowed" title="Pas de fichier">📄</button>'}${isAdmin()?'<button class="btn btn-d btn-sm" onclick="deleteDoc(null,'+gi+')">🗑️</button>':''}</div>`;}).join('')}</div></div>`:''}
   `;
 }
 
@@ -2720,7 +2728,7 @@ function showQR(){
   document.getElementById('qrContent').innerHTML=`
     <div class="grid2">
       <div class="card">
-        <div class="card-hdr"><i data-lucide="qr-code" class="card-hdr-ico"></i>QR Code – ${eq.id}</div>
+        <div class="card-hdr">📱 QR Code – ${eq.id}</div>
         <div class="card-body" style="text-align:center">
           <div class="qr-box" id="qrBox" onclick="toast('QR Code copié : '+this.dataset.url,'s')" data-url="${url}">
             <div id="qrCanvas" style="display:inline-block;margin:0 auto"></div>
@@ -2730,7 +2738,7 @@ function showQR(){
         </div>
       </div>
       <div class="card">
-        <div class="card-hdr"><i data-lucide="tag" class="card-hdr-ico"></i>Étiquette d'identification</div>
+        <div class="card-hdr">🏷️ Étiquette d'identification</div>
         <div class="card-body">
           <div style="border:2px solid var(--bl);border-radius:4px;padding:14px;font-size:12px">
             <div style="font-weight:700;font-size:15px;color:var(--bl);margin-bottom:6px">${eq.id} – ${eq.des}</div>
@@ -2831,7 +2839,7 @@ function printQR(){
     <div>${now}</div>
   </div>
 </div>
-<button class="btn-print no-print" onclick="window.print()><i data-lucide="printer" class="btn-ico"></i>Imprimer / Exporter en PDF</button>
+<button class="btn-print no-print" onclick="window.print()">🖨️ Imprimer / Exporter en PDF</button>
 </body></html>`);
   w.document.close();
 }
@@ -2940,7 +2948,7 @@ function printAllQR(){
 
     const w=window.open('','_blank');
     w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Fiches QR – Tous les équipements</title><style>${ficheStyle}</style></head><body>
-      <div class="toolbar no-print"><button class="btn-print" onclick="window.print()><i data-lucide="printer" class="btn-ico"></i>Imprimer tout (${DB.eq.length} équipements – ${pagesHtml.length} page${pagesHtml.length>1?'s':''})</button></div>
+      <div class="toolbar no-print"><button class="btn-print" onclick="window.print()">🖨️ Imprimer tout (${DB.eq.length} équipements – ${pagesHtml.length} page${pagesHtml.length>1?'s':''})</button></div>
       ${pagesHtml.join('')}
     </body></html>`);
     w.document.close();
@@ -3228,14 +3236,14 @@ function renderDashboard(){
   const durs=DB.bt.filter(b=>b.dur>0).map(b=>b.dur);
   const mttr=durs.length?durs.reduce((a,b)=>a+b,0)/durs.length:0;
   document.getElementById('kpiGrid').innerHTML=`
-    <div class="kpi bl"><div class="kpi-val">${total?Math.round(op/total*100):0}%</div><div class="kpi-lbl">Disponibilité du parc</div><i data-lucide="bar-chart-3" class="kpi-ico"></i></div>
-    <div class="kpi ${op===total?'gn':'or'}"><div class="kpi-val">${op}/${total}</div><div class="kpi-lbl">Équipements opérationnels</div><i data-lucide="building-2" class="kpi-ico"></i></div>
-    <div class="kpi bl"><div class="kpi-val">${nbBT}</div><div class="kpi-lbl">Interventions totales</div><i data-lucide="wrench" class="kpi-ico"></i></div>
-    <div class="kpi ${prev/nbBT>=0.65?'gn':'or'}"><div class="kpi-val">${Math.round(prev/nbBT*100)}%</div><div class="kpi-lbl">Taux maintenance préventive</div><i data-lucide="clipboard-list" class="kpi-ico"></i></div>
-    <div class="kpi bl"><div class="kpi-val">${mttr.toFixed(1)} h</div><div class="kpi-lbl">MTTR moyen</div><i data-lucide="timer" class="kpi-ico"></i></div>
-    <div class="kpi or"><div class="kpi-val">${cout.toLocaleString('fr-FR')}€</div><div class="kpi-lbl">Coût total interventions</div><i data-lucide="euro" class="kpi-ico"></i></div>
-    <div class="kpi ${al===0?'gn':'rd'}"><div class="kpi-val">${al}</div><div class="kpi-lbl">Alertes stock actives</div><i data-lucide="package" class="kpi-ico"></i></div>
-    <div class="kpi ${enc===0?'gn':'or'}"><div class="kpi-val">${enc}</div><div class="kpi-lbl">BT en cours</div><i data-lucide="repeat" class="kpi-ico"></i></div>`;
+    <div class="kpi bl"><div class="kpi-val">${total?Math.round(op/total*100):0}%</div><div class="kpi-lbl">Disponibilité du parc</div><div class="kpi-ico">📊</div></div>
+    <div class="kpi ${op===total?'gn':'or'}"><div class="kpi-val">${op}/${total}</div><div class="kpi-lbl">Équipements opérationnels</div><div class="kpi-ico">🏥</div></div>
+    <div class="kpi bl"><div class="kpi-val">${nbBT}</div><div class="kpi-lbl">Interventions totales</div><div class="kpi-ico">🔨</div></div>
+    <div class="kpi ${prev/nbBT>=0.65?'gn':'or'}"><div class="kpi-val">${Math.round(prev/nbBT*100)}%</div><div class="kpi-lbl">Taux maintenance préventive</div><div class="kpi-ico">📋</div></div>
+    <div class="kpi bl"><div class="kpi-val">${mttr.toFixed(1)} h</div><div class="kpi-lbl">MTTR moyen</div><div class="kpi-ico">⏱</div></div>
+    <div class="kpi or"><div class="kpi-val">${cout.toLocaleString('fr-FR')}€</div><div class="kpi-lbl">Coût total interventions</div><div class="kpi-ico">💶</div></div>
+    <div class="kpi ${al===0?'gn':'rd'}"><div class="kpi-val">${al}</div><div class="kpi-lbl">Alertes stock actives</div><div class="kpi-ico">📦</div></div>
+    <div class="kpi ${enc===0?'gn':'or'}"><div class="kpi-val">${enc}</div><div class="kpi-lbl">BT en cours</div><div class="kpi-ico">🔄</div></div>`;
   drawBarChart('cvInterv',[{l:'Préventif',v:DB.bt.filter(b=>b.type==='Préventif').length,c:'#1E6B3C'},{l:'Correctif',v:DB.bt.filter(b=>b.type==='Correctif').length,c:'#E53E3E'},{l:'En cours',v:enc,c:'#E67E22'},{l:'Clôturés',v:DB.bt.filter(b=>b.stat==='✅ Clôturé').length,c:'#2E75B6'}]);
   drawDonut('cvStatut',[{l:'Opérationnels',v:op,c:'#1E6B3C'},{l:'En maint.',v:DB.eq.filter(e=>e.stat.includes('maintenance')).length,c:'#E67E22'},{l:'Hors service',v:DB.eq.filter(e=>e.stat.includes('Hors')).length,c:'#E53E3E'}],total);
   // ── Pareto dynamique basé sur DB.bt (interventions correctrices clôturées) ──
@@ -3516,7 +3524,7 @@ function renderAMDEC(){
       <td style="text-align:center;font-weight:700;font-size:13px;color:${col};background:${bg};border-radius:4px">${c}</td>
       <td style="font-size:11.5px">${r.action}</td>
       <td style="font-size:11.5px">${r.resp}</td>
-      <td><button class="btn btn-e btn-sm" onclick="amdecDel(${i})"><i data-lucide="trash-2" style="width:13px;height:13px"></i></button></td>
+      <td><button class="btn btn-e btn-sm" onclick="amdecDel(${i})">🗑</button></td>
     </tr>`;
   }).join('');
 }
@@ -3631,7 +3639,7 @@ function renderPDCA(){
       <td>${fmtD(r.ech)}</td>
       <td><div style="display:flex;align-items:center;gap:6px"><div style="flex:1;background:#E2E8F0;border-radius:4px;height:8px"><div style="width:${pct}%;background:${PDCA_COLORS[r.phase]};height:8px;border-radius:4px"></div></div><span style="font-size:11px;font-weight:600;min-width:28px">${pct}%</span></div></td>
       <td>${statBadge}</td>
-      <td><button class="btn btn-e btn-sm" onclick="pdcaDel(${i})"><i data-lucide="trash-2" style="width:13px;height:13px"></i></button></td>
+      <td><button class="btn btn-e btn-sm" onclick="pdcaDel(${i})">🗑</button></td>
     </tr>`;
   }).join('');
 }
@@ -3708,12 +3716,12 @@ function renderBudget(){
   const tauxConso=totalPrev>0?Math.round(totalReal/totalPrev*100):0;
   const restant=totalPrev-totalReal;
   document.getElementById('kpiBudg').innerHTML=`
-    <div class="kpi bl"><div class="kpi-val">${fmtE(totalPrev)}</div><div class="kpi-lbl">Budget prévisionnel ${BUDGET.annee||''}</div><i data-lucide="clipboard-list" class="kpi-ico"></i></div>
-    <div class="kpi ${ecart>0?'rd':'gn'}"><div class="kpi-val">${fmtE(totalReal)}</div><div class="kpi-lbl">Dépenses réelles</div><i data-lucide="banknote" class="kpi-ico"></i></div>
-    <div class="kpi ${ecart>0?'rd':'gn'}"><div class="kpi-val">${ecart>0?'+':''}${fmtE(ecart)}</div><div class="kpi-lbl">Écart budgétaire</div><i data-lucide="${ecart>0?'alert-triangle':'check-circle-2'}" class="kpi-ico"></i></div>
-    <div class="kpi bl"><div class="kpi-val">${tauxConso}%</div><div class="kpi-lbl">Taux de consommation</div><i data-lucide="bar-chart-3" class="kpi-ico"></i></div>
-    <div class="kpi ${restant<0?'rd':'or'}"><div class="kpi-val">${fmtE(Math.abs(restant))}</div><div class="kpi-lbl">${restant<0?'Dépassement':'Solde restant'}</div><i data-lucide="${restant<0?'trending-down':'trending-up'}" class="kpi-ico"></i></div>
-    <div class="kpi bl"><div class="kpi-val">${BUDGET.postes.length}</div><div class="kpi-lbl">Postes budgétaires</div><i data-lucide="folder" class="kpi-ico"></i></div>`;
+    <div class="kpi bl"><div class="kpi-val">${fmtE(totalPrev)}</div><div class="kpi-lbl">Budget prévisionnel ${BUDGET.annee||''}</div><div class="kpi-ico">📋</div></div>
+    <div class="kpi ${ecart>0?'rd':'gn'}"><div class="kpi-val">${fmtE(totalReal)}</div><div class="kpi-lbl">Dépenses réelles</div><div class="kpi-ico">💸</div></div>
+    <div class="kpi ${ecart>0?'rd':'gn'}"><div class="kpi-val">${ecart>0?'+':''}${fmtE(ecart)}</div><div class="kpi-lbl">Écart budgétaire</div><div class="kpi-ico">${ecart>0?'⚠️':'✅'}</div></div>
+    <div class="kpi bl"><div class="kpi-val">${tauxConso}%</div><div class="kpi-lbl">Taux de consommation</div><div class="kpi-ico">📊</div></div>
+    <div class="kpi ${restant<0?'rd':'or'}"><div class="kpi-val">${fmtE(Math.abs(restant))}</div><div class="kpi-lbl">${restant<0?'Dépassement':'Solde restant'}</div><div class="kpi-ico">${restant<0?'🔴':'🟢'}</div></div>
+    <div class="kpi bl"><div class="kpi-val">${BUDGET.postes.length}</div><div class="kpi-lbl">Postes budgétaires</div><div class="kpi-ico">📁</div></div>`;
   drawGroupBar('cvBudg',BUDGET.postes.map(p=>p.nom),BUDGET.postes.map(p=>p.prev),BUDGET.postes.map(p=>p.real));
   drawDonut('cvPie',BUDGET.postes.map((p,i)=>({l:p.nom.split(' ').slice(0,2).join(' '),v:p.real,c:['#2E75B6','#E67E22','#1E6B3C','#8E44AD','#F39C12','#E53E3E','#16A085','#884EA0'][i%8]})),totalReal);
   document.getElementById('budgetDetail').innerHTML=`
@@ -3736,8 +3744,8 @@ function renderBudget(){
         <div style="font-size:10px;color:var(--mut);margin-top:2px">${fmtE(p.real)} / ${fmtE(p.prev)}</div>
       </td>
       <td style="padding:8px;white-space:nowrap">
-        ${isAdmin()?'<button class="btn btn-g btn-sm" onclick="openBudgetPoste('+i+')"><i data-lucide="pencil" style="width:13px;height:13px"></i></button>':''}
-        ${isAdmin()?'<button class="btn btn-d btn-sm" onclick="deleteBudgetPoste('+i+')"><i data-lucide="trash-2" style="width:13px;height:13px"></i></button>':''}
+        ${isAdmin()?'<button class="btn btn-g btn-sm" onclick="openBudgetPoste('+i+')">✏️</button>':''}
+        ${isAdmin()?'<button class="btn btn-d btn-sm" onclick="deleteBudgetPoste('+i+')">🗑️</button>':''}
       </td>
     </tr>`;}).join('')}</tbody>
     ${BUDGET.postes.length>0?`<tfoot><tr style="background:var(--gg);font-weight:700">
@@ -4590,7 +4598,7 @@ function rapport(){
       </div>
     </div>
 
-    <button class="no-print" onclick="window.print()" style="margin-top:28px;padding:11px 24px;background:#1F4E79;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:13px;font-weight:600><i data-lucide="printer" class="btn-ico"></i>Imprimer / Exporter en PDF</button>
+    <button class="no-print" onclick="window.print()" style="margin-top:28px;padding:11px 24px;background:#1F4E79;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:13px;font-weight:600">🖨️ Imprimer / Exporter en PDF</button>
   </div>
 
   <div class="doc-footer">
@@ -4800,7 +4808,7 @@ function rapportSalarie(){
       </div>
     </div>
 
-    <button class="no-print btn-print" style="margin-top:28px" onclick="window.print()><i data-lucide="printer" class="btn-ico"></i>Imprimer / Exporter en PDF</button>
+    <button class="no-print btn-print" style="margin-top:28px" onclick="window.print()">🖨️ Imprimer / Exporter en PDF</button>
   </div>
 
   <div class="doc-footer">
@@ -4849,9 +4857,9 @@ function renderUsers(){
     <td style="color:var(--mut);font-size:11px">${u.lastConn?fmtD(u.lastConn):'Jamais'}</td>
     <td><span class="badge ${u.actif?'bg':'br'}">${u.actif?'✅ Actif':'⛔ Inactif'}</span></td>
     <td style="white-space:nowrap">
-      ${isAdmin()?`<button class="btn btn-g btn-sm" onclick="editUser(${i})"><i data-lucide="pencil" style="width:13px;height:13px"></i></button>
-      <button class="btn btn-w btn-sm" onclick="resetMdp(${i})"><i data-lucide="key" style="width:13px;height:13px"></i></button>
-      <button class="btn btn-d btn-sm" onclick="deleteUser(${i})"><i data-lucide="trash-2" style="width:13px;height:13px"></i></button>`:'<span style="color:var(--mut);font-size:11px">—</span>'}
+      ${isAdmin()?`<button class="btn btn-g btn-sm" onclick="editUser(${i})">✏️</button>
+      <button class="btn btn-w btn-sm" onclick="resetMdp(${i})">🔑</button>
+      <button class="btn btn-d btn-sm" onclick="deleteUser(${i})">🗑️</button>`:'<span style="color:var(--mut);font-size:11px">—</span>'}
     </td>
   </tr>`).join('');
 }
@@ -5031,11 +5039,6 @@ function loadPersonalization(){
       });
     }
   } catch(e){ console.error('Erreur restauration personnalisation:', e); }
-  // Restaurer les titres personnalisés (menu + pages), stockés séparément par appareil
-  try {
-    const titles = getCustomTitles();
-    if(Object.keys(titles).length) applyCustomTitlesToDOM(titles);
-  } catch(e){ console.error('Erreur restauration titres:', e); }
 }
 
 let currentTheme='blue';
@@ -5289,32 +5292,10 @@ const ID_DEFAULTS = {
   logo: '⚙ G<span>MAO</span>',
   sub: 'Atelier Maintenance Matériels Roulants &amp; Transport Automatique – GHRMSA Emile Muller',
   foot: 'GMAO v1_Vanilla<br>GHRMSA © 2025<br>Atelier MR &amp; TA',
-  pages: {
-    dashboard:     {nav:'Tableau de bord',        title:'Tableau de bord opérationnel'},
-    direction:     {nav:'Vue direction',           title:'Vue direction – Indicateurs stratégiques'},
-    equipements:   {nav:'Équipements',             title:'Registre des équipements'},
-    historique:    {nav:'Historique technique',    title:'Historique technique complet'},
-    criticite:     {nav:'Criticité auto',          title:'Indice de criticité calculé'},
-    qrcode:        {nav:'QR Codes',                title:'Identification par QR Code'},
-    interventions: {nav:'Interventions',           title:'Bons de travail – Interventions'},
-    planning:      {nav:'Planning',                title:'Planning annuel de maintenance préventive'},
-    fiabilite:     {nav:'Fiabilité MTBF/MTTR',     title:'Analyse de fiabilité – MTBF / MTTR'},
-    immobilisations:{nav:'Immobilisations',        title:'Suivi des immobilisations'},
-    predictif:     {nav:'Maintenance prédictive',  title:'Maintenance prédictive'},
-    causesracines: {nav:'Causes racines',          title:'Analyse des causes racines'},
-    stock:         {nav:'Stock pièces',            title:'Gestion du stock de pièces détachées'},
-    budget:        {nav:'Budget',                  title:'Suivi budgétaire maintenance'},
-    contrats:      {nav:'Contrats &amp; garanties',title:'Contrats &amp; garanties'},
-    devis:         {nav:'Devis',                   title:'Gestion des devis'},
-    documents:     {nav:'Documentation',           title:'Documentation technique'},
-    techniciens:   {nav:'Techniciens',             title:'Équipe – Habilitations &amp; compétences'},
-    metrologie:    {nav:'Métrologie',              title:'Métrologie – Contrôles réglementaires'},
-    utilisateurs:  {nav:'Utilisateurs',            title:'Gestion des utilisateurs'},
-    conformite:    {nav:'Conformité HAS',          title:'Conformité réglementaire &amp; Audit HAS'},
-    rondes:        {nav:'Tournées de ronde',       title:'Tournées de ronde'},
-    batiment:      {nav:'Plan bâtiment',           title:'Plan du bâtiment – Localisation des équipements'},
-    consignes:     {nav:'Consignes équipe',        title:'Passation de consignes – Communication équipe'},
-    audit:         {nav:'Journal audit',           title:'Journal d\'audit – Traçabilité des actions'}
+  icons: {
+    dashboard:'📊',equipements:'🏥',interventions:'🔨',planning:'📅',
+    stock:'📦',budget:'💶',contrats:'📋',documents:'📁',
+    techniciens:'👥',metrologie:'📐',qrcode:'📱',historique:'📜'
   }
 };
 
@@ -5326,56 +5307,15 @@ function openIdentiteTab(){
   if(logo) document.getElementById('id_logo').value = logo.textContent.trim();
   if(sub)  document.getElementById('id_sub').value  = sub.textContent.trim();
   if(foot) document.getElementById('id_foot').value = foot.textContent.trim();
-
-  // Construire dynamiquement la liste éditable des titres (nav + page) pour chaque page
-  const grid = document.getElementById('titlesEditorGrid');
-  if(grid){
-    const saved = getCustomTitles();
-    grid.innerHTML = Object.keys(ID_DEFAULTS.pages).map(key=>{
-      const def = ID_DEFAULTS.pages[key];
-      const navVal = (saved[key] && saved[key].nav) || '';
-      const titleVal = (saved[key] && saved[key].title) || '';
-      return `
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;align-items:end;padding:7px 0;border-bottom:1px solid var(--gg)">
-          <div><label style="font-size:10px;color:var(--mut)">Menu – ${def.nav}</label>
-            <input type="text" id="navtitle_${key}" placeholder="${def.nav}" value="${navVal.replace(/"/g,'&quot;')}"></div>
-          <div><label style="font-size:10px;color:var(--mut)">Titre de page</label>
-            <input type="text" id="pgtitle_${key}" placeholder="${def.title.replace(/&amp;/g,'&')}" value="${titleVal.replace(/"/g,'&quot;')}"></div>
-        </div>`;
-    }).join('');
-  }
-}
-
-// Lit les titres personnalisés enregistrés pour cet appareil (localStorage)
-function getCustomTitles(){
-  try {
-    const raw = localStorage.getItem('gmao_custom_titles');
-    return raw ? JSON.parse(raw) : {};
-  } catch(e){ return {}; }
-}
-
-// Applique un jeu de titres personnalisés au DOM (sidebar + titres de page)
-function applyCustomTitlesToDOM(titles){
-  Object.keys(ID_DEFAULTS.pages).forEach(key=>{
-    const custom = titles[key];
-    const navText = (custom && custom.nav) ? custom.nav : ID_DEFAULTS.pages[key].nav;
-    const titleText = (custom && custom.title) ? custom.title : ID_DEFAULTS.pages[key].title;
-
-    document.querySelectorAll('.nav-item').forEach(ni=>{
-      if(ni.getAttribute('onclick') && ni.getAttribute('onclick').includes("show('"+key+"')")){
-        const lbl = ni.querySelector('.nav-lbl');
-        if(lbl) lbl.textContent = navText;
-        ni.setAttribute('data-label', navText);
-      }
-    });
-
-    const pageEl = document.getElementById('page-'+key);
-    if(pageEl){
-      const titleEl = pageEl.querySelector('.pg-title');
-      if(titleEl){
-        const icoEl = titleEl.querySelector('.pg-title-ico');
-        const icoHtml = icoEl ? icoEl.outerHTML : '';
-        titleEl.innerHTML = icoHtml + titleText;
+  // Icônes actuelles
+  Object.keys(ID_DEFAULTS.icons).forEach(key=>{
+    const items=document.querySelectorAll('.nav-item');
+    for(const ni of items){
+      if(ni.getAttribute('onclick')&&ni.getAttribute('onclick').includes("show('"+key+"')")){
+        const ico=ni.querySelector('.nav-ico');
+        const el=document.getElementById('ico_'+key);
+        if(ico&&el) el.value=ico.textContent.trim();
+        break;
       }
     }
   });
@@ -5391,24 +5331,20 @@ function applyIdentite(){
   if(foot) document.querySelector('.sid-foot').innerHTML = foot;
   document.title = (logo ? logo.replace(/<[^>]+>/g,'') : 'GMAO') + (sub ? ' – '+sub : '');
 
-  // Collecter les titres personnalisés saisis dans la grille
-  const titles = {};
-  Object.keys(ID_DEFAULTS.pages).forEach(key=>{
-    const navEl = document.getElementById('navtitle_'+key);
-    const titleEl = document.getElementById('pgtitle_'+key);
-    const nav = navEl ? navEl.value.trim() : '';
-    const title = titleEl ? titleEl.value.trim() : '';
-    if(nav || title){
-      titles[key] = {};
-      if(nav) titles[key].nav = nav;
-      if(title) titles[key].title = title;
+  // Mettre à jour les icônes du menu
+  Object.keys(ID_DEFAULTS.icons).forEach(key=>{
+    const val=document.getElementById('ico_'+key);
+    if(!val||!val.value.trim()) return;
+    const items=document.querySelectorAll('.nav-item');
+    for(const ni of items){
+      if(ni.getAttribute('onclick')&&ni.getAttribute('onclick').includes("show('"+key+"')")){
+        const ico=ni.querySelector('.nav-ico');
+        if(ico) ico.textContent=val.value.trim();
+        break;
+      }
     }
   });
 
-  try { localStorage.setItem('gmao_custom_titles', JSON.stringify(titles)); } catch(e){}
-  applyCustomTitlesToDOM(titles);
-  refreshIcons();
-  savePersonalization();
   toast('✅ Identité mise à jour','s');
 }
 
@@ -5419,11 +5355,18 @@ function resetIdentite(){
   document.getElementById('id_logo').value = '';
   document.getElementById('id_sub').value  = '';
   document.getElementById('id_foot').value = '';
-
-  try { localStorage.removeItem('gmao_custom_titles'); } catch(e){}
-  applyCustomTitlesToDOM({});
-  refreshIcons();
-  openIdentiteTab(); // re-générer la grille avec les placeholders par défaut
+  Object.keys(ID_DEFAULTS.icons).forEach(key=>{
+    const items=document.querySelectorAll('.nav-item');
+    for(const ni of items){
+      if(ni.getAttribute('onclick')&&ni.getAttribute('onclick').includes("show('"+key+"')")){
+        const ico=ni.querySelector('.nav-ico');
+        if(ico) ico.textContent=ID_DEFAULTS.icons[key];
+        break;
+      }
+    }
+    const el=document.getElementById('ico_'+key);
+    if(el) el.value='';
+  });
   toast('↩️ Identité réinitialisée','w');
 }
 
@@ -6041,10 +5984,10 @@ function updateAuditStats(){
   const el=document.getElementById('auditStats'); if(!el)return;
   const cnt=t=>AUDIT_LOG.filter(e=>e.type===t).length;
   el.innerHTML=`
-    <div class="kpi gn"><div class="kpi-val">${cnt('create')}</div><div class="kpi-lbl">Créations</div><i data-lucide="check-circle-2" class="kpi-ico"></i></div>
-    <div class="kpi or"><div class="kpi-val">${cnt('update')}</div><div class="kpi-lbl">Modifications</div><i data-lucide="pencil" class="kpi-ico"></i></div>
-    <div class="kpi rd"><div class="kpi-val">${cnt('delete')}</div><div class="kpi-lbl">Suppressions</div><i data-lucide="trash-2" class="kpi-ico"></i></div>
-    <div class="kpi bl"><div class="kpi-val">${cnt('login')}</div><div class="kpi-lbl">Connexions/Déco.</div><i data-lucide="lock" class="kpi-ico"></i></div>`;
+    <div class="kpi gn"><div class="kpi-val">${cnt('create')}</div><div class="kpi-lbl">Créations</div><div class="kpi-ico">✅</div></div>
+    <div class="kpi or"><div class="kpi-val">${cnt('update')}</div><div class="kpi-lbl">Modifications</div><div class="kpi-ico">✏️</div></div>
+    <div class="kpi rd"><div class="kpi-val">${cnt('delete')}</div><div class="kpi-lbl">Suppressions</div><div class="kpi-ico">🗑️</div></div>
+    <div class="kpi bl"><div class="kpi-val">${cnt('login')}</div><div class="kpi-lbl">Connexions/Déco.</div><div class="kpi-ico">🔐</div></div>`;
   const cntEl=document.getElementById('auditCount');
   if(cntEl) cntEl.textContent=`${AUDIT_LOG.length} entrée${AUDIT_LOG.length>1?'s':''}`;
 }
@@ -6445,7 +6388,7 @@ function renderConsignesInEl(el, list){
     <div class="consigne-card ${c.type}">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
         <div style="font-size:12.5px;font-weight:700">${c.type==='urgent'?'🔴':c.type==='info'?'🔵':'🟢'} ${c.titre}</div>
-        ${isAdmin()?`<button class="btn btn-d btn-sm" onclick="deleteConsigne(${DB_CONSIGNES.indexOf(c)})"><i data-lucide="trash-2" style="width:13px;height:13px"></i></button>`:''}
+        ${isAdmin()?`<button class="btn btn-d btn-sm" onclick="deleteConsigne(${DB_CONSIGNES.indexOf(c)})">🗑️</button>`:''}
       </div>
       <div style="font-size:12px;margin-top:6px;line-height:1.5">${c.contenu}</div>
       ${c.eq?`<div style="margin-top:4px"><span class="badge bb">${c.eq}</span></div>`:''}
@@ -6520,7 +6463,7 @@ function renderBatiment(){
         🏢 ${bat} <span style="font-weight:400;font-size:11px;color:var(--mut);margin-left:8px">${eqs.length} équipement${eqs.length>1?'s':''}</span>
         ${zoneInfo&&zoneInfo.desc?`<span style="margin-left:12px;font-size:11px;color:var(--mut);font-weight:400">📌 ${zoneInfo.desc}</span>`:''}
         <span style="margin-left:auto;display:flex;gap:4px">
-          ${isAdmin()&&!eqs.length&&zoneInfo?`<button class="btn btn-d btn-sm" onclick="deleteBatZone(${zoneIdx})" title="Supprimer cette zone"><i data-lucide="trash-2" style="width:13px;height:13px"></i></button>`:''}
+          ${isAdmin()&&!eqs.length&&zoneInfo?`<button class="btn btn-d btn-sm" onclick="deleteBatZone(${zoneIdx})" title="Supprimer cette zone">🗑️</button>`:''}
         </span>
       </div>
       <div class="card-body">
@@ -6609,10 +6552,10 @@ function renderEq(){
       <td style="text-align:center">${mttrBadge}</td>
       <td>${fmtD(e.next)}</td>
       <td style="white-space:nowrap">
-        <button class="btn btn-g btn-sm" onclick="show('historique');document.getElementById('histEqSel').value='${e.id}';renderHistorique()" title="Historique"><i data-lucide="history" style="width:13px;height:13px"></i></button>
-        <button class="btn btn-g btn-sm" onclick="show('qrcode');document.getElementById('qrEqSel').value='${e.id}';showQR()" title="QR Code"><i data-lucide="qr-code" style="width:13px;height:13px"></i></button>
-        <button class="btn btn-g btn-sm" onclick="quickBT('${e.id}')" title="Nouveau BT"><i data-lucide="plus" style="width:13px;height:13px"></i>BT</button>
-        ${isAdmin()?`<button class="btn btn-d btn-sm" onclick="endOfLifeEq('${e.id}')" title="Fin de vie"><i data-lucide="archive" style="width:13px;height:13px"></i></button>`:''}
+        <button class="btn btn-g btn-sm" onclick="show('historique');document.getElementById('histEqSel').value='${e.id}';renderHistorique()" title="Historique">📜</button>
+        <button class="btn btn-g btn-sm" onclick="show('qrcode');document.getElementById('qrEqSel').value='${e.id}';showQR()" title="QR Code">📱</button>
+        <button class="btn btn-g btn-sm" onclick="quickBT('${e.id}')" title="Nouveau BT">➕BT</button>
+        ${isAdmin()?`<button class="btn btn-d btn-sm" onclick="endOfLifeEq('${e.id}')" title="Fin de vie">⚰️</button>`:''}
       </td>
     </tr>`;}).join('');
 }
@@ -6724,8 +6667,8 @@ function renderDevis(){
       <td>${statBadge(d.statut)}</td>
       <td style="font-size:11px;color:var(--mut);max-width:160px">${d.obs||'–'}</td>
       <td style="white-space:nowrap">
-        <button class="btn btn-g btn-sm" onclick="editDevis(${i})"><i data-lucide="pencil" style="width:13px;height:13px"></i></button>
-        ${isAdmin()?`<button class="btn btn-d btn-sm" onclick="deleteDevis(${i})"><i data-lucide="trash-2" style="width:13px;height:13px"></i></button>`:''}
+        <button class="btn btn-g btn-sm" onclick="editDevis(${i})">✏️</button>
+        ${isAdmin()?`<button class="btn btn-d btn-sm" onclick="deleteDevis(${i})">🗑️</button>`:''}
       </td>
     </tr>`).join('');
 }
@@ -6768,31 +6711,6 @@ async function init(){
   // Si la page a été ouverte via un QR code d'équipement (?eq=EQ-001),
   // et que l'utilisateur est déjà connecté (auto-login), on ouvre directement son historique.
   if(window._currentUser) handleQrRedirect();
-  refreshIcons();
-  startIconObserver();
-}
-
-// Transforme les balises <i data-lucide="..."> en SVG.
-function refreshIcons(){
-  try {
-    if(window.lucide && typeof window.lucide.createIcons === 'function'){
-      window.lucide.createIcons();
-    }
-  } catch(e){ console.error('Erreur rendu icônes:', e); }
-}
-
-// Observe automatiquement tout changement du DOM (innerHTML régénéré par les render*())
-// et déclenche le rendu des icônes Lucide sans avoir à l'appeler manuellement partout.
-// Léger debounce pour éviter de spammer l'appel si plusieurs zones changent d'un coup.
-let _iconObserverTimer = null;
-function startIconObserver(){
-  if(!window.MutationObserver) return;
-  const target = document.querySelector('.main') || document.body;
-  const observer = new MutationObserver(()=>{
-    clearTimeout(_iconObserverTimer);
-    _iconObserverTimer = setTimeout(refreshIcons, 80);
-  });
-  observer.observe(target, { childList:true, subtree:true });
 }
 
 // Lit le paramètre ?eq= de l'URL et ouvre directement l'historique de l'équipement correspondant.
@@ -6843,8 +6761,7 @@ function getSnapshot(){
 
 function updateSaveStatus(label){
   const el = document.getElementById('saveStatus');
-  if(el) el.innerHTML = '<i data-lucide="check-circle-2" style="width:11px;height:11px"></i>' + (label||'–');
-  refreshIcons();
+  if(el) el.textContent = '✅ ' + (label||'–');
 }
 
 function saveManual(){
