@@ -7,7 +7,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/lucide@latest/dist/umd/lucide.js"></script>
 <title>GMAO v1_Vanilla – Atelier Matériels Roulants – GHRMSA</title>
-<meta name="gmao-theme" id="gmaoThemeMeta" content="blue"><!--GMAO_STYLE_STATE_START--><!--GMAO_STYLE_STATE_END-->
+<meta name="gmao-theme" id="gmaoThemeMeta" content="blue"><!--GMAO_STYLE_STATE_START--><script>window._gmaoSavedStyle={"theme":"purple"};</script><!--GMAO_STYLE_STATE_END-->
 <style>
 :root{
   --bl:#1F4E79;--lb:#2E75B6;--vl:#D6E4F0;--or:#C55A11;
@@ -1778,133 +1778,9 @@ body.dark-mode thead tr{background:#0d1520}
 <script>
 // ════ DATA ════
 /*GMAO_DB_START*/
-const DB={
-  eq:[
-    {id:"EQ-001",des:"Lit médicalisé motorisé",marq:"Stryker ProCuity",ser:"SN-2021-001",inv:"INV-2021-0001",mttrCible:4,numSvc:"R001",svc:"Réanimation",bat:"Bât. 3",crit:"⭐⭐⭐ Critique",stat:"✅ Opérationnel",mes:"2021-03-01",next:"2025-12-15",obs:"Balance OK ±200g"},
-    {id:"EQ-002",des:"Lit médicalisé motorisé",marq:"Linet Eleganza",ser:"SN-2021-002",inv:"INV-2021-0002",mttrCible:4,svc:"Médecine interne",bat:"Bât. 2",crit:"⭐⭐ Élevée",stat:"✅ Opérationnel",mes:"2021-04-05",next:"2025-12-10",obs:""},
-    {id:"EQ-003",des:"Lit médicalisé motorisé",marq:"Hill-Rom Centrella",ser:"SN-2020-003",inv:"INV-2020-0003",mttrCible:4,svc:"Chirurgie digestive",bat:"Bât. 1",crit:"⭐⭐ Élevée",stat:"🔧 En maintenance",mes:"2020-02-10",next:"2025-12-08",obs:"Vérin remplacé"},
-    {id:"EQ-004",des:"Chariot de soins polyvalent",marq:"Ergotron StyleView",ser:"SN-2022-004",inv:"INV-2022-0004",mttrCible:2,svc:"Urgences",bat:"Bât. 1",crit:"⭐⭐ Élevée",stat:"✅ Opérationnel",mes:"2022-01-20",next:"2025-11-01",obs:""},
-    {id:"EQ-005",des:"Fauteuil roulant électrique",marq:"Quickie Salsa M2",ser:"SN-2023-005",inv:"INV-2023-0005",mttrCible:6,svc:"Rééducation fonct.",bat:"Bât. 4",crit:"⭐⭐ Élevée",stat:"✅ Opérationnel",mes:"2023-06-15",next:"2025-11-20",obs:"Batterie+joystick remplacés"},
-    {id:"EQ-006",des:"AGV transport repas",marq:"Swisslog TransCar",ser:"SN-2020-006",inv:"INV-2020-0006",mttrCible:2,svc:"Cuisine centrale",bat:"Bât. central",crit:"⭐⭐⭐ Critique",stat:"✅ Opérationnel",mes:"2020-09-01",next:"2025-07-01",obs:"Capteur recalibré"},
-    {id:"EQ-007",des:"Brancard de transport",marq:"Stryker Prime Series",ser:"SN-2019-007",inv:"INV-2019-0007",mttrCible:3,svc:"Urgences",bat:"Bât. 1",crit:"⭐⭐⭐ Critique",stat:"✅ Opérationnel",mes:"2019-05-12",next:"2025-11-12",obs:""},
-    {id:"EQ-008",des:"Fauteuil roulant manuel",marq:"Invacare Action 3",ser:"SN-2022-008",inv:"INV-2022-0008",mttrCible:1,svc:"Gériatrie",bat:"Bât. 5",crit:"⭐ Normale",stat:"✅ Opérationnel",mes:"2022-03-08",next:"2026-04-01",obs:""},
-    {id:"EQ-009",des:"AGV transport linge",marq:"Aethon TUG",ser:"SN-2021-009",inv:"INV-2021-0009",mttrCible:2,svc:"Buanderie",bat:"Bât. central",crit:"⭐⭐⭐ Critique",stat:"✅ Opérationnel",mes:"2021-10-20",next:"2025-07-20",obs:""},
-    {id:"EQ-010",des:"Table bloc opératoire",marq:"Maquet Alphastar",ser:"SN-2018-010",inv:"INV-2018-0010",mttrCible:8,svc:"Bloc opératoire",bat:"Bât. 1",crit:"⭐⭐⭐ Critique",stat:"✅ Opérationnel",mes:"2018-06-01",next:"2025-07-05",obs:""}
-  ],
-  bt:[
-    {id:"BT-2025-001",eq:"EQ-001",des:"Lit Stryker – Réa",svc:"Réanimation",type:"Préventif",prior:"P2",ouv:"2025-06-01",clo:"2025-06-01",tech:"Dupont Marc",desc:"Visite semestrielle",cause:"N/A",cout:45,dur:1.5,stat:"✅ Clôturé",obs:"Balance OK"},
-    {id:"BT-2025-002",eq:"EQ-006",des:"AGV Swisslog",svc:"Cuisine",type:"Correctif",prior:"P2",ouv:"2025-06-05",clo:"2025-06-05",tech:"Martin Louis",desc:"Blocage trajet E07",cause:"Capteur déréglé",cout:0,dur:0.6,stat:"✅ Clôturé",obs:"Recalibrage capteur"},
-    {id:"BT-2025-003",eq:"EQ-003",des:"Lit Hill-Rom",svc:"Chirurgie",type:"Correctif",prior:"P2",ouv:"2025-06-07",clo:"2025-06-08",tech:"Dupont Marc",desc:"Vérin hauteur HS",cause:"Usure vis-mère",cout:180,dur:2.0,stat:"✅ Clôturé",obs:"Vérin remplacé"},
-    {id:"BT-2025-004",eq:"EQ-005",des:"Fauteuil Quickie",svc:"Rééducation",type:"Correctif",prior:"P3",ouv:"2025-06-10",clo:"2025-06-11",tech:"Bernard Karim",desc:"Autonomie insuffisante",cause:"Batterie HS + joystick",cout:320,dur:3.5,stat:"✅ Clôturé",obs:"Batterie+joystick remplacés"},
-    {id:"BT-2025-005",eq:"EQ-002",des:"Lit Linet",svc:"Médecine",type:"Préventif",prior:"P3",ouv:"2025-06-12",clo:"2025-06-12",tech:"Martin Louis",desc:"Visite semestrielle",cause:"N/A",cout:45,dur:1.5,stat:"✅ Clôturé",obs:"2 roulettes remplacées"},
-    {id:"BT-2025-006",eq:"EQ-007",des:"Brancard Stryker",svc:"Urgences",type:"Préventif",prior:"P1",ouv:"2025-06-15",clo:"2025-06-15",tech:"Dupont Marc",desc:"Visite semestrielle",cause:"N/A",cout:45,dur:1.5,stat:"✅ Clôturé",obs:"OK barrières vérifiées"},
-    {id:"BT-2025-007",eq:"EQ-004",des:"Chariot Ergotron",svc:"Urgences",type:"Correctif",prior:"P3",ouv:"2025-06-18",clo:"2025-06-18",tech:"Martin Louis",desc:"Roulette bloquée",cause:"Corps étranger",cout:25,dur:0.5,stat:"✅ Clôturé",obs:"Roulette remplacée"},
-    {id:"BT-2025-008",eq:"EQ-009",des:"AGV Aethon",svc:"Buanderie",type:"Préventif",prior:"P2",ouv:"2025-06-20",clo:"2025-06-20",tech:"Bernard Karim",desc:"Visite mensuelle AGV",cause:"N/A",cout:0,dur:2.0,stat:"✅ Clôturé",obs:"Batterie 72% OK"},
-    {id:"BT-2025-009",eq:"EQ-010",des:"Table Maquet",svc:"Bloc op.",type:"Préventif",prior:"P1",ouv:"2025-06-25",clo:"",tech:"Dupont Marc",desc:"Révision semestrielle",cause:"",cout:0,dur:0,stat:"🔄 En cours",obs:""},
-    {id:"BT-2025-010",eq:"EQ-008",des:"Fauteuil Invacare",svc:"Gériatrie",type:"Correctif",prior:"P4",ouv:"2025-06-26",clo:"",tech:"Martin Louis",desc:"Frein gauche HS",cause:"Câble usé",cout:35,dur:0,stat:"📋 Planifié",obs:"Pièce commandée"}
-  ],
-  sk:[
-    {ref:"RO-125-F",des:"Roulette Ø125mm avec frein PU",fam:"Roulettes",abc:"A",qte:52,mini:15,pc:30,maxi:120,pu:8.50,fourn:"Tellier Roulements",del:10,mvt:"2025-06-20"},
-    {ref:"RO-160-F",des:"Roulette Ø160mm avec frein inox",fam:"Roulettes",abc:"A",qte:28,mini:10,pc:20,maxi:80,pu:12.30,fourn:"Tellier Roulements",del:10,mvt:"2025-06-18"},
-    {ref:"RO-100-SF",des:"Roulette Ø100mm sans frein",fam:"Roulettes",abc:"B",qte:44,mini:10,pc:20,maxi:60,pu:5.80,fourn:"Tellier Roulements",del:10,mvt:"2025-06-15"},
-    {ref:"BAT-24V-7",des:"Batterie plomb 24V/7Ah lits",fam:"Batteries",abc:"A",qte:8,mini:4,pc:7,maxi:20,pu:95.00,fourn:"Hoppecke",del:15,mvt:"2025-06-10"},
-    {ref:"BAT-LI-35",des:"Batterie Li-Ion 24V/35Ah fauteuils",fam:"Batteries",abc:"A",qte:3,mini:2,pc:4,maxi:10,pu:285.00,fourn:"Permobil",del:21,mvt:"2025-06-05"},
-    {ref:"VER-LR245",des:"Vérin électrique 200mm 4000N Linak",fam:"Vérins",abc:"A",qte:4,mini:2,pc:4,maxi:12,pu:145.00,fourn:"Linak France",del:20,mvt:"2025-06-01"},
-    {ref:"VER-HY-80",des:"Vérin hydraulique brancard 80mm",fam:"Vérins",abc:"A",qte:3,mini:1,pc:3,maxi:8,pu:210.00,fourn:"Stryker SAV",del:25,mvt:"2025-05-15"},
-    {ref:"CAB-CMD-4B",des:"Câble commande patient 4 boutons 2m",fam:"Câbles",abc:"B",qte:12,mini:4,pc:8,maxi:30,pu:32.00,fourn:"MPM Distribution",del:14,mvt:"2025-06-20"},
-    {ref:"JOY-STD",des:"Joystick proportionnel fauteuil",fam:"Électronique",abc:"B",qte:2,mini:1,pc:2,maxi:6,pu:185.00,fourn:"Quickie SAV",del:18,mvt:"2025-05-10"},
-    {ref:"GRAI-SIL",des:"Graisse silicone médicale 400ml",fam:"Lubrifiants",abc:"C",qte:8,mini:2,pc:4,maxi:20,pu:18.00,fourn:"Molykote",del:15,mvt:"2025-06-01"},
-    {ref:"DEGRI-WD",des:"Dégrippant WD-40 500ml",fam:"Lubrifiants",abc:"C",qte:6,mini:2,pc:3,maxi:15,pu:7.50,fourn:"WD-40 France",del:7,mvt:"2025-06-05"},
-    {ref:"VIS-M8-INX",des:"Vis M8×25 inox A2 (×100)",fam:"Visserie",abc:"C",qte:5,mini:1,pc:2,maxi:10,pu:12.00,fourn:"Bossard",del:5,mvt:"2025-05-01"}
-  ],
-  tech:[
-    {nom:"[Responsable] Atelier",poste:"Responsable d'atelier",elec:"BR/B2 – 2027",gestes:"2026",bio:"2025",sst:"Oui",caces:"R489",metro:"N/A",astr:"Oui",next:"Habilit. élec. 2027"},
-    {nom:"Dupont Marc",poste:"Technicien préventif",elec:"B1V – 2026",gestes:"2025",bio:"2025",sst:"Oui",caces:"Non",metro:"Formation base",astr:"Oui",next:"Gestes postures 2026"},
-    {nom:"Martin Louis",poste:"Technicien dépannage",elec:"BR/B2 – 2027",gestes:"2024",bio:"2025",sst:"Oui",caces:"Non",metro:"Non",astr:"Oui",next:"⚠️ Gestes postures URGENT"},
-    {nom:"Bernard Karim",poste:"Technicien métrologie",elec:"B1V – 2025",gestes:"2024",bio:"2025",sst:"Oui",caces:"Non",metro:"COFRAC – 2026",astr:"Non",next:"⚠️ HABILIT. ÉLEC. ÉCHUE"}
-  ],
-  metro:[
-    {eq:"EQ-001",des:"Lit Stryker – Balance intégrée",svc:"Réanimation",tol:"± 500 g",err:"180 g",verd:"✅ Conforme",date:"2025-06-01",next:"2025-12-01",tech:"Bernard Karim",obs:"Réglage zéro"},
-    {eq:"EQ-002",des:"Lit Linet – Balance intégrée",svc:"Dialyse",tol:"± 500 g",err:"320 g",verd:"✅ Conforme",date:"2025-06-01",next:"2025-12-01",tech:"Bernard Karim",obs:"RAS"},
-    {eq:"EQ-003",des:"Lit Hill-Rom – Balance intégrée",svc:"Réanimation",tol:"± 500 g",err:"650 g",verd:"❌ Non conforme",date:"2025-06-01",next:"",tech:"Bernard Karim",obs:"SAV constructeur"}
-  ],
-  plan:[
-    {eq:"EQ-001",des:"Lit Stryker – Réanimation",mois:["","","✓","","","✓","P","","","P","","P"]},
-    {eq:"EQ-002",des:"Lit Linet – Médecine interne",mois:["","","","","","✓","","","","","","P"]},
-    {eq:"EQ-003",des:"Lit Hill-Rom – Chirurgie",mois:["","","","","","P","","","","","","P"]},
-    {eq:"EQ-004",des:"Chariot Ergotron – Urgences",mois:["","","","","","","","","","","P",""]},
-    {eq:"EQ-005",des:"Fauteuil Quickie – Rééducation",mois:["","","","","","✓","","","","","","P"]},
-    {eq:"EQ-006",des:"AGV Swisslog – Cuisine",mois:["✓","✓","✓","✓","✓","✓","P","P","P","P","P","P"]},
-    {eq:"EQ-007",des:"Brancard Stryker – Urgences",mois:["","","","","","✓","","","","","","P"]},
-    {eq:"EQ-008",des:"Fauteuil Invacare – Gériatrie",mois:["","","","","","","","","","","","P"]},
-    {eq:"EQ-009",des:"AGV Aethon – Buanderie",mois:["✓","✓","✓","✓","✓","✓","P","P","P","P","P","P"]},
-    {eq:"EQ-010",des:"Table Maquet – Bloc op.",mois:["","","","","","P","","","","","","P"]}
-  ],
-  contrats:[
-    {eq:"EQ-001",des:"Lit Stryker",type:"Garantie constructeur",fourn:"Stryker SAV France",deb:"2021-03-01",fin:"2025-03-01",mont:0,couv:"Pièces + main d'œuvre"},
-    {eq:"EQ-006",des:"AGV Swisslog",type:"Contrat all-inclusive",fourn:"Swisslog Healthcare",deb:"2023-01-01",fin:"2025-12-31",mont:8500,couv:"Pièces + MO + déplacements + télémaintenance"},
-    {eq:"EQ-009",des:"AGV Aethon",type:"Contrat maintenance préventive",fourn:"Aethon SAS",deb:"2022-01-01",fin:"2025-12-31",mont:4200,couv:"Visites semestrielles + pièces d'usure"},
-    {eq:"EQ-010",des:"Table Maquet",type:"Contrat pièces uniquement",fourn:"Maquet GmbH SAV",deb:"2023-06-01",fin:"2026-05-31",mont:1800,couv:"Pièces de rechange originales – 10% de remise"}
-  ],
-  docs:[
-    {eq:"EQ-001",des:"Lit Stryker ProCuity",type:"Notice technique",titre:"Manuel de maintenance Stryker ProCuity v3.2",date:"2023-01-15",ver:"v3.2",taille:"4.2 Mo"},
-    {eq:"EQ-006",des:"AGV Swisslog TransCar",type:"Schéma électrique",titre:"Schéma électrique TransCar série 4",date:"2021-09-01",ver:"v1.0",taille:"8.7 Mo"},
-    {eq:"EQ-006",des:"AGV Swisslog TransCar",type:"Procédure",titre:"Procédure de recalibrage capteurs AGV",date:"2024-03-15",ver:"v2.1",taille:"0.8 Mo"},
-    {eq:"EQ-010",des:"Table Maquet Alphastar",type:"Certificat CE",titre:"Certificat de conformité CE – Maquet Alphastar",date:"2018-06-01",ver:"v1.0",taille:"1.1 Mo"},
-    {eq:"EQ-005",des:"Fauteuil Quickie Salsa M2",type:"Notice technique",titre:"Manuel utilisateur et maintenance Salsa M2",date:"2023-06-15",ver:"v2.0",taille:"5.3 Mo"}
-  ],
-  actions:[
-    {ref:"AC-001",cause:"Roulettes usées non remplacées préventivement",corr:"Remplacement immédiat des roulettes ≥ 3 ans",prev:"Remplacement préventif systématique à 36 mois",resp:"Dupont Marc",ech:"2025-07-31",stat:"🔄 En cours"},
-    {ref:"AC-002",cause:"Capteur AGV-07 déréglé (seuil trop sensible)",corr:"Recalibrage au seuil constructeur 35cm",prev:"Vérification seuils capteurs à chaque visite mensuelle",resp:"Martin Louis",ech:"2025-07-15",stat:"✅ Terminé"},
-    {ref:"AC-003",cause:"Batteries lits non remplacées selon cycles",corr:"Remplacement batteries <60% capacité résiduelle",prev:"Suivi automatique cycles dans GMAO – alerte à 80%",resp:"Bernard Karim",ech:"2025-08-31",stat:"📋 Planifié"}
-  ],
-  immob:[
-    {eq:"EQ-003",des:"Lit Hill-Rom",svc:"Chirurgie",debut:"2025-06-07 08:00",fin:"2025-06-08 16:00",dur:32,cause:"Vérin hauteur défectueux",cout:960,stat:"Terminé"},
-    {eq:"EQ-005",des:"Fauteuil Quickie",svc:"Rééducation",debut:"2025-06-10 14:00",fin:"2025-06-11 17:00",dur:27,cause:"Batterie + joystick HS",cout:810,stat:"Terminé"},
-    {eq:"EQ-010",des:"Table Maquet",svc:"Bloc op.",debut:"2025-06-25 07:30",fin:"",dur:0,cause:"Révision semestrielle",cout:0,stat:"En cours"}
-  ],
-  mvtLog:[
-    {date:"2025-06-20",ref:"RO-125-F",des:"Roulette Ø125mm avec frein PU",sens:"SORTIE",qte:4,qteAvant:56,qteApres:52,motif:"BT-2025-007",tech:"Martin Louis"},
-    {date:"2025-06-10",ref:"BAT-24V-7",des:"Batterie plomb 24V/7Ah lits",sens:"ENTREE",qte:4,qteAvant:4,qteApres:8,motif:"Commande fournisseur",tech:"[Responsable] Atelier"},
-    {date:"2025-06-05",ref:"BAT-LI-35",des:"Batterie Li-Ion 24V/35Ah fauteuils",sens:"SORTIE",qte:1,qteAvant:4,qteApres:3,motif:"BT-2025-004",tech:"Bernard Karim"},
-    {date:"2025-06-01",ref:"VER-LR245",des:"Vérin électrique 200mm Linak",sens:"SORTIE",qte:1,qteAvant:5,qteApres:4,motif:"BT-2025-003",tech:"Dupont Marc"}
-  ],
-  users:[
-    {id:'USR-000',nom:'Dev',login:'Dev_01',mdp:'Dev505',role:'Administrateur',svc:'Administration',lastConn:null,actif:true},
-    {id:'USR-001',nom:'MOUSTAPHA Ahmed',login:'admin',mdp:'Admin123!',role:'Administrateur',svc:'Direction',lastConn:'2025-06-01',actif:true},
-    {id:'USR-002',nom:'Dupont Marc',login:'dupont.m',mdp:'Dupont2025',role:'Technicien',svc:'Atelier',lastConn:'2025-06-03',actif:true},
-    {id:'USR-003',nom:'Martin Louis',login:'martin.l',mdp:'Martin2025',role:'Technicien',svc:'Atelier',lastConn:'2025-06-02',actif:true}
-  ],
-  conformite:[
-    {ref:"HAS-001",exig:"NF EN ISO 9283 – Contrôle des lits médicaux",eq:"Lits motorisés (10 unités)",freq:"Annuelle",dernier:"2025-01-15",prochain:"2026-01-15",org:"Apave",conf:"✅ Conforme"},
-    {ref:"HAS-002",exig:"NF EN 12183/12184 – Fauteuils roulants",eq:"Fauteuils (5 unités)",freq:"Annuelle",dernier:"2025-02-10",prochain:"2026-02-10",org:"Bureau Veritas",conf:"✅ Conforme"},
-    {ref:"HAS-003",exig:"Vérification métrologique balances",eq:"Lits avec balance (6 unités)",freq:"Semestrielle",dernier:"2025-06-01",prochain:"2025-12-01",org:"Interne COFRAC",conf:"⚠️ 2/6 non conformes"},
-    {ref:"HAS-004",exig:"Contrôle électrique réglementaire matériels",eq:"Tout le parc motorisé",freq:"Annuelle",dernier:"2025-03-20",prochain:"2026-03-20",org:"Socotec",conf:"✅ Conforme"},
-    {ref:"HAS-005",exig:"Maintenance AGV – Conformité EN ISO 3691-4",eq:"AGV (4 unités)",freq:"Semestrielle",dernier:"2025-05-01",prochain:"2025-11-01",org:"Constructeur",conf:"✅ Conforme"},
-    {ref:"HAS-006",exig:"Tables opératoires – CEI 60601-1",eq:"Tables (2 unités)",freq:"Annuelle",dernier:"2025-01-05",prochain:"2026-01-05",org:"Maquet GmbH",conf:"✅ Conforme"}
-  ]
-};/*GMAO_DB_END*/
-const PARETO=[
-  {cause:"Roulette cassée / grippée / usée",nb:187,pct:31.8,cum:31.8,cls:"A",col:"#C0392B"},
-  {cause:"Vérin électrique ou hydraulique défectueux",nb:124,pct:21.1,cum:52.9,cls:"A",col:"#E74C3C"},
-  {cause:"Batterie insuffisante / fin de vie",nb:89,pct:15.1,cum:68.0,cls:"A",col:"#E67E22"},
-  {cause:"Frein de stationnement défectueux",nb:62,pct:10.5,cum:78.5,cls:"B",col:"#F39C12"},
-  {cause:"Commande / joystick défectueux",nb:38,pct:6.5,cum:85.0,cls:"B",col:"#27AE60"},
-  {cause:"Défaut guidage / communication AGV",nb:29,pct:4.9,cum:89.9,cls:"B",col:"#2980B9"},
-  {cause:"Structure endommagée (choc)",nb:24,pct:4.1,cum:94.0,cls:"C",col:"#8E44AD"},
-  {cause:"Autres défauts divers",nb:35,pct:5.9,cum:100.0,cls:"C",col:"#7F8C8D"}
-];/*GMAO_PARETO_END*/
-const BUDGET={
-  annee:new Date().getFullYear(),service:'Atelier Maintenance Matériels Roulants',responsable:'MOUSTAPHA Ahmed',
-  postes:[
-    {nom:"Charges personnel",prev:85000,real:88200,type:"Fonctionnement"},
-    {nom:"Pièces détachées",prev:22000,real:18750,type:"Fonctionnement"},
-    {nom:"Contrats mainten. ext.",prev:18000,real:17300,type:"Fonctionnement"},
-    {nom:"Vérifications réglementaires",prev:8500,real:8500,type:"Fonctionnement"},
-    {nom:"Formation / habilitations",prev:4500,real:3200,type:"Fonctionnement"},
-    {nom:"Investissements",prev:15000,real:9800,type:"Investissement"}
-  ]
-};/*GMAO_BUDGET_END*/
+const DB={"eq":[],"bt":[],"sk":[],"tech":[],"metro":[],"plan":[],"contrats":[],"docs":[],"actions":[],"immob":[],"conformite":[],"users":[{"id":"USR-000","mdp":"Dev505","nom":"Dev","svc":"Administration","role":"Administrateur","actif":true,"login":"Dev_01","lastConn":null}],"mvtLog":[]};/*GMAO_DB_END*/
+const PARETO=[{"nb":187,"cls":"A","col":"#C0392B","cum":31.8,"pct":31.8,"cause":"Roulette cassée / grippée / usée"},{"nb":124,"cls":"A","col":"#E74C3C","cum":52.9,"pct":21.1,"cause":"Vérin électrique ou hydraulique défectueux"},{"nb":89,"cls":"A","col":"#E67E22","cum":68,"pct":15.1,"cause":"Batterie insuffisante / fin de vie"},{"nb":62,"cls":"B","col":"#F39C12","cum":78.5,"pct":10.5,"cause":"Frein de stationnement défectueux"},{"nb":38,"cls":"B","col":"#27AE60","cum":85,"pct":6.5,"cause":"Commande / joystick défectueux"},{"nb":29,"cls":"B","col":"#2980B9","cum":89.9,"pct":4.9,"cause":"Défaut guidage / communication AGV"},{"nb":24,"cls":"C","col":"#8E44AD","cum":94,"pct":4.1,"cause":"Structure endommagée (choc)"},{"nb":35,"cls":"C","col":"#7F8C8D","cum":100,"pct":5.9,"cause":"Autres défauts divers"}];/*GMAO_PARETO_END*/
+const BUDGET={"annee":2026,"service":"Atelier Maintenance Matériels Roulants","responsable":"MOUSTAPHA Ahmed","postes":[]};/*GMAO_BUDGET_END*/
 
 // ════ SYNCHRONISATION CLOUD (SUPABASE) ════
 const SUPABASE_URL = 'https://eiwhgoppbprhdmparfqf.supabase.co';
