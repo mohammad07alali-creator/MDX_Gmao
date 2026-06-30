@@ -7,7 +7,11 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/lucide@latest/dist/umd/lucide.js"></script>
 <title>GMAO v1_Vanilla – Atelier Matériels Roulants – GHRMSA</title>
-<meta name="gmao-theme" id="gmaoThemeMeta" content="blue"><!--GMAO_STYLE_STATE_START--><script>window._gmaoSavedStyle={"theme":"purple"};</script><!--GMAO_STYLE_STATE_END-->
+<link rel="manifest" href="./manifest.json">
+<meta name="theme-color" content="#1F4E79">
+<link rel="icon" href="./icon-192.png">
+<link rel="apple-touch-icon" href="./icon-192.png">
+<meta name="gmao-theme" id="gmaoThemeMeta" content="blue"><!--GMAO_STYLE_STATE_START--><!--GMAO_STYLE_STATE_END-->
 <style>
 :root{
   --bl:#1F4E79;--lb:#2E75B6;--vl:#D6E4F0;--or:#C55A11;
@@ -458,6 +462,9 @@ body.dark-mode thead tr{background:#0d1520}
   <div class="topbar-logo" style="display:flex;align-items:center;gap:6px"><i data-lucide="settings" style="width:16px;height:16px"></i>G<span>MAO</span></div>
   <div class="topbar-sub">Atelier Maintenance Matériels Roulants &amp; Transport Automatique – GHRMSA Emile Muller</div>
   <div class="topbar-date" id="topDate"></div>
+  <button id="installBtn" class="btn" style="display:none;background:#2E75B6;color:#fff;border:1px solid #7BC8F6;padding:5px 10px;font-size:11.5px;white-space:nowrap" onclick="installPWA()" title="Installer l'application sur cet appareil">
+    <i data-lucide="download" style="width:13px;height:13px"></i> <span class="btn-txt">Installer</span>
+  </button>
   <div id="cloudSyncStatus" style="font-size:11px;font-weight:600;white-space:nowrap;margin-right:8px" title="État de la synchronisation avec la base partagée">☁️ Connexion…</div>
   <div id="connectedUser" style="font-size:11.5px;color:#BDD7EE;white-space:nowrap;display:flex;align-items:center;gap:6px"></div>
   <!-- CLOCHE NOTIFICATIONS -->
@@ -502,6 +509,7 @@ body.dark-mode thead tr{background:#0d1520}
   <div class="nav-item nav-restricted" onclick="show('budget')"><i data-lucide="euro" class="nav-ico"></i><span class="nav-lbl">Budget</span></div>
   <div class="nav-item" onclick="show('contrats')"><i data-lucide="file-text" class="nav-ico"></i><span class="nav-lbl">Contrats &amp; garanties</span></div>
   <div class="nav-item" onclick="show('devis')"><i data-lucide="file-signature" class="nav-ico"></i><span class="nav-lbl">Devis</span></div>
+  <div class="nav-item" onclick="show('projet')"><i data-lucide="chart-gantt" class="nav-ico"></i><span class="nav-lbl">Gestion de projet</span></div>
   <div class="nav-item" onclick="show('documents')"><i data-lucide="folder-open" class="nav-ico"></i><span class="nav-lbl">Documentation</span></div>
   <div class="sid-sec">Équipe &amp; Qualité</div>
   <div class="nav-item nav-restricted" onclick="show('techniciens')"><i data-lucide="users" class="nav-ico"></i><span class="nav-lbl">Techniciens</span></div>
@@ -1091,6 +1099,52 @@ body.dark-mode thead tr{background:#0d1520}
   <div class="modal-footer">
     <button class="btn btn-g" onclick="closeM('mDevis')">Annuler</button>
     <button class="btn btn-p" onclick="saveDevis()"><i data-lucide="save" class="btn-ico"></i>Enregistrer</button>
+  </div>
+</div></div>
+
+<!-- GESTION DE PROJET -->
+<div class="page" id="page-projet">
+  <div class="pg-title"><i data-lucide="chart-gantt" class="pg-title-ico"></i>Gestion de projet</div>
+  <div class="pg-sub">Suivi du projet de développement GMAO – Planning et diagramme de Gantt</div>
+  <div class="btn-row">
+    <button class="btn btn-p" onclick="openNewProj()"><i data-lucide="plus" class="btn-ico"></i>Nouvelle tâche / phase</button>
+    <input placeholder="🔍 Rechercher..." style="width:220px" oninput="fltTbl('tProj',this.value)">
+  </div>
+  <div class="kpi-grid" id="kpiProj"></div>
+  <div class="card">
+    <div class="card-hdr"><i data-lucide="calendar-range" class="card-hdr-ico"></i>Diagramme de Gantt</div>
+    <div class="card-body" style="overflow-x:auto"><div id="ganttChart"></div></div>
+  </div>
+  <div class="card"><div class="tbl-wrap"><table id="tProj">
+    <thead><tr><th>Tâche / Phase</th><th>Type</th><th>Début</th><th>Fin</th><th>Durée</th><th>Avancement</th><th>Responsable</th><th>Statut</th><th>Actions</th></tr></thead>
+    <tbody id="bodyProj"></tbody>
+  </table></div></div>
+</div>
+
+<!-- MODALE GESTION DE PROJET -->
+<div class="modal-bg" id="mProj"><div class="modal" style="max-width:560px">
+  <div class="modal-hdr" id="mProjTitle"><span style="display:flex;align-items:center;gap:8px"><i data-lucide="chart-gantt" class="modal-hdr-ico"></i>Nouvelle tâche / phase</span> <button class="modal-x" onclick="closeM('mProj')">✕</button></div>
+  <div class="modal-body"><div class="form-grid">
+    <input type="hidden" id="pj_idx">
+    <div class="fg-full">
+      <label>Nom de la tâche / phase *</label>
+      <input id="pj_nom" placeholder="Ex: Développement v1 à v5 – Interface & modules de base">
+    </div>
+    <div><label>Type</label><select id="pj_type">
+      <option value="phase">Phase</option>
+      <option value="tache">Tâche</option>
+      <option value="jalon">Jalon</option>
+    </select></div>
+    <div><label>Catégorie</label><input id="pj_cat" placeholder="Ex: Conception, Développement, Tests..."></div>
+    <div><label>Date de début *</label><input id="pj_debut" type="date"></div>
+    <div><label>Date de fin *</label><input id="pj_fin" type="date"></div>
+    <div><label>Avancement (%)</label><input id="pj_avancement" type="number" min="0" max="100" step="5" value="0"></div>
+    <div><label>Responsable</label><input id="pj_respo" placeholder="Ex: Mhmad" value="Mhmad"></div>
+    <div class="fg-full"><label>Observations</label><textarea id="pj_obs" rows="2" placeholder="Remarques, dépendances..."></textarea></div>
+  </div></div>
+  <div class="modal-footer">
+    <button class="btn btn-g" onclick="closeM('mProj')">Annuler</button>
+    <button class="btn btn-p" onclick="saveProj()"><i data-lucide="save" class="btn-ico"></i>Enregistrer</button>
   </div>
 </div></div>
 
@@ -1778,9 +1832,133 @@ body.dark-mode thead tr{background:#0d1520}
 <script>
 // ════ DATA ════
 /*GMAO_DB_START*/
-const DB={"eq":[],"bt":[],"sk":[],"tech":[],"metro":[],"plan":[],"contrats":[],"docs":[],"actions":[],"immob":[],"conformite":[],"users":[{"id":"USR-000","mdp":"Dev505","nom":"Dev","svc":"Administration","role":"Administrateur","actif":true,"login":"Dev_01","lastConn":null}],"mvtLog":[]};/*GMAO_DB_END*/
-const PARETO=[{"nb":187,"cls":"A","col":"#C0392B","cum":31.8,"pct":31.8,"cause":"Roulette cassée / grippée / usée"},{"nb":124,"cls":"A","col":"#E74C3C","cum":52.9,"pct":21.1,"cause":"Vérin électrique ou hydraulique défectueux"},{"nb":89,"cls":"A","col":"#E67E22","cum":68,"pct":15.1,"cause":"Batterie insuffisante / fin de vie"},{"nb":62,"cls":"B","col":"#F39C12","cum":78.5,"pct":10.5,"cause":"Frein de stationnement défectueux"},{"nb":38,"cls":"B","col":"#27AE60","cum":85,"pct":6.5,"cause":"Commande / joystick défectueux"},{"nb":29,"cls":"B","col":"#2980B9","cum":89.9,"pct":4.9,"cause":"Défaut guidage / communication AGV"},{"nb":24,"cls":"C","col":"#8E44AD","cum":94,"pct":4.1,"cause":"Structure endommagée (choc)"},{"nb":35,"cls":"C","col":"#7F8C8D","cum":100,"pct":5.9,"cause":"Autres défauts divers"}];/*GMAO_PARETO_END*/
-const BUDGET={"annee":2026,"service":"Atelier Maintenance Matériels Roulants","responsable":"MOUSTAPHA Ahmed","postes":[]};/*GMAO_BUDGET_END*/
+const DB={
+  eq:[
+    {id:"EQ-001",des:"Lit médicalisé motorisé",marq:"Stryker ProCuity",ser:"SN-2021-001",inv:"INV-2021-0001",mttrCible:4,numSvc:"R001",svc:"Réanimation",bat:"Bât. 3",crit:"⭐⭐⭐ Critique",stat:"✅ Opérationnel",mes:"2021-03-01",next:"2025-12-15",obs:"Balance OK ±200g"},
+    {id:"EQ-002",des:"Lit médicalisé motorisé",marq:"Linet Eleganza",ser:"SN-2021-002",inv:"INV-2021-0002",mttrCible:4,svc:"Médecine interne",bat:"Bât. 2",crit:"⭐⭐ Élevée",stat:"✅ Opérationnel",mes:"2021-04-05",next:"2025-12-10",obs:""},
+    {id:"EQ-003",des:"Lit médicalisé motorisé",marq:"Hill-Rom Centrella",ser:"SN-2020-003",inv:"INV-2020-0003",mttrCible:4,svc:"Chirurgie digestive",bat:"Bât. 1",crit:"⭐⭐ Élevée",stat:"🔧 En maintenance",mes:"2020-02-10",next:"2025-12-08",obs:"Vérin remplacé"},
+    {id:"EQ-004",des:"Chariot de soins polyvalent",marq:"Ergotron StyleView",ser:"SN-2022-004",inv:"INV-2022-0004",mttrCible:2,svc:"Urgences",bat:"Bât. 1",crit:"⭐⭐ Élevée",stat:"✅ Opérationnel",mes:"2022-01-20",next:"2025-11-01",obs:""},
+    {id:"EQ-005",des:"Fauteuil roulant électrique",marq:"Quickie Salsa M2",ser:"SN-2023-005",inv:"INV-2023-0005",mttrCible:6,svc:"Rééducation fonct.",bat:"Bât. 4",crit:"⭐⭐ Élevée",stat:"✅ Opérationnel",mes:"2023-06-15",next:"2025-11-20",obs:"Batterie+joystick remplacés"},
+    {id:"EQ-006",des:"AGV transport repas",marq:"Swisslog TransCar",ser:"SN-2020-006",inv:"INV-2020-0006",mttrCible:2,svc:"Cuisine centrale",bat:"Bât. central",crit:"⭐⭐⭐ Critique",stat:"✅ Opérationnel",mes:"2020-09-01",next:"2025-07-01",obs:"Capteur recalibré"},
+    {id:"EQ-007",des:"Brancard de transport",marq:"Stryker Prime Series",ser:"SN-2019-007",inv:"INV-2019-0007",mttrCible:3,svc:"Urgences",bat:"Bât. 1",crit:"⭐⭐⭐ Critique",stat:"✅ Opérationnel",mes:"2019-05-12",next:"2025-11-12",obs:""},
+    {id:"EQ-008",des:"Fauteuil roulant manuel",marq:"Invacare Action 3",ser:"SN-2022-008",inv:"INV-2022-0008",mttrCible:1,svc:"Gériatrie",bat:"Bât. 5",crit:"⭐ Normale",stat:"✅ Opérationnel",mes:"2022-03-08",next:"2026-04-01",obs:""},
+    {id:"EQ-009",des:"AGV transport linge",marq:"Aethon TUG",ser:"SN-2021-009",inv:"INV-2021-0009",mttrCible:2,svc:"Buanderie",bat:"Bât. central",crit:"⭐⭐⭐ Critique",stat:"✅ Opérationnel",mes:"2021-10-20",next:"2025-07-20",obs:""},
+    {id:"EQ-010",des:"Table bloc opératoire",marq:"Maquet Alphastar",ser:"SN-2018-010",inv:"INV-2018-0010",mttrCible:8,svc:"Bloc opératoire",bat:"Bât. 1",crit:"⭐⭐⭐ Critique",stat:"✅ Opérationnel",mes:"2018-06-01",next:"2025-07-05",obs:""}
+  ],
+  bt:[
+    {id:"BT-2025-001",eq:"EQ-001",des:"Lit Stryker – Réa",svc:"Réanimation",type:"Préventif",prior:"P2",ouv:"2025-06-01",clo:"2025-06-01",tech:"Dupont Marc",desc:"Visite semestrielle",cause:"N/A",cout:45,dur:1.5,stat:"✅ Clôturé",obs:"Balance OK"},
+    {id:"BT-2025-002",eq:"EQ-006",des:"AGV Swisslog",svc:"Cuisine",type:"Correctif",prior:"P2",ouv:"2025-06-05",clo:"2025-06-05",tech:"Martin Louis",desc:"Blocage trajet E07",cause:"Capteur déréglé",cout:0,dur:0.6,stat:"✅ Clôturé",obs:"Recalibrage capteur"},
+    {id:"BT-2025-003",eq:"EQ-003",des:"Lit Hill-Rom",svc:"Chirurgie",type:"Correctif",prior:"P2",ouv:"2025-06-07",clo:"2025-06-08",tech:"Dupont Marc",desc:"Vérin hauteur HS",cause:"Usure vis-mère",cout:180,dur:2.0,stat:"✅ Clôturé",obs:"Vérin remplacé"},
+    {id:"BT-2025-004",eq:"EQ-005",des:"Fauteuil Quickie",svc:"Rééducation",type:"Correctif",prior:"P3",ouv:"2025-06-10",clo:"2025-06-11",tech:"Bernard Karim",desc:"Autonomie insuffisante",cause:"Batterie HS + joystick",cout:320,dur:3.5,stat:"✅ Clôturé",obs:"Batterie+joystick remplacés"},
+    {id:"BT-2025-005",eq:"EQ-002",des:"Lit Linet",svc:"Médecine",type:"Préventif",prior:"P3",ouv:"2025-06-12",clo:"2025-06-12",tech:"Martin Louis",desc:"Visite semestrielle",cause:"N/A",cout:45,dur:1.5,stat:"✅ Clôturé",obs:"2 roulettes remplacées"},
+    {id:"BT-2025-006",eq:"EQ-007",des:"Brancard Stryker",svc:"Urgences",type:"Préventif",prior:"P1",ouv:"2025-06-15",clo:"2025-06-15",tech:"Dupont Marc",desc:"Visite semestrielle",cause:"N/A",cout:45,dur:1.5,stat:"✅ Clôturé",obs:"OK barrières vérifiées"},
+    {id:"BT-2025-007",eq:"EQ-004",des:"Chariot Ergotron",svc:"Urgences",type:"Correctif",prior:"P3",ouv:"2025-06-18",clo:"2025-06-18",tech:"Martin Louis",desc:"Roulette bloquée",cause:"Corps étranger",cout:25,dur:0.5,stat:"✅ Clôturé",obs:"Roulette remplacée"},
+    {id:"BT-2025-008",eq:"EQ-009",des:"AGV Aethon",svc:"Buanderie",type:"Préventif",prior:"P2",ouv:"2025-06-20",clo:"2025-06-20",tech:"Bernard Karim",desc:"Visite mensuelle AGV",cause:"N/A",cout:0,dur:2.0,stat:"✅ Clôturé",obs:"Batterie 72% OK"},
+    {id:"BT-2025-009",eq:"EQ-010",des:"Table Maquet",svc:"Bloc op.",type:"Préventif",prior:"P1",ouv:"2025-06-25",clo:"",tech:"Dupont Marc",desc:"Révision semestrielle",cause:"",cout:0,dur:0,stat:"🔄 En cours",obs:""},
+    {id:"BT-2025-010",eq:"EQ-008",des:"Fauteuil Invacare",svc:"Gériatrie",type:"Correctif",prior:"P4",ouv:"2025-06-26",clo:"",tech:"Martin Louis",desc:"Frein gauche HS",cause:"Câble usé",cout:35,dur:0,stat:"📋 Planifié",obs:"Pièce commandée"}
+  ],
+  sk:[
+    {ref:"RO-125-F",des:"Roulette Ø125mm avec frein PU",fam:"Roulettes",abc:"A",qte:52,mini:15,pc:30,maxi:120,pu:8.50,fourn:"Tellier Roulements",del:10,mvt:"2025-06-20"},
+    {ref:"RO-160-F",des:"Roulette Ø160mm avec frein inox",fam:"Roulettes",abc:"A",qte:28,mini:10,pc:20,maxi:80,pu:12.30,fourn:"Tellier Roulements",del:10,mvt:"2025-06-18"},
+    {ref:"RO-100-SF",des:"Roulette Ø100mm sans frein",fam:"Roulettes",abc:"B",qte:44,mini:10,pc:20,maxi:60,pu:5.80,fourn:"Tellier Roulements",del:10,mvt:"2025-06-15"},
+    {ref:"BAT-24V-7",des:"Batterie plomb 24V/7Ah lits",fam:"Batteries",abc:"A",qte:8,mini:4,pc:7,maxi:20,pu:95.00,fourn:"Hoppecke",del:15,mvt:"2025-06-10"},
+    {ref:"BAT-LI-35",des:"Batterie Li-Ion 24V/35Ah fauteuils",fam:"Batteries",abc:"A",qte:3,mini:2,pc:4,maxi:10,pu:285.00,fourn:"Permobil",del:21,mvt:"2025-06-05"},
+    {ref:"VER-LR245",des:"Vérin électrique 200mm 4000N Linak",fam:"Vérins",abc:"A",qte:4,mini:2,pc:4,maxi:12,pu:145.00,fourn:"Linak France",del:20,mvt:"2025-06-01"},
+    {ref:"VER-HY-80",des:"Vérin hydraulique brancard 80mm",fam:"Vérins",abc:"A",qte:3,mini:1,pc:3,maxi:8,pu:210.00,fourn:"Stryker SAV",del:25,mvt:"2025-05-15"},
+    {ref:"CAB-CMD-4B",des:"Câble commande patient 4 boutons 2m",fam:"Câbles",abc:"B",qte:12,mini:4,pc:8,maxi:30,pu:32.00,fourn:"MPM Distribution",del:14,mvt:"2025-06-20"},
+    {ref:"JOY-STD",des:"Joystick proportionnel fauteuil",fam:"Électronique",abc:"B",qte:2,mini:1,pc:2,maxi:6,pu:185.00,fourn:"Quickie SAV",del:18,mvt:"2025-05-10"},
+    {ref:"GRAI-SIL",des:"Graisse silicone médicale 400ml",fam:"Lubrifiants",abc:"C",qte:8,mini:2,pc:4,maxi:20,pu:18.00,fourn:"Molykote",del:15,mvt:"2025-06-01"},
+    {ref:"DEGRI-WD",des:"Dégrippant WD-40 500ml",fam:"Lubrifiants",abc:"C",qte:6,mini:2,pc:3,maxi:15,pu:7.50,fourn:"WD-40 France",del:7,mvt:"2025-06-05"},
+    {ref:"VIS-M8-INX",des:"Vis M8×25 inox A2 (×100)",fam:"Visserie",abc:"C",qte:5,mini:1,pc:2,maxi:10,pu:12.00,fourn:"Bossard",del:5,mvt:"2025-05-01"}
+  ],
+  tech:[
+    {nom:"[Responsable] Atelier",poste:"Responsable d'atelier",elec:"BR/B2 – 2027",gestes:"2026",bio:"2025",sst:"Oui",caces:"R489",metro:"N/A",astr:"Oui",next:"Habilit. élec. 2027"},
+    {nom:"Dupont Marc",poste:"Technicien préventif",elec:"B1V – 2026",gestes:"2025",bio:"2025",sst:"Oui",caces:"Non",metro:"Formation base",astr:"Oui",next:"Gestes postures 2026"},
+    {nom:"Martin Louis",poste:"Technicien dépannage",elec:"BR/B2 – 2027",gestes:"2024",bio:"2025",sst:"Oui",caces:"Non",metro:"Non",astr:"Oui",next:"⚠️ Gestes postures URGENT"},
+    {nom:"Bernard Karim",poste:"Technicien métrologie",elec:"B1V – 2025",gestes:"2024",bio:"2025",sst:"Oui",caces:"Non",metro:"COFRAC – 2026",astr:"Non",next:"⚠️ HABILIT. ÉLEC. ÉCHUE"}
+  ],
+  metro:[
+    {eq:"EQ-001",des:"Lit Stryker – Balance intégrée",svc:"Réanimation",tol:"± 500 g",err:"180 g",verd:"✅ Conforme",date:"2025-06-01",next:"2025-12-01",tech:"Bernard Karim",obs:"Réglage zéro"},
+    {eq:"EQ-002",des:"Lit Linet – Balance intégrée",svc:"Dialyse",tol:"± 500 g",err:"320 g",verd:"✅ Conforme",date:"2025-06-01",next:"2025-12-01",tech:"Bernard Karim",obs:"RAS"},
+    {eq:"EQ-003",des:"Lit Hill-Rom – Balance intégrée",svc:"Réanimation",tol:"± 500 g",err:"650 g",verd:"❌ Non conforme",date:"2025-06-01",next:"",tech:"Bernard Karim",obs:"SAV constructeur"}
+  ],
+  plan:[
+    {eq:"EQ-001",des:"Lit Stryker – Réanimation",mois:["","","✓","","","✓","P","","","P","","P"]},
+    {eq:"EQ-002",des:"Lit Linet – Médecine interne",mois:["","","","","","✓","","","","","","P"]},
+    {eq:"EQ-003",des:"Lit Hill-Rom – Chirurgie",mois:["","","","","","P","","","","","","P"]},
+    {eq:"EQ-004",des:"Chariot Ergotron – Urgences",mois:["","","","","","","","","","","P",""]},
+    {eq:"EQ-005",des:"Fauteuil Quickie – Rééducation",mois:["","","","","","✓","","","","","","P"]},
+    {eq:"EQ-006",des:"AGV Swisslog – Cuisine",mois:["✓","✓","✓","✓","✓","✓","P","P","P","P","P","P"]},
+    {eq:"EQ-007",des:"Brancard Stryker – Urgences",mois:["","","","","","✓","","","","","","P"]},
+    {eq:"EQ-008",des:"Fauteuil Invacare – Gériatrie",mois:["","","","","","","","","","","","P"]},
+    {eq:"EQ-009",des:"AGV Aethon – Buanderie",mois:["✓","✓","✓","✓","✓","✓","P","P","P","P","P","P"]},
+    {eq:"EQ-010",des:"Table Maquet – Bloc op.",mois:["","","","","","P","","","","","","P"]}
+  ],
+  contrats:[
+    {eq:"EQ-001",des:"Lit Stryker",type:"Garantie constructeur",fourn:"Stryker SAV France",deb:"2021-03-01",fin:"2025-03-01",mont:0,couv:"Pièces + main d'œuvre"},
+    {eq:"EQ-006",des:"AGV Swisslog",type:"Contrat all-inclusive",fourn:"Swisslog Healthcare",deb:"2023-01-01",fin:"2025-12-31",mont:8500,couv:"Pièces + MO + déplacements + télémaintenance"},
+    {eq:"EQ-009",des:"AGV Aethon",type:"Contrat maintenance préventive",fourn:"Aethon SAS",deb:"2022-01-01",fin:"2025-12-31",mont:4200,couv:"Visites semestrielles + pièces d'usure"},
+    {eq:"EQ-010",des:"Table Maquet",type:"Contrat pièces uniquement",fourn:"Maquet GmbH SAV",deb:"2023-06-01",fin:"2026-05-31",mont:1800,couv:"Pièces de rechange originales – 10% de remise"}
+  ],
+  docs:[
+    {eq:"EQ-001",des:"Lit Stryker ProCuity",type:"Notice technique",titre:"Manuel de maintenance Stryker ProCuity v3.2",date:"2023-01-15",ver:"v3.2",taille:"4.2 Mo"},
+    {eq:"EQ-006",des:"AGV Swisslog TransCar",type:"Schéma électrique",titre:"Schéma électrique TransCar série 4",date:"2021-09-01",ver:"v1.0",taille:"8.7 Mo"},
+    {eq:"EQ-006",des:"AGV Swisslog TransCar",type:"Procédure",titre:"Procédure de recalibrage capteurs AGV",date:"2024-03-15",ver:"v2.1",taille:"0.8 Mo"},
+    {eq:"EQ-010",des:"Table Maquet Alphastar",type:"Certificat CE",titre:"Certificat de conformité CE – Maquet Alphastar",date:"2018-06-01",ver:"v1.0",taille:"1.1 Mo"},
+    {eq:"EQ-005",des:"Fauteuil Quickie Salsa M2",type:"Notice technique",titre:"Manuel utilisateur et maintenance Salsa M2",date:"2023-06-15",ver:"v2.0",taille:"5.3 Mo"}
+  ],
+  actions:[
+    {ref:"AC-001",cause:"Roulettes usées non remplacées préventivement",corr:"Remplacement immédiat des roulettes ≥ 3 ans",prev:"Remplacement préventif systématique à 36 mois",resp:"Dupont Marc",ech:"2025-07-31",stat:"🔄 En cours"},
+    {ref:"AC-002",cause:"Capteur AGV-07 déréglé (seuil trop sensible)",corr:"Recalibrage au seuil constructeur 35cm",prev:"Vérification seuils capteurs à chaque visite mensuelle",resp:"Martin Louis",ech:"2025-07-15",stat:"✅ Terminé"},
+    {ref:"AC-003",cause:"Batteries lits non remplacées selon cycles",corr:"Remplacement batteries <60% capacité résiduelle",prev:"Suivi automatique cycles dans GMAO – alerte à 80%",resp:"Bernard Karim",ech:"2025-08-31",stat:"📋 Planifié"}
+  ],
+  immob:[
+    {eq:"EQ-003",des:"Lit Hill-Rom",svc:"Chirurgie",debut:"2025-06-07 08:00",fin:"2025-06-08 16:00",dur:32,cause:"Vérin hauteur défectueux",cout:960,stat:"Terminé"},
+    {eq:"EQ-005",des:"Fauteuil Quickie",svc:"Rééducation",debut:"2025-06-10 14:00",fin:"2025-06-11 17:00",dur:27,cause:"Batterie + joystick HS",cout:810,stat:"Terminé"},
+    {eq:"EQ-010",des:"Table Maquet",svc:"Bloc op.",debut:"2025-06-25 07:30",fin:"",dur:0,cause:"Révision semestrielle",cout:0,stat:"En cours"}
+  ],
+  mvtLog:[
+    {date:"2025-06-20",ref:"RO-125-F",des:"Roulette Ø125mm avec frein PU",sens:"SORTIE",qte:4,qteAvant:56,qteApres:52,motif:"BT-2025-007",tech:"Martin Louis"},
+    {date:"2025-06-10",ref:"BAT-24V-7",des:"Batterie plomb 24V/7Ah lits",sens:"ENTREE",qte:4,qteAvant:4,qteApres:8,motif:"Commande fournisseur",tech:"[Responsable] Atelier"},
+    {date:"2025-06-05",ref:"BAT-LI-35",des:"Batterie Li-Ion 24V/35Ah fauteuils",sens:"SORTIE",qte:1,qteAvant:4,qteApres:3,motif:"BT-2025-004",tech:"Bernard Karim"},
+    {date:"2025-06-01",ref:"VER-LR245",des:"Vérin électrique 200mm Linak",sens:"SORTIE",qte:1,qteAvant:5,qteApres:4,motif:"BT-2025-003",tech:"Dupont Marc"}
+  ],
+  users:[
+    {id:'USR-000',nom:'Dev',login:'Dev_01',mdp:'Dev505',role:'Administrateur',svc:'Administration',lastConn:null,actif:true},
+    {id:'USR-001',nom:'MOUSTAPHA Ahmed',login:'admin',mdp:'Admin123!',role:'Administrateur',svc:'Direction',lastConn:'2025-06-01',actif:true},
+    {id:'USR-002',nom:'Dupont Marc',login:'dupont.m',mdp:'Dupont2025',role:'Technicien',svc:'Atelier',lastConn:'2025-06-03',actif:true},
+    {id:'USR-003',nom:'Martin Louis',login:'martin.l',mdp:'Martin2025',role:'Technicien',svc:'Atelier',lastConn:'2025-06-02',actif:true}
+  ],
+  conformite:[
+    {ref:"HAS-001",exig:"NF EN ISO 9283 – Contrôle des lits médicaux",eq:"Lits motorisés (10 unités)",freq:"Annuelle",dernier:"2025-01-15",prochain:"2026-01-15",org:"Apave",conf:"✅ Conforme"},
+    {ref:"HAS-002",exig:"NF EN 12183/12184 – Fauteuils roulants",eq:"Fauteuils (5 unités)",freq:"Annuelle",dernier:"2025-02-10",prochain:"2026-02-10",org:"Bureau Veritas",conf:"✅ Conforme"},
+    {ref:"HAS-003",exig:"Vérification métrologique balances",eq:"Lits avec balance (6 unités)",freq:"Semestrielle",dernier:"2025-06-01",prochain:"2025-12-01",org:"Interne COFRAC",conf:"⚠️ 2/6 non conformes"},
+    {ref:"HAS-004",exig:"Contrôle électrique réglementaire matériels",eq:"Tout le parc motorisé",freq:"Annuelle",dernier:"2025-03-20",prochain:"2026-03-20",org:"Socotec",conf:"✅ Conforme"},
+    {ref:"HAS-005",exig:"Maintenance AGV – Conformité EN ISO 3691-4",eq:"AGV (4 unités)",freq:"Semestrielle",dernier:"2025-05-01",prochain:"2025-11-01",org:"Constructeur",conf:"✅ Conforme"},
+    {ref:"HAS-006",exig:"Tables opératoires – CEI 60601-1",eq:"Tables (2 unités)",freq:"Annuelle",dernier:"2025-01-05",prochain:"2026-01-05",org:"Maquet GmbH",conf:"✅ Conforme"}
+  ]
+};/*GMAO_DB_END*/
+const PARETO=[
+  {cause:"Roulette cassée / grippée / usée",nb:187,pct:31.8,cum:31.8,cls:"A",col:"#C0392B"},
+  {cause:"Vérin électrique ou hydraulique défectueux",nb:124,pct:21.1,cum:52.9,cls:"A",col:"#E74C3C"},
+  {cause:"Batterie insuffisante / fin de vie",nb:89,pct:15.1,cum:68.0,cls:"A",col:"#E67E22"},
+  {cause:"Frein de stationnement défectueux",nb:62,pct:10.5,cum:78.5,cls:"B",col:"#F39C12"},
+  {cause:"Commande / joystick défectueux",nb:38,pct:6.5,cum:85.0,cls:"B",col:"#27AE60"},
+  {cause:"Défaut guidage / communication AGV",nb:29,pct:4.9,cum:89.9,cls:"B",col:"#2980B9"},
+  {cause:"Structure endommagée (choc)",nb:24,pct:4.1,cum:94.0,cls:"C",col:"#8E44AD"},
+  {cause:"Autres défauts divers",nb:35,pct:5.9,cum:100.0,cls:"C",col:"#7F8C8D"}
+];/*GMAO_PARETO_END*/
+const BUDGET={
+  annee:new Date().getFullYear(),service:'Atelier Maintenance Matériels Roulants',responsable:'MOUSTAPHA Ahmed',
+  postes:[
+    {nom:"Charges personnel",prev:85000,real:88200,type:"Fonctionnement"},
+    {nom:"Pièces détachées",prev:22000,real:18750,type:"Fonctionnement"},
+    {nom:"Contrats mainten. ext.",prev:18000,real:17300,type:"Fonctionnement"},
+    {nom:"Vérifications réglementaires",prev:8500,real:8500,type:"Fonctionnement"},
+    {nom:"Formation / habilitations",prev:4500,real:3200,type:"Fonctionnement"},
+    {nom:"Investissements",prev:15000,real:9800,type:"Investissement"}
+  ]
+};/*GMAO_BUDGET_END*/
 
 // ════ SYNCHRONISATION CLOUD (SUPABASE) ════
 const SUPABASE_URL = 'https://eiwhgoppbprhdmparfqf.supabase.co';
@@ -1806,7 +1984,7 @@ function buildCloudSnapshot(){
     plan: DB.plan, contrats: DB.contrats, docs: DB.docs, actions: DB.actions,
     immob: DB.immob||[], conformite: DB.conformite||[], users: DB.users||[],
     mvtLog: DB.mvtLog||[], pareto: PARETO, budget: BUDGET,
-    db_rondes: DB_RONDES, db_consignes: DB_CONSIGNES, db_bat_zones: DB_BAT_ZONES, db_devis: DB_DEVIS,
+    db_rondes: DB_RONDES, db_consignes: DB_CONSIGNES, db_bat_zones: DB_BAT_ZONES, db_devis: DB_DEVIS, db_proj: DB_PROJ,
     db_amdec: window.DB_AMDEC||[], db_pdca: window.DB_PDCA||[],
     audit_log: AUDIT_LOG.slice(0, 500)
   };
@@ -1824,6 +2002,7 @@ function applyCloudSnapshot(snap){
     if(snap.db_consignes){ DB_CONSIGNES.length=0; snap.db_consignes.forEach(x=>DB_CONSIGNES.push(x)); }
     if(snap.db_bat_zones){ DB_BAT_ZONES.length=0; snap.db_bat_zones.forEach(x=>DB_BAT_ZONES.push(x)); }
     if(snap.db_devis){ DB_DEVIS.length=0; snap.db_devis.forEach(x=>DB_DEVIS.push(x)); }
+    if(snap.db_proj){ DB_PROJ.length=0; snap.db_proj.forEach(x=>DB_PROJ.push(x)); }
     if(snap.db_amdec){ window.DB_AMDEC=snap.db_amdec; }
     if(snap.db_pdca){ window.DB_PDCA=snap.db_pdca; }
     if(snap.audit_log){
@@ -2100,6 +2279,7 @@ function show(name){
     predictif:renderPredictif,causesracines:renderCauses,
     stock:renderSk,budget:renderBudget,utilisateurs:renderUsers,
     contrats:renderContrats,documents:renderDocs,
+    projet:renderProjet,
     techniciens:renderTech,metrologie:renderMetro,
     conformite:renderConformite,
     rondes:renderRondes, batiment:renderBatiment,
@@ -2617,12 +2797,10 @@ function showQR(){
           <div style="border:2px solid var(--bl);border-radius:4px;padding:14px;font-size:12px">
             <div style="font-weight:700;font-size:15px;color:var(--bl);margin-bottom:6px">${eq.id} – ${eq.des}</div>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px">
-              <div><strong>Marque :</strong> ${eq.marq}</div>
-              <div><strong>N° série :</strong> ${eq.ser}</div>
+              <div><strong>N° Service :</strong> ${eq.numSvc||'–'}</div>
               <div><strong>Service :</strong> ${eq.svc}</div>
-              <div><strong>Bât. :</strong> ${eq.bat}</div>
-              <div><strong>MES :</strong> ${fmtD(eq.mes)}</div>
-              <div><strong>Statut :</strong> ${eq.stat}</div>
+              <div><strong>N° Série :</strong> ${eq.ser}</div>
+              <div><strong>Date MES :</strong> ${fmtD(eq.mes)}</div>
             </div>
             <div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--brd);font-size:11px;color:var(--mut)">
               ${bts} interventions – Coût total : ${fmtE(coutTotal)} – ${critBadge(eq.crit)}
@@ -2669,51 +2847,44 @@ function printQR(){
   *{box-sizing:border-box;margin:0;padding:0}
   body{font-family:Arial,sans-serif;background:#fff;color:#1a2332;font-size:10px;padding:24px}
   .fiche{
-    border:1.5px solid #1F4E79;border-radius:5px;padding:14px 16px;
-    max-width:340px;margin:0 auto;display:flex;flex-direction:column;
+    border:1px solid #9a9a9a;border-radius:14px;overflow:hidden;
+    width:380px;margin:0 auto;display:flex;flex-direction:column;
+    background:linear-gradient(135deg,#f4f4f4 0%,#ffffff 22%,#d8d8d8 48%,#ffffff 72%,#e8e8e8 100%);
+    box-shadow:0 1px 4px rgba(0,0,0,.25);
   }
-  .header{display:flex;flex-direction:row;align-items:flex-start;gap:10px;margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid #CBD5E0}
-  .qr-img{order:0;flex-shrink:0}
-  .qr-img img{width:80px;height:80px;border:1px solid #CBD5E0;border-radius:3px;display:block}
-  .qr-placeholder{width:80px;height:80px;border:1.5px dashed #1F4E79;border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:7px;color:#1F4E79;text-align:center;padding:4px;word-break:break-all;font-weight:600}
-  .header-info{order:1;flex:1;min-width:0}
-  .eq-id{font-size:16px;font-weight:700;color:#1F4E79;margin-bottom:2px}
-  .eq-des{font-size:11px;font-weight:600;margin-bottom:5px;line-height:1.25}
-  .badge{display:inline-block;padding:2px 8px;border-radius:9px;font-size:9px;font-weight:700}
-  .grid{display:grid;grid-template-columns:1fr 1fr;gap:6px 10px;font-size:9.5px}
-  .row{display:flex;flex-direction:column;overflow:hidden}
-  .row .lbl{font-size:7px;color:#5a6a7a;text-transform:uppercase;letter-spacing:.3px}
-  .row .val{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .footer{margin-top:10px;padding-top:6px;border-top:1px solid #CBD5E0;font-size:7.5px;color:#5a6a7a;display:flex;justify-content:space-between}
+  .tag-hdr{background:#1a1a1a;color:#fff;text-align:center;font-weight:800;font-size:15px;letter-spacing:.4px;padding:7px 0}
+  .tag-body{display:flex;align-items:flex-start;gap:12px;padding:12px 14px 6px}
+  .qr-img{flex-shrink:0}
+  .qr-img img{width:92px;height:92px;display:block;border:5px solid #fff;box-shadow:0 0 0 1px #ccc}
+  .qr-placeholder{width:92px;height:92px;border:1.5px dashed #1F4E79;display:flex;align-items:center;justify-content:center;font-size:7px;color:#1F4E79;text-align:center;padding:4px;word-break:break-all;font-weight:600;background:#fff}
+  .tag-text{flex:1;min-width:0}
+  .tag-main{font-size:17px;font-weight:800;line-height:1.1;color:#000}
+  .tag-main b{color:#1F4E79}
+  .tag-grid{display:grid;grid-template-columns:1fr 1fr;gap:4px 10px;font-size:9.5px;margin-top:6px}
+  .tag-grid .lbl{font-size:7px;color:#5a6a7a;text-transform:uppercase;letter-spacing:.3px;display:block}
+  .tag-grid .val{font-weight:700;color:#000}
   @media print{.no-print{display:none}}
   .btn-print{display:block;margin:16px auto 0;padding:8px 24px;background:#1F4E79;color:#fff;border:none;border-radius:4px;font-size:13px;cursor:pointer;font-weight:600}
 </style>
 </head><body>
 <div class="fiche">
-  <div class="header">
+  <div class="tag-hdr">GHRMSA – ATELIER MR &amp; TA</div>
+  <div class="tag-body">
     <div class="qr-img">
       ${qrImgSrc ? `<img src="${qrImgSrc}" alt="QR Code ${eq.id}">` : `<div class="qr-placeholder">QR</div>`}
     </div>
-    <div class="header-info">
-      <div class="eq-id">${eq.id}</div>
-      <div class="eq-des">${eq.des}</div>
-      <span class="badge" style="${critColor}">${eq.crit||'–'}</span>
+    <div class="tag-text">
+      <div class="tag-main"><b>${eq.id}</b> – ${eq.des}</div>
+      <div class="tag-grid">
+        <div><span class="lbl">N° Service</span><span class="val">${eq.numSvc||'–'}</span></div>
+        <div><span class="lbl">Service</span><span class="val">${eq.svc||'–'}</span></div>
+        <div><span class="lbl">N° Série</span><span class="val">${eq.ser||'–'}</span></div>
+        <div><span class="lbl">Date MES</span><span class="val">${fmtD(eq.mes)||'–'}</span></div>
+      </div>
     </div>
   </div>
-  <div class="grid">
-    <div class="row"><span class="lbl">Service</span><span class="val">${eq.svc||'–'}</span></div>
-    <div class="row"><span class="lbl">Bâtiment</span><span class="val">${eq.bat||'–'}</span></div>
-    <div class="row"><span class="lbl">N° Série</span><span class="val">${eq.ser||'–'}</span></div>
-    <div class="row"><span class="lbl">Statut</span><span class="val">${eq.stat||'–'}</span></div>
-    <div class="row"><span class="lbl">Interventions</span><span class="val">${bts}</span></div>
-    <div class="row"><span class="lbl">Coût total</span><span class="val">${fmtE(coutTotal)}</span></div>
-  </div>
-  <div class="footer">
-    <div>🏥 GHRMSA – Atelier Matériels Roulants</div>
-    <div>${now}</div>
-  </div>
 </div>
-<button class="btn-print no-print" onclick="window.print()><i data-lucide="printer" class="btn-ico"></i>Imprimer / Exporter en PDF</button>
+<button class="btn-print no-print" onclick="window.print()"><i data-lucide="printer" class="btn-ico"></i>Imprimer / Exporter en PDF</button>
 </body></html>`);
   w.document.close();
 }
@@ -2730,22 +2901,21 @@ function printAllQR(){
     }
     .page-grid:last-of-type{page-break-after:auto}
     .fiche{
-      border:1.5px solid #1F4E79;border-radius:5px;padding:9px 11px;
-      display:flex;flex-direction:column;justify-content:flex-start;overflow:hidden;
+      border:1px solid #9a9a9a;border-radius:10px;overflow:hidden;
+      display:flex;flex-direction:column;
+      background:linear-gradient(135deg,#f4f4f4 0%,#ffffff 22%,#d8d8d8 48%,#ffffff 72%,#e8e8e8 100%);
     }
-    .header{display:flex;flex-direction:row;align-items:flex-start;gap:8px;margin-bottom:6px;padding-bottom:6px;border-bottom:1px solid #CBD5E0}
-    .qr-img{order:0}
-    .qr-img img{width:62px;height:62px;border:1px solid #CBD5E0;border-radius:3px;display:block}
-    .qr-placeholder{width:62px;height:62px;border:1.5px dashed #1F4E79;border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:6px;color:#1F4E79;text-align:center;padding:3px;word-break:break-all;font-weight:600}
-    .header-info{order:1;flex:1;min-width:0}
-    .eq-id{font-size:13px;font-weight:700;color:#1F4E79;margin-bottom:1px}
-    .eq-des{font-size:9.5px;font-weight:600;margin-bottom:4px;line-height:1.2}
-    .badge{display:inline-block;padding:1px 6px;border-radius:8px;font-size:8px;font-weight:700}
-    .grid{display:grid;grid-template-columns:1fr 1fr;gap:6px 8px;font-size:8.5px;align-content:start}
-    .row{display:flex;flex-direction:column;overflow:hidden}
-    .row .lbl{font-size:6.5px;color:#5a6a7a;text-transform:uppercase;letter-spacing:.3px}
-    .row .val{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-    .footer{margin-top:10px;padding-top:5px;border-top:1px solid #CBD5E0;font-size:6.5px;color:#5a6a7a;display:flex;justify-content:space-between}
+    .tag-hdr{background:#1a1a1a;color:#fff;text-align:center;font-weight:800;font-size:10px;letter-spacing:.3px;padding:4px 0}
+    .tag-body{display:flex;align-items:flex-start;gap:7px;padding:7px 9px 4px}
+    .qr-img{flex-shrink:0}
+    .qr-img img{width:60px;height:60px;display:block;border:3px solid #fff;box-shadow:0 0 0 1px #ccc}
+    .qr-placeholder{width:60px;height:60px;border:1.5px dashed #1F4E79;display:flex;align-items:center;justify-content:center;font-size:6px;color:#1F4E79;text-align:center;padding:3px;word-break:break-all;font-weight:600;background:#fff}
+    .tag-text{flex:1;min-width:0}
+    .tag-main{font-size:11px;font-weight:800;line-height:1.1;color:#000}
+    .tag-main b{color:#1F4E79}
+    .tag-grid{display:grid;grid-template-columns:1fr 1fr;gap:2px 6px;font-size:7px;margin-top:3px}
+    .tag-grid .lbl{font-size:5.5px;color:#5a6a7a;text-transform:uppercase;letter-spacing:.2px;display:block}
+    .tag-grid .val{font-weight:700;color:#000}
     @media print{
       .no-print{display:none}
       @page{size:A4;margin:8mm}
@@ -2779,37 +2949,26 @@ function printAllQR(){
 
   Promise.all(pending).then(()=>{
     document.body.removeChild(tmp);
-    const now=new Date().toLocaleDateString('fr-FR');
 
     const fiches=DB.eq.map(eq=>{
-      const bts=DB.bt.filter(b=>b.eq===eq.id).length;
-      const cout=DB.bt.filter(b=>b.eq===eq.id).reduce((s,b)=>s+(b.cout||0),0);
       const url=`${window.location.origin}${window.location.pathname}?eq=${eq.id}`;
       const img=canvases[eq.id];
-      const critColor=eq.crit==='Critique'?'background:#FFE0E0;color:#9B2C2C':eq.crit==='Élevée'?'background:#FFF2CC;color:#7B4F00':eq.crit==='Modérée'?'background:#D6E4F0;color:#1F4E79':'background:#E2EFDA;color:#1E6B3C';
       return `
         <div class="fiche">
-          <div class="header">
+          <div class="tag-hdr">GHRMSA – ATELIER MR &amp; TA</div>
+          <div class="tag-body">
             <div class="qr-img">
               ${img?`<img src="${img}" alt="QR ${eq.id}">`:`<div class="qr-placeholder">QR</div>`}
             </div>
-            <div class="header-info">
-              <div class="eq-id">${eq.id}</div>
-              <div class="eq-des">${eq.des}</div>
-              <span class="badge" style="${critColor}">${eq.crit||'–'}</span>
+            <div class="tag-text">
+              <div class="tag-main"><b>${eq.id}</b> – ${eq.des}</div>
+              <div class="tag-grid">
+                <div><span class="lbl">N° Service</span><span class="val">${eq.numSvc||'–'}</span></div>
+                <div><span class="lbl">Service</span><span class="val">${eq.svc||'–'}</span></div>
+                <div><span class="lbl">N° Série</span><span class="val">${eq.ser||'–'}</span></div>
+                <div><span class="lbl">Date MES</span><span class="val">${fmtD(eq.mes)||'–'}</span></div>
+              </div>
             </div>
-          </div>
-          <div class="grid">
-            <div class="row"><span class="lbl">Service</span><span class="val">${eq.svc||'–'}</span></div>
-            <div class="row"><span class="lbl">Bâtiment</span><span class="val">${eq.bat||'–'}</span></div>
-            <div class="row"><span class="lbl">N° Série</span><span class="val">${eq.ser||'–'}</span></div>
-            <div class="row"><span class="lbl">Statut</span><span class="val">${eq.stat||'–'}</span></div>
-            <div class="row"><span class="lbl">Interventions</span><span class="val">${bts}</span></div>
-            <div class="row"><span class="lbl">Coût total</span><span class="val">${fmtE(cout)}</span></div>
-          </div>
-          <div class="footer">
-            <div>🏥 GHRMSA – Atelier Matériels Roulants</div>
-            <div>${now}</div>
           </div>
         </div>`;
     });
@@ -2822,7 +2981,7 @@ function printAllQR(){
 
     const w=window.open('','_blank');
     w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Fiches QR – Tous les équipements</title><style>${ficheStyle}</style></head><body>
-      <div class="toolbar no-print"><button class="btn-print" onclick="window.print()><i data-lucide="printer" class="btn-ico"></i>Imprimer tout (${DB.eq.length} équipements – ${pagesHtml.length} page${pagesHtml.length>1?'s':''})</button></div>
+      <div class="toolbar no-print"><button class="btn-print" onclick="window.print()"><i data-lucide="printer" class="btn-ico"></i>Imprimer tout (${DB.eq.length} équipements – ${pagesHtml.length} page${pagesHtml.length>1?'s':''})</button></div>
       ${pagesHtml.join('')}
     </body></html>`);
     w.document.close();
@@ -4472,7 +4631,7 @@ function rapport(){
       </div>
     </div>
 
-    <button class="no-print" onclick="window.print()" style="margin-top:28px;padding:11px 24px;background:#1F4E79;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:13px;font-weight:600><i data-lucide="printer" class="btn-ico"></i>Imprimer / Exporter en PDF</button>
+    <button class="no-print" onclick="window.print()" style="margin-top:28px;padding:11px 24px;background:#1F4E79;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:13px;font-weight:600"><i data-lucide="printer" class="btn-ico"></i>Imprimer / Exporter en PDF</button>
   </div>
 
   <div class="doc-footer">
@@ -4682,7 +4841,7 @@ function rapportSalarie(){
       </div>
     </div>
 
-    <button class="no-print btn-print" style="margin-top:28px" onclick="window.print()><i data-lucide="printer" class="btn-ico"></i>Imprimer / Exporter en PDF</button>
+    <button class="no-print btn-print" style="margin-top:28px" onclick="window.print()"><i data-lucide="printer" class="btn-ico"></i>Imprimer / Exporter en PDF</button>
   </div>
 
   <div class="doc-footer">
@@ -5189,6 +5348,7 @@ const ID_DEFAULTS = {
     budget:        {nav:'Budget',                  title:'Suivi budgétaire maintenance'},
     contrats:      {nav:'Contrats &amp; garanties',title:'Contrats &amp; garanties'},
     devis:         {nav:'Devis',                   title:'Gestion des devis'},
+    projet:        {nav:'Gestion de projet',       title:'Gestion de projet – Planning &amp; Gantt'},
     documents:     {nav:'Documentation',           title:'Documentation technique'},
     techniciens:   {nav:'Techniciens',             title:'Équipe – Habilitations &amp; compétences'},
     metrologie:    {nav:'Métrologie',              title:'Métrologie – Contrôles réglementaires'},
@@ -6707,6 +6867,238 @@ function renderDevis(){
         ${isAdmin()?`<button class="btn btn-d btn-sm" onclick="deleteDevis(${i})"><i data-lucide="trash-2" style="width:13px;height:13px"></i></button>`:''}
       </td>
     </tr>`).join('');
+}
+
+// ════ GESTION DE PROJET ════
+const DB_PROJ = [
+  {id:'PJ-001',nom:'Cahier des charges & analyse des besoins',type:'phase',cat:'Conception',debut:'2025-09-01',fin:'2025-09-20',avancement:100,respo:'Mhmad',obs:'Reprise du classeur gmao.py existant'},
+  {id:'PJ-002',nom:'Conception base de données (équipements, BT, stock)',type:'phase',cat:'Conception',debut:'2025-09-21',fin:'2025-10-10',avancement:100,respo:'Mhmad',obs:''},
+  {id:'PJ-003',nom:'Développement v1 à v5 – Interface & modules de base',type:'tache',cat:'Développement',debut:'2025-10-11',fin:'2025-11-30',avancement:100,respo:'Mhmad',obs:''},
+  {id:'PJ-004',nom:'Migration cloud Supabase + hébergement GitHub Pages',type:'tache',cat:'Développement',debut:'2025-12-01',fin:'2025-12-19',avancement:100,respo:'Mhmad',obs:''},
+  {id:'PJ-005',nom:'Jalon – Mise en ligne v10',type:'jalon',cat:'Jalon',debut:'2025-12-20',fin:'2025-12-20',avancement:100,respo:'Mhmad',obs:''},
+  {id:'PJ-006',nom:'Système de rôles & permissions (5 rôles)',type:'tache',cat:'Développement',debut:'2026-01-05',fin:'2026-02-05',avancement:100,respo:'Mhmad',obs:''},
+  {id:'PJ-007',nom:'Correctifs critiques (icônes, onclick, logout, réseau)',type:'tache',cat:'Maintenance',debut:'2026-02-06',fin:'2026-03-10',avancement:100,respo:'Mhmad',obs:''},
+  {id:'PJ-008',nom:'PWA & adaptation mobile (responsive, drawer, manifest)',type:'tache',cat:'Développement',debut:'2026-03-11',fin:'2026-04-25',avancement:100,respo:'Mhmad',obs:''},
+  {id:'PJ-009',nom:'Module Gestion de projet & diagramme de Gantt',type:'tache',cat:'Développement',debut:'2026-06-15',fin:'2026-07-10',avancement:40,respo:'Mhmad',obs:''},
+  {id:'PJ-010',nom:'Jalon – Version v16',type:'jalon',cat:'Jalon',debut:'2026-07-10',fin:'2026-07-10',avancement:0,respo:'Mhmad',obs:''},
+  {id:'PJ-011',nom:'Tests & recette utilisateur (atelier)',type:'phase',cat:'Tests',debut:'2026-07-11',fin:'2026-08-05',avancement:0,respo:'Mhmad',obs:''},
+  {id:'PJ-012',nom:'Rédaction rapport PFMP & soutenance',type:'phase',cat:'Rapport',debut:'2026-08-06',fin:'2026-09-10',avancement:10,respo:'Mhmad',obs:''}
+];
+
+function nextPJ(){ return 'PJ-'+String(DB_PROJ.length+1).padStart(3,'0'); }
+
+function openNewProj(){
+  document.getElementById('pj_idx').value='';
+  document.getElementById('pj_nom').value='';
+  document.getElementById('pj_type').value='tache';
+  document.getElementById('pj_cat').value='';
+  document.getElementById('pj_debut').value=today();
+  document.getElementById('pj_fin').value=today();
+  document.getElementById('pj_avancement').value=0;
+  document.getElementById('pj_respo').value='Mhmad';
+  document.getElementById('pj_obs').value='';
+  document.getElementById('mProjTitle').innerHTML='<i data-lucide="chart-gantt" class="modal-hdr-ico"></i>Nouvelle tâche / phase';
+  openM('mProj');
+}
+
+function saveProj(){
+  const nom=document.getElementById('pj_nom').value.trim();
+  const debut=document.getElementById('pj_debut').value;
+  const fin=document.getElementById('pj_fin').value;
+  if(!nom){toast('⚠️ Nom de la tâche obligatoire','e');return;}
+  if(!debut||!fin){toast('⚠️ Dates de début et de fin obligatoires','e');return;}
+  if(new Date(fin)<new Date(debut)){toast('⚠️ La date de fin doit être après la date de début','e');return;}
+  const idx=document.getElementById('pj_idx').value;
+  const obj={
+    id:idx===''?nextPJ():DB_PROJ[parseInt(idx)].id,
+    nom, type:document.getElementById('pj_type').value,
+    cat:document.getElementById('pj_cat').value.trim(),
+    debut, fin,
+    avancement:Math.max(0,Math.min(100,parseInt(document.getElementById('pj_avancement').value)||0)),
+    respo:document.getElementById('pj_respo').value.trim()||'Mhmad',
+    obs:document.getElementById('pj_obs').value.trim()
+  };
+  if(idx===''){ DB_PROJ.push(obj); auditLog('create','Tâche projet créée : '+obj.id+' – '+obj.nom); }
+  else { DB_PROJ[parseInt(idx)]=obj; auditLog('update','Tâche projet modifiée : '+obj.id+' – '+obj.nom); }
+  closeM('mProj'); renderProjet(); toast('✅ Enregistré','s'); syncToCloud();
+}
+
+function editProj(i){
+  const p=DB_PROJ[i];if(!p)return;
+  document.getElementById('pj_idx').value=i;
+  document.getElementById('pj_nom').value=p.nom;
+  document.getElementById('pj_type').value=p.type;
+  document.getElementById('pj_cat').value=p.cat||'';
+  document.getElementById('pj_debut').value=p.debut;
+  document.getElementById('pj_fin').value=p.fin;
+  document.getElementById('pj_avancement').value=p.avancement||0;
+  document.getElementById('pj_respo').value=p.respo||'';
+  document.getElementById('pj_obs').value=p.obs||'';
+  document.getElementById('mProjTitle').innerHTML='<i data-lucide="pencil" class="modal-hdr-ico"></i>Modifier : '+p.id;
+  openM('mProj');
+}
+
+function deleteProj(i){
+  const p=DB_PROJ[i];if(!p)return;
+  confirmDelete(`Supprimer "${p.nom}" ?`,()=>{
+    auditLog('delete','Tâche projet supprimée : '+p.id+' – '+p.nom);
+    DB_PROJ.splice(i,1);renderProjet();
+    toast('🗑️ Supprimé','w');
+    syncToCloud();
+  });
+}
+
+function projStatus(p){
+  const today=new Date();
+  if((p.avancement||0)>=100) return {lbl:'✅ Terminé',cls:'bg'};
+  if(new Date(p.fin)<today) return {lbl:'🚨 En retard',cls:'br'};
+  if(new Date(p.debut)>today) return {lbl:'⏳ À venir',cls:'bb'};
+  return {lbl:'🔄 En cours',cls:'by'};
+}
+
+function renderProjet(){
+  const tasks=DB_PROJ.slice().sort((a,b)=>new Date(a.debut)-new Date(b.debut));
+  const kpiEl=document.getElementById('kpiProj');
+  const ganttEl=document.getElementById('ganttChart');
+  const bodyEl=document.getElementById('bodyProj');
+  if(tasks.length===0){
+    kpiEl.innerHTML='';
+    ganttEl.innerHTML='<div style="color:var(--mut);text-align:center;padding:24px">Aucune tâche enregistrée.</div>';
+    bodyEl.innerHTML='<tr><td colspan="9" style="text-align:center;padding:24px;color:var(--mut)">Aucune tâche. Cliquez sur <strong>➕ Nouvelle tâche / phase</strong></td></tr>';
+    return;
+  }
+  const today=new Date();
+  const avgAvanc=Math.round(tasks.reduce((s,t)=>s+(t.avancement||0),0)/tasks.length);
+  const enRetard=tasks.filter(t=>new Date(t.fin)<today&&(t.avancement||0)<100).length;
+  const jalons=tasks.filter(t=>t.type==='jalon').length;
+  const minD=new Date(Math.min(...tasks.map(t=>new Date(t.debut))));
+  const maxD=new Date(Math.max(...tasks.map(t=>new Date(t.fin))));
+  const dureeTotale=Math.max(1,Math.round((maxD-minD)/86400000));
+  const totalMs=Math.max(1,maxD-minD);
+
+  kpiEl.innerHTML=`
+    <div class="kpi bl"><div class="kpi-val">${avgAvanc}%</div><div class="kpi-lbl">Avancement global</div></div>
+    <div class="kpi or"><div class="kpi-val">${enRetard}</div><div class="kpi-lbl">Tâches en retard</div></div>
+    <div class="kpi gn"><div class="kpi-val">${jalons}</div><div class="kpi-lbl">Jalons</div></div>
+    <div class="kpi bl"><div class="kpi-val">${dureeTotale} j</div><div class="kpi-lbl">Durée totale du projet</div></div>`;
+
+  // ── Construction des repères mensuels d'en-tête ──
+  let months=[]; let cur=new Date(minD.getFullYear(),minD.getMonth(),1);
+  const endM=new Date(maxD.getFullYear(),maxD.getMonth(),1);
+  while(cur<=endM){ months.push(new Date(cur)); cur=new Date(cur.getFullYear(),cur.getMonth()+1,1); }
+  const ratio=d=>Math.max(0,Math.min(1,(d-minD)/totalMs));
+  const leftCss=r=>`calc(180px + (100% - 180px) * ${r})`;
+
+  const headerHtml=months.map(m=>{
+    const r=ratio(m);
+    const lbl=m.toLocaleDateString('fr-FR',{month:'short',year:'2-digit'});
+    return `<div style="position:absolute;left:${leftCss(r)};top:0;bottom:0;border-left:1px solid var(--gg);font-size:9.5px;color:var(--mut);padding-left:3px;white-space:nowrap">${lbl}</div>`;
+  }).join('');
+
+  const todayInRange=today>=minD&&today<=maxD;
+  const todayLine=todayInRange?`<div style="position:absolute;left:${leftCss(ratio(today))};top:0;bottom:0;width:2px;background:#E53E3E;z-index:2" title="Aujourd'hui"></div>`:'';
+
+  const rowsHtml=tasks.map(t=>{
+    const r1=ratio(new Date(t.debut)), r2=ratio(new Date(t.fin));
+    const left=leftCss(r1);
+    const width=`calc((100% - 180px) * ${Math.max(r2-r1,0.004)})`;
+    const avc=t.avancement||0;
+    if(t.type==='jalon'){
+      return `<div style="position:relative;height:30px;display:flex;align-items:center;border-bottom:1px solid var(--gg)">
+        <div style="width:180px;flex-shrink:0;font-size:11px;font-weight:600;padding-right:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${t.nom}">◆ ${t.nom}</div>
+        <div style="position:relative;flex:1;height:100%">
+          <div style="position:absolute;left:${left};top:50%;width:13px;height:13px;margin-left:-6px;margin-top:-6px;background:${avc>=100?'var(--gn)':'var(--or)'};transform:rotate(45deg);border-radius:2px" title="${t.nom} – ${fmtD(t.debut)}"></div>
+        </div>
+      </div>`;
+    }
+    const baseColor=t.type==='phase'?'var(--vl)':'var(--lgn)';
+    const fillColor=t.type==='phase'?'var(--lb)':'var(--gn)';
+    return `<div style="position:relative;height:30px;display:flex;align-items:center;border-bottom:1px solid var(--gg)">
+      <div style="width:180px;flex-shrink:0;font-size:11px;padding-right:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${t.nom}">${t.nom}</div>
+      <div style="position:relative;flex:1;height:100%">
+        <div style="position:absolute;left:${left};width:${width};top:5px;height:18px;border-radius:4px;background:${baseColor};overflow:hidden" title="${t.nom} – ${fmtD(t.debut)} → ${fmtD(t.fin)} – ${avc}%">
+          <div style="height:100%;width:${avc}%;background:${fillColor}"></div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+
+  ganttEl.innerHTML=`
+    <div style="position:relative;height:22px;margin-bottom:2px">${headerHtml}</div>
+    <div style="position:relative">${todayLine}${rowsHtml}</div>
+    <div style="margin-top:10px;display:flex;gap:16px;font-size:10.5px;color:var(--mut);flex-wrap:wrap">
+      <span><span style="display:inline-block;width:10px;height:10px;background:var(--lb);border-radius:2px;margin-right:4px;vertical-align:middle"></span>Phase</span>
+      <span><span style="display:inline-block;width:10px;height:10px;background:var(--gn);border-radius:2px;margin-right:4px;vertical-align:middle"></span>Tâche</span>
+      <span><span style="display:inline-block;width:10px;height:10px;background:var(--or);transform:rotate(45deg);margin-right:4px;vertical-align:middle"></span>Jalon</span>
+      <span><span style="display:inline-block;width:10px;height:10px;background:#E53E3E;margin-right:4px;vertical-align:middle"></span>Aujourd'hui</span>
+    </div>`;
+
+  bodyEl.innerHTML=tasks.map(t=>{
+    const i=DB_PROJ.indexOf(t);
+    const st=projStatus(t);
+    const duree=t.type==='jalon'?'–':Math.max(1,Math.round((new Date(t.fin)-new Date(t.debut))/86400000))+' j';
+    const typeLbl=t.type==='phase'?'Phase':t.type==='jalon'?'◆ Jalon':'Tâche';
+    return `<tr>
+      <td style="font-size:12px;font-weight:600">${t.nom}</td>
+      <td style="font-size:11px">${typeLbl}</td>
+      <td>${fmtD(t.debut)}</td>
+      <td>${fmtD(t.fin)}</td>
+      <td style="font-size:11px">${duree}</td>
+      <td style="min-width:90px">
+        <div style="display:flex;align-items:center;gap:6px">
+          <div style="flex:1;height:7px;background:var(--gg);border-radius:4px;overflow:hidden"><div style="height:100%;width:${t.avancement||0}%;background:var(--lb)"></div></div>
+          <span style="font-size:10.5px;font-variant-numeric:tabular-nums">${t.avancement||0}%</span>
+        </div>
+      </td>
+      <td style="font-size:11px">${t.respo||'–'}</td>
+      <td><span class="badge ${st.cls}">${st.lbl}</span></td>
+      <td style="white-space:nowrap">
+        <button class="btn btn-g btn-sm" onclick="editProj(${i})"><i data-lucide="pencil" style="width:13px;height:13px"></i></button>
+        <button class="btn btn-d btn-sm" onclick="deleteProj(${i})"><i data-lucide="trash-2" style="width:13px;height:13px"></i></button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+// ════ PWA – INSTALLATION ════
+let deferredInstallPrompt = null;
+
+if('serviceWorker' in navigator){
+  window.addEventListener('load', ()=>{
+    navigator.serviceWorker.register('./sw.js').catch(()=>{});
+  });
+}
+
+window.addEventListener('beforeinstallprompt', (e)=>{
+  e.preventDefault();
+  deferredInstallPrompt = e;
+  const btn = document.getElementById('installBtn');
+  if(btn) btn.style.display = 'flex';
+});
+
+function installPWA(){
+  const btn = document.getElementById('installBtn');
+  if(!deferredInstallPrompt){
+    toast('Pour installer : menu ⋮ du navigateur → "Installer l\'application"','w');
+    return;
+  }
+  deferredInstallPrompt.prompt();
+  deferredInstallPrompt.userChoice.then(choice=>{
+    if(choice.outcome==='accepted'){ toast('✅ Application installée','s'); }
+    deferredInstallPrompt = null;
+    if(btn) btn.style.display = 'none';
+  });
+}
+
+window.addEventListener('appinstalled', ()=>{
+  const btn = document.getElementById('installBtn');
+  if(btn) btn.style.display = 'none';
+  deferredInstallPrompt = null;
+});
+
+if(window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone===true){
+  const btn = document.getElementById('installBtn');
+  if(btn) btn.style.display = 'none';
 }
 
 async function init(){
