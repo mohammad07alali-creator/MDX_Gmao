@@ -6969,21 +6969,20 @@ function updateMsgBadge(){
 const msgStatBadge=s=>s==='Traité'?'<span class="badge bg">✅ Traité</span>':s==='En cours'?'<span class="badge by">🔄 En cours</span>':'<span class="badge bb">🆕 Nouveau</span>';
 
 function renderMessagerie(){
-  const svc=isServiceAccount();
-  const list=svc?DB_MESSAGES.filter(m=>m.service===window._currentUser.svc):DB_MESSAGES;
+  const list=DB_MESSAGES;
   const nouv=list.filter(m=>m.statut==='Nouveau').length;
   const cours=list.filter(m=>m.statut==='En cours').length;
   const traite=list.filter(m=>m.statut==='Traité').length;
   const urg=list.filter(m=>m.urgent&&m.statut!=='Traité').length;
   document.getElementById('kpiMsg').innerHTML=`
-    <div class="kpi bl"><div class="kpi-val">${list.length}</div><div class="kpi-lbl">${svc?'Vos messages':'Total messages'}</div></div>
+    <div class="kpi bl"><div class="kpi-val">${list.length}</div><div class="kpi-lbl">Total messages</div></div>
     <div class="kpi bl"><div class="kpi-val">${nouv}</div><div class="kpi-lbl">🆕 Nouveaux</div></div>
     <div class="kpi or"><div class="kpi-val">${cours}</div><div class="kpi-lbl">🔄 En cours</div></div>
     <div class="kpi gn"><div class="kpi-val">${traite}</div><div class="kpi-lbl">✅ Traités</div></div>
     <div class="kpi rd"><div class="kpi-val">${urg}</div><div class="kpi-lbl">🚨 Urgents non traités</div></div>`;
   const sorted=list.map(m=>({m,i:DB_MESSAGES.indexOf(m)})).sort((a,b)=>(b.m.date||'').localeCompare(a.m.date||''));
   document.getElementById('bodyMsg').innerHTML=sorted.length===0?
-    `<tr><td colspan="9" style="text-align:center;padding:24px;color:var(--mut)">${svc?'Aucune demande envoyée pour le moment. Cliquez sur <strong>➕ Nouvelle demande d\'intervention</strong>.':'Aucun message reçu pour le moment. Les demandes envoyées via les QR codes équipements apparaîtront ici.'}</td></tr>`:
+    '<tr><td colspan="9" style="text-align:center;padding:24px;color:var(--mut)">Aucun message reçu pour le moment. Les demandes envoyées via les QR codes équipements apparaîtront ici.</td></tr>':
     sorted.map(({m,i})=>`<tr ${m.urgent&&m.statut!=='Traité'?'style="background:var(--lr)"':''}>
       <td><strong style="font-size:11px">${m.id}</strong></td>
       <td style="font-size:11px;white-space:nowrap">${fmtD((m.date||'').slice(0,10))} ${(m.date||'').slice(11,16)}</td>
