@@ -457,6 +457,72 @@ body.dark-mode thead tr{background:#0d1520}
   </div>
 </div>
 
+<!-- ÉCRAN ACCÈS VISITEUR (QR CODE) -->
+<div id="kioskScreen" style="display:none;position:fixed;inset:0;z-index:9998;background:linear-gradient(135deg,#0D1B2A 0%,#1F4E79 60%,#2E75B6 100%);align-items:center;justify-content:center;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;padding:16px">
+  <div class="login-card" style="max-width:440px">
+    <div class="login-header">
+      <div class="login-logo"><i data-lucide="qr-code" style="width:22px;height:22px;vertical-align:-4px"></i> Accès <span>équipement</span></div>
+      <div class="login-sub">Consultez l'historique et contactez l'atelier maintenance</div>
+      <div class="login-hospital">🏥 GHRMSA – Hôpital Emile Muller · Mulhouse</div>
+    </div>
+    <div class="login-body" id="kioskGateBody">
+      <div id="kioskEqInfo" style="background:#F0F6FC;border:1px solid #D6E4F0;border-radius:8px;padding:12px 14px;margin-bottom:18px;font-size:13px;color:#1F4E79;font-weight:700"></div>
+      <div class="login-error show" id="kioskError" style="display:none"></div>
+      <div class="login-field">
+        <label>Nom et prénom *</label>
+        <input type="text" id="kioskNom" placeholder="Votre nom complet" autocomplete="name">
+      </div>
+      <div class="login-field">
+        <label>Service / Fonction *</label>
+        <input type="text" id="kioskService" placeholder="Ex: Service Cardiologie, ASH, IDE..." autocomplete="off">
+      </div>
+      <div class="login-field">
+        <label>Téléphone (optionnel)</label>
+        <input type="text" id="kioskTel" placeholder="Pour vous recontacter si besoin" autocomplete="tel">
+      </div>
+      <button class="login-btn" onclick="kioskEnter()"><i data-lucide="log-in" class="btn-ico"></i>Accéder à la fiche équipement</button>
+    </div>
+    <div class="login-footer">Accès limité à l'historique de cet équipement et à la messagerie de l'atelier.<br>
+      <button onclick="kioskShowStaffLogin()" style="background:none;border:none;color:#9BBDD4;text-decoration:underline;cursor:pointer;font-size:11px;margin-top:8px;padding:0">Vous êtes membre de l'atelier maintenance ? Connexion ici</button>
+    </div>
+  </div>
+</div>
+
+<!-- ESPACE VISITEUR (HISTORIQUE + MESSAGERIE LECTURE/ENVOI UNIQUEMENT) -->
+<div id="kioskApp" style="display:none;min-height:100vh;background:var(--bg,#F5F6FA);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif">
+  <div style="background:linear-gradient(135deg,#0D1B2A 0%,#1F4E79 60%,#2E75B6 100%);color:#fff;padding:16px 20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
+    <div style="display:flex;align-items:center;gap:10px">
+      <i data-lucide="qr-code" style="width:20px;height:20px"></i>
+      <div>
+        <div style="font-weight:800;font-size:15px" id="kioskHdrEq">–</div>
+        <div style="font-size:11.5px;opacity:.85" id="kioskHdrVisitor">–</div>
+      </div>
+    </div>
+    <button onclick="kioskExit()" style="background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);color:#fff;border-radius:6px;padding:7px 14px;cursor:pointer;font-size:12px;display:flex;align-items:center;gap:6px"><i data-lucide="log-out" style="width:13px;height:13px"></i>Quitter</button>
+  </div>
+  <div style="max-width:760px;margin:0 auto;padding:20px 16px 60px">
+    <div class="card" style="margin-bottom:18px">
+      <div class="card-hdr"><i data-lucide="history" class="card-hdr-ico"></i>Historique de l'équipement</div>
+      <div class="card-body" id="kioskHisto">–</div>
+    </div>
+    <div class="card">
+      <div class="card-hdr"><i data-lucide="message-square" class="card-hdr-ico"></i>Messagerie atelier – Demander une intervention</div>
+      <div class="card-body">
+        <div class="form-grid">
+          <div class="fg-full"><label>Objet de la demande *</label><input id="kioskMsgObjet" placeholder="Ex: Bruit anormal, panne, vérification..."></div>
+          <div class="fg-full"><label>Message *</label><textarea id="kioskMsgTexte" rows="4" placeholder="Décrivez le problème ou la demande..."></textarea></div>
+          <div class="fg-full" style="display:flex;align-items:center;gap:8px">
+            <input type="checkbox" id="kioskMsgUrgent" style="width:16px;height:16px">
+            <label style="margin:0;font-weight:600;color:#9B2335">🚨 Urgent / Équipement immobilisé</label>
+          </div>
+        </div>
+        <button class="btn btn-p" style="margin-top:10px" onclick="kioskSendMessage()"><i data-lucide="send" class="btn-ico"></i>Envoyer à l'atelier</button>
+        <div style="margin-top:24px" id="kioskMsgList"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="topbar">
   <button class="hamburger-btn" onclick="toggleSidebar()" title="Réduire/développer le menu"><i data-lucide="menu" style="width:18px;height:18px"></i></button>
   <div class="topbar-logo" style="display:flex;align-items:center;gap:6px"><i data-lucide="settings" style="width:16px;height:16px"></i>G<span>MAO</span></div>
@@ -509,7 +575,8 @@ body.dark-mode thead tr{background:#0d1520}
   <div class="nav-item nav-restricted" onclick="show('budget')"><i data-lucide="euro" class="nav-ico"></i><span class="nav-lbl">Budget</span></div>
   <div class="nav-item" onclick="show('contrats')"><i data-lucide="file-text" class="nav-ico"></i><span class="nav-lbl">Contrats &amp; garanties</span></div>
   <div class="nav-item" onclick="show('devis')"><i data-lucide="file-signature" class="nav-ico"></i><span class="nav-lbl">Devis</span></div>
-  <div class="nav-item" onclick="show('projet')"><i data-lucide="chart-gantt" class="nav-ico"></i><span class="nav-lbl">Gestion de projet</span></div>
+  <div class="nav-item nav-restricted" onclick="show('projet')"><i data-lucide="chart-gantt" class="nav-ico"></i><span class="nav-lbl">Gestion de projet</span></div>
+  <div class="nav-item" onclick="show('messagerie')"><i data-lucide="message-circle" class="nav-ico"></i><span class="nav-lbl">Messagerie</span><span class="nav-badge" id="bMSG">0</span></div>
   <div class="nav-item" onclick="show('documents')"><i data-lucide="folder-open" class="nav-ico"></i><span class="nav-lbl">Documentation</span></div>
   <div class="sid-sec">Équipe &amp; Qualité</div>
   <div class="nav-item nav-restricted" onclick="show('techniciens')"><i data-lucide="users" class="nav-ico"></i><span class="nav-lbl">Techniciens</span></div>
@@ -1052,6 +1119,7 @@ body.dark-mode thead tr{background:#0d1520}
   <div class="pg-sub">Demandes de devis, suivi et validation – Maintenances et équipements</div>
   <div class="btn-row">
     <button class="btn btn-p" onclick="openNewDevis()"><i data-lucide="plus" class="btn-ico"></i>Nouveau devis</button>
+    <button class="btn btn-g" onclick="printDevisListe()"><i data-lucide="printer" class="btn-ico"></i>Imprimer la liste</button>
     <input placeholder="🔍 Rechercher..." style="width:220px" oninput="fltTbl('tDevis',this.value)">
     <select onchange="fltDevisStatut(this.value)" style="width:160px">
       <option value="">Tous statuts</option>
@@ -1099,6 +1167,36 @@ body.dark-mode thead tr{background:#0d1520}
   <div class="modal-footer">
     <button class="btn btn-g" onclick="closeM('mDevis')">Annuler</button>
     <button class="btn btn-p" onclick="saveDevis()"><i data-lucide="save" class="btn-ico"></i>Enregistrer</button>
+  </div>
+</div></div>
+
+<!-- MESSAGERIE -->
+<div class="page" id="page-messagerie">
+  <div class="pg-title"><i data-lucide="message-circle" class="pg-title-ico"></i>Messagerie atelier</div>
+  <div class="pg-sub">Demandes d'intervention envoyées via QR code par les services – Accès via la fiche équipement</div>
+  <div class="btn-row">
+    <input placeholder="🔍 Rechercher..." style="width:220px" oninput="fltTbl('tMsg',this.value)">
+    <select onchange="fltMsgStatut(this.value)" style="width:160px">
+      <option value="">Tous statuts</option>
+      <option value="Nouveau">🆕 Nouveau</option>
+      <option value="En cours">🔄 En cours</option>
+      <option value="Traité">✅ Traité</option>
+    </select>
+  </div>
+  <div class="kpi-grid" id="kpiMsg"></div>
+  <div class="card"><div class="tbl-wrap"><table id="tMsg">
+    <thead><tr><th>N°</th><th>Date</th><th>Équipement</th><th>Visiteur</th><th>Service</th><th>Objet</th><th>Urgent</th><th>Statut</th><th>Actions</th></tr></thead>
+    <tbody id="bodyMsg"></tbody>
+  </table></div></div>
+</div>
+
+<!-- MODALE MESSAGE -->
+<div class="modal-bg" id="mMsg"><div class="modal" style="max-width:600px">
+  <div class="modal-hdr" id="mMsgTitle"><span style="display:flex;align-items:center;gap:8px"><i data-lucide="message-circle" class="modal-hdr-ico"></i>Demande d'intervention</span> <button class="modal-x" onclick="closeM('mMsg')">✕</button></div>
+  <div class="modal-body" id="mMsgBody"></div>
+  <div class="modal-footer">
+    <button class="btn btn-g" onclick="closeM('mMsg')">Fermer</button>
+    <button class="btn btn-p" onclick="convertMsgToBT()"><i data-lucide="wrench" class="btn-ico"></i>Créer un BT à partir de ce message</button>
   </div>
 </div></div>
 
@@ -1984,7 +2082,7 @@ function buildCloudSnapshot(){
     plan: DB.plan, contrats: DB.contrats, docs: DB.docs, actions: DB.actions,
     immob: DB.immob||[], conformite: DB.conformite||[], users: DB.users||[],
     mvtLog: DB.mvtLog||[], pareto: PARETO, budget: BUDGET,
-    db_rondes: DB_RONDES, db_consignes: DB_CONSIGNES, db_bat_zones: DB_BAT_ZONES, db_devis: DB_DEVIS, db_proj: DB_PROJ,
+    db_rondes: DB_RONDES, db_consignes: DB_CONSIGNES, db_bat_zones: DB_BAT_ZONES, db_devis: DB_DEVIS, db_proj: DB_PROJ, db_messages: DB_MESSAGES,
     db_amdec: window.DB_AMDEC||[], db_pdca: window.DB_PDCA||[],
     audit_log: AUDIT_LOG.slice(0, 500)
   };
@@ -2003,6 +2101,7 @@ function applyCloudSnapshot(snap){
     if(snap.db_bat_zones){ DB_BAT_ZONES.length=0; snap.db_bat_zones.forEach(x=>DB_BAT_ZONES.push(x)); }
     if(snap.db_devis){ DB_DEVIS.length=0; snap.db_devis.forEach(x=>DB_DEVIS.push(x)); }
     if(snap.db_proj){ DB_PROJ.length=0; snap.db_proj.forEach(x=>DB_PROJ.push(x)); }
+    if(snap.db_messages){ DB_MESSAGES.length=0; snap.db_messages.forEach(x=>DB_MESSAGES.push(x)); }
     if(snap.db_amdec){ window.DB_AMDEC=snap.db_amdec; }
     if(snap.db_pdca){ window.DB_PDCA=snap.db_pdca; }
     if(snap.audit_log){
@@ -2102,10 +2201,18 @@ function subscribeCloudRealtime(){
     .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'gmao_state', filter: 'id=eq.1' }, (payload)=>{
       if(!payload.new || !payload.new.data) return;
       applyCloudSnapshot(payload.new.data);
+      if(window._kioskMode){
+        if(window._kioskEq) kioskRenderHisto(window._kioskEq);
+        kioskRenderMsgList();
+        return;
+      }
       populateSelects();
       renderEq();renderBT();renderSk();renderPlan();renderTech();renderMetro();renderContrats();renderDocs();renderConformite();renderHistoSelect();renderUsers();
-      updateBadges();
+      updateBadges();updateMsgBadge();
+      generateNotifications();
       if(document.getElementById('page-dashboard') && document.getElementById('page-dashboard').classList.contains('active')) renderDashboard();
+      const msgEl = document.getElementById('page-messagerie');
+      if(msgEl && msgEl.classList.contains('active')) renderMessagerie();
       updateDescList();updateCausePanneList();
       const auditEl = document.getElementById('page-audit');
       if(auditEl && auditEl.classList.contains('active')) renderAudit();
@@ -2258,6 +2365,7 @@ function updateBadges(){
   const bb=document.getElementById('bBT');const bs=document.getElementById('bSK');
   bb.textContent=enc;bb.style.display=enc>0?'':'none';
   bs.textContent=al;bs.style.display=al>0?'':'none';
+  updateMsgBadge();
 }
 
 // ════ SHOW PAGE ════
@@ -2279,7 +2387,7 @@ function show(name){
     predictif:renderPredictif,causesracines:renderCauses,
     stock:renderSk,budget:renderBudget,utilisateurs:renderUsers,
     contrats:renderContrats,documents:renderDocs,
-    projet:renderProjet,
+    projet:renderProjet, messagerie:renderMessagerie,
     techniciens:renderTech,metrologie:renderMetro,
     conformite:renderConformite,
     rondes:renderRondes, batiment:renderBatiment,
@@ -5348,6 +5456,7 @@ const ID_DEFAULTS = {
     budget:        {nav:'Budget',                  title:'Suivi budgétaire maintenance'},
     contrats:      {nav:'Contrats &amp; garanties',title:'Contrats &amp; garanties'},
     devis:         {nav:'Devis',                   title:'Gestion des devis'},
+    messagerie:    {nav:'Messagerie',              title:'Messagerie atelier'},
     projet:        {nav:'Gestion de projet',       title:'Gestion de projet – Planning &amp; Gantt'},
     documents:     {nav:'Documentation',           title:'Documentation technique'},
     techniciens:   {nav:'Techniciens',             title:'Équipe – Habilitations &amp; compétences'},
@@ -5704,7 +5813,7 @@ function isResponsable(){
 }
 
 // Pages réservées Admin / Responsable / Adjoint
-const RESTRICTED_PAGES=['direction','criticite','fiabilite','immobilisations','predictif','budget','techniciens','conformite','audit'];
+const RESTRICTED_PAGES=['direction','criticite','fiabilite','immobilisations','predictif','budget','techniciens','conformite','audit','projet'];
 
 function updateNavVisibility(){
   const ok=isResponsable();
@@ -5870,6 +5979,9 @@ async function doLogin(){
     // Stocker l'utilisateur connecté et activer l'interface TOUT DE SUITE
     // (avant même la fin de l'animation de fondu), pour que les clics fonctionnent sans délai.
     window._currentUser=user;
+    window._kioskMode=false;
+    const topbarEl=document.querySelector('.topbar');if(topbarEl)topbarEl.style.removeProperty('display');
+    const layoutEl=document.querySelector('.layout');if(layoutEl)layoutEl.style.removeProperty('display');
     const nameEl=document.getElementById('connectedUser');
     if(nameEl)nameEl.textContent='👤 '+user.nom;
     updateAdminUI();
@@ -6280,6 +6392,14 @@ function generateNotifications(){
   DB.metro.filter(m => m.verd.includes('Non conforme')).forEach(m => {
     addNotif(`metro-nonconforme-${m.des}-${m.date}`, '📐', `Métrologie non conforme`, `${m.des} – Erreur: ${m.err}`, 'error');
   });
+  // Tâches de gestion de projet en retard — réservé à la gestion (Responsable/Adjoint/Admin)
+  if(isGestion && typeof DB_PROJ!=='undefined'){
+    DB_PROJ.forEach(p => {
+      if(!p.fin || (p.avancement||0)>=100) return;
+      const j = Math.ceil((now - new Date(p.fin)) / 86400000);
+      if(j > 0) addNotif(`projet-retard-${p.id}`, '📊', `Projet en retard : ${p.nom}`, `Échéance dépassée de J+${j} – Avancement: ${p.avancement||0}%`, 'error');
+    });
+  }
   updateNotifBadge();
 }
 // Fermer panneau si clic en dehors
@@ -6763,6 +6883,263 @@ function isTechnicien(){
 
 // ════ DEVIS ════
 const DB_DEVIS = [];
+// ════ MESSAGERIE (demandes visiteurs via QR code) ════
+const DB_MESSAGES = [];
+function nextMsgId(){
+  const n = DB_MESSAGES.length ? Math.max(...DB_MESSAGES.map(m=>parseInt((m.id||'MSG-000').split('-')[1])||0))+1 : 1;
+  return 'MSG-'+String(n).padStart(3,'0');
+}
+
+// ════ BADGE MESSAGERIE (sidebar) ════
+function updateMsgBadge(){
+  const n = DB_MESSAGES.filter(m=>m.statut==='Nouveau').length;
+  const b = document.getElementById('bMSG');
+  if(!b) return;
+  b.textContent = n;
+  b.style.display = n>0?'':'none';
+}
+
+// ════ RENDU PAGE MESSAGERIE (interface technicien/admin) ════
+const msgStatBadge=s=>s==='Traité'?'<span class="badge bg">✅ Traité</span>':s==='En cours'?'<span class="badge by">🔄 En cours</span>':'<span class="badge bb">🆕 Nouveau</span>';
+
+function renderMessagerie(){
+  const nouv=DB_MESSAGES.filter(m=>m.statut==='Nouveau').length;
+  const cours=DB_MESSAGES.filter(m=>m.statut==='En cours').length;
+  const traite=DB_MESSAGES.filter(m=>m.statut==='Traité').length;
+  const urg=DB_MESSAGES.filter(m=>m.urgent&&m.statut!=='Traité').length;
+  document.getElementById('kpiMsg').innerHTML=`
+    <div class="kpi bl"><div class="kpi-val">${DB_MESSAGES.length}</div><div class="kpi-lbl">Total messages</div></div>
+    <div class="kpi bl"><div class="kpi-val">${nouv}</div><div class="kpi-lbl">🆕 Nouveaux</div></div>
+    <div class="kpi or"><div class="kpi-val">${cours}</div><div class="kpi-lbl">🔄 En cours</div></div>
+    <div class="kpi gn"><div class="kpi-val">${traite}</div><div class="kpi-lbl">✅ Traités</div></div>
+    <div class="kpi rd"><div class="kpi-val">${urg}</div><div class="kpi-lbl">🚨 Urgents non traités</div></div>`;
+  const sorted=DB_MESSAGES.map((m,i)=>({m,i})).sort((a,b)=>(b.m.date||'').localeCompare(a.m.date||''));
+  document.getElementById('bodyMsg').innerHTML=sorted.length===0?
+    '<tr><td colspan="9" style="text-align:center;padding:24px;color:var(--mut)">Aucun message reçu pour le moment. Les demandes envoyées via les QR codes équipements apparaîtront ici.</td></tr>':
+    sorted.map(({m,i})=>`<tr ${m.urgent&&m.statut!=='Traité'?'style="background:var(--lr)"':''}>
+      <td><strong style="font-size:11px">${m.id}</strong></td>
+      <td style="font-size:11px;white-space:nowrap">${fmtD((m.date||'').slice(0,10))} ${(m.date||'').slice(11,16)}</td>
+      <td style="font-size:11px"><span class="badge bb">${m.eq||'–'}</span> ${m.eqDes||''}</td>
+      <td style="font-size:11px">${m.visiteur||'–'}</td>
+      <td style="font-size:11px">${m.service||'–'}</td>
+      <td style="font-size:11px">${m.objet||'–'}</td>
+      <td>${m.urgent?'<span class="badge br">🚨 Urgent</span>':'–'}</td>
+      <td>${msgStatBadge(m.statut)}</td>
+      <td><button class="btn btn-g btn-sm" onclick="openMsg(${i})" title="Voir / traiter"><i data-lucide="eye" style="width:13px;height:13px"></i></button></td>
+    </tr>`).join('');
+  updateMsgBadge();
+}
+
+function fltMsgStatut(v){
+  document.querySelectorAll('#tMsg tbody tr').forEach(r=>{
+    r.style.display=(!v||r.textContent.includes(v))?'':'none';
+  });
+}
+
+let _curMsgIdx=null;
+function openMsg(i){
+  const m=DB_MESSAGES[i];if(!m)return;
+  _curMsgIdx=i;
+  document.getElementById('mMsgTitle').innerHTML=`<span style="display:flex;align-items:center;gap:8px"><i data-lucide="message-circle" class="modal-hdr-ico"></i>${m.id} – ${m.objet||''}</span> <button class="modal-x" onclick="closeM('mMsg')">✕</button>`;
+  document.getElementById('mMsgBody').innerHTML=`
+    <div class="form-grid">
+      <div><label>Équipement</label><div style="padding:7px 0;font-weight:700">${m.eq||'–'} ${m.eqDes?'– '+m.eqDes:''}</div></div>
+      <div><label>Statut</label><div style="padding:7px 0">${msgStatBadge(m.statut)}</div></div>
+      <div><label>Demandeur</label><div style="padding:7px 0">${m.visiteur||'–'}</div></div>
+      <div><label>Service</label><div style="padding:7px 0">${m.service||'–'}</div></div>
+      <div><label>Téléphone</label><div style="padding:7px 0">${m.tel||'–'}</div></div>
+      <div><label>Reçu le</label><div style="padding:7px 0">${m.date?new Date(m.date).toLocaleString('fr-FR'):'–'}</div></div>
+      <div class="fg-full"><label>Objet</label><div style="padding:7px 0;font-weight:700">${m.objet||'–'}</div></div>
+      <div class="fg-full"><label>Message</label><div style="padding:7px 0;white-space:pre-wrap">${m.texte||'–'}</div></div>
+      ${m.urgent?'<div class="fg-full"><span class="badge br">🚨 Urgent / Équipement immobilisé</span></div>':''}
+    </div>
+    <div class="btn-row" style="margin-top:14px">
+      <button class="btn btn-w btn-sm" onclick="setMsgStatut('En cours')"><i data-lucide="loader" class="btn-ico"></i>Prendre en charge</button>
+      <button class="btn btn-s btn-sm" onclick="setMsgStatut('Traité')"><i data-lucide="check" class="btn-ico"></i>Marquer traité</button>
+    </div>`;
+  openM('mMsg');
+  refreshIcons();
+}
+
+function setMsgStatut(s){
+  if(_curMsgIdx===null)return;
+  const m=DB_MESSAGES[_curMsgIdx];if(!m)return;
+  m.statut=s;
+  auditLog('update','Message '+m.id+' marqué : '+s);
+  renderMessagerie();
+  openMsg(_curMsgIdx);
+  toast('✅ Statut mis à jour : '+s,'s');
+  syncToCloud();
+}
+
+// Crée un BT (bon de travail) directement à partir du message ouvert
+function convertMsgToBT(){
+  if(_curMsgIdx===null)return;
+  const m=DB_MESSAGES[_curMsgIdx];if(!m)return;
+  if(!isTechnicien()){toast('🔒 Accès réservé aux techniciens et administrateurs','e');return;}
+  closeM('mMsg');
+  const eqSel=document.getElementById('fi_eq');
+  if(eqSel){eqSel.value=m.eq||'';fillSvc();}
+  const dateEl=document.getElementById('fi_date');
+  if(dateEl)dateEl.value=today();
+  const descEl=document.getElementById('fi_desc');
+  if(descEl)descEl.value=(m.objet||'')+(m.texte?' – '+m.texte:'')+' (Demande de '+(m.visiteur||'visiteur')+', '+(m.service||'–')+')';
+  const priorEl=document.getElementById('fi_prior');
+  if(priorEl&&m.urgent)priorEl.value='P1 – Urgence absolue';
+  openM('mInterv');
+  if(m.statut==='Nouveau'){m.statut='En cours';renderMessagerie();syncToCloud();}
+  toast('📋 Complétez les informations et créez le bon de travail','s');
+}
+
+// ════════════════════════════════════════════════════════════════
+// ════ ACCÈS VISITEUR PAR QR CODE (kiosque restreint) ════
+// Un QR code pointe vers cette page avec ?eq=EQ-XXX. Si la personne
+// n'est PAS connectée en tant que membre de l'atelier, on lui demande
+// son identité puis on l'enferme dans une vue restreinte :
+// historique (lecture seule) + messagerie (envoi uniquement) de CET
+// équipement. Aucun autre module de la GMAO n'est accessible.
+// ════════════════════════════════════════════════════════════════
+
+// Détecte le paramètre ?eq= et bascule l'interface en mode kiosque si
+// l'utilisateur n'a pas de session valide. Renvoie true si le mode
+// kiosque a été activé (et donc que le flux normal doit s'arrêter).
+function kioskCheckUrl(){
+  const params=new URLSearchParams(window.location.search);
+  const eqId=params.get('eq');
+  if(!eqId)return false;
+  window._kioskMode=true;
+  window._kioskEq=eqId;
+  const loginEl=document.getElementById('loginScreen');
+  if(loginEl)loginEl.classList.add('hidden');
+  const topbarEl=document.querySelector('.topbar');
+  if(topbarEl)topbarEl.style.display='none';
+  const layoutEl=document.querySelector('.layout');
+  if(layoutEl)layoutEl.style.display='none';
+  const eq=DB.eq.find(e=>e.id===eqId);
+  const info=document.getElementById('kioskEqInfo');
+  if(info){
+    info.innerHTML=eq?('🔧 '+eq.id+' — '+eq.des+(eq.svc?' · '+eq.svc:'')):('⚠️ Équipement "'+eqId+'" introuvable. Vous pouvez tout de même envoyer un message à l\'atelier.');
+  }
+  document.getElementById('kioskScreen').style.display='flex';
+  setTimeout(()=>{const el=document.getElementById('kioskNom');if(el)el.focus();},100);
+  refreshIcons();
+  return true;
+}
+
+// Valide les informations du visiteur et ouvre l'espace restreint.
+function kioskEnter(){
+  const nom=document.getElementById('kioskNom').value.trim();
+  const service=document.getElementById('kioskService').value.trim();
+  const tel=document.getElementById('kioskTel').value.trim();
+  const errEl=document.getElementById('kioskError');
+  if(!nom||!service){
+    errEl.textContent='Merci de renseigner votre nom et votre service / fonction.';
+    errEl.style.display='block';
+    return;
+  }
+  errEl.style.display='none';
+  window._kioskVisitor={nom,service,tel};
+  try{sessionStorage.setItem('gmao_kiosk_visitor',JSON.stringify(window._kioskVisitor));}catch(e){}
+  document.getElementById('kioskScreen').style.display='none';
+  document.getElementById('kioskApp').style.display='block';
+  const eq=DB.eq.find(e=>e.id===window._kioskEq);
+  document.getElementById('kioskHdrEq').textContent=eq?(eq.id+' – '+eq.des):(window._kioskEq||'Équipement');
+  document.getElementById('kioskHdrVisitor').textContent=nom+' · '+service;
+  kioskRenderHisto(window._kioskEq);
+  kioskRenderMsgList();
+  auditLog('login','Accès visiteur QR code : '+nom+' ('+service+') – Équipement '+window._kioskEq);
+  refreshIcons();
+}
+
+// Affiche l'historique (lecture seule) de l'équipement scanné.
+function kioskRenderHisto(eqId){
+  const el=document.getElementById('kioskHisto');
+  if(!el)return;
+  const eq=DB.eq.find(e=>e.id===eqId);
+  if(!eq){el.innerHTML='<p style="color:var(--mut);font-size:12px">Équipement introuvable.</p>';return;}
+  const bts=DB.bt.filter(b=>b.eq===eqId).sort((a,b)=>(b.ouv||'').localeCompare(a.ouv||''));
+  el.innerHTML=`
+    <div class="grid2" style="gap:8px;font-size:12.5px;margin-bottom:14px">
+      <div><strong>Désignation :</strong> ${eq.des}</div>
+      <div><strong>Marque / Modèle :</strong> ${eq.marq||'–'}</div>
+      <div><strong>N° de série :</strong> <code style="background:var(--gr);padding:1px 6px;border-radius:3px">${eq.ser||'–'}</code></div>
+      <div><strong>Service affecté :</strong> ${eq.svc||'–'}</div>
+      <div><strong>Statut actuel :</strong> ${statEqBadge(eq.stat||'–')}</div>
+      <div><strong>Prochain entretien :</strong> ${fmtD(eq.next)}</div>
+    </div>
+    <div style="font-size:11px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Interventions (${bts.length})</div>
+    <div class="timeline">
+      ${bts.length===0?'<p style="color:var(--mut);font-size:12px">Aucune intervention enregistrée.</p>':bts.map(b=>`
+      <div class="tl-item ${b.type==='Préventif'?'prev':b.type==='Correctif'?'corr':'metro'}">
+        <div class="tl-dot"></div>
+        <div>
+          <div class="tl-date">${fmtD(b.ouv)}${b.clo?' → '+fmtD(b.clo):''} – ${typeBadge(b.type)} ${priorBadge(b.prior)}</div>
+          <div class="tl-desc">${b.desc||''}</div>
+        </div>
+      </div>`).join('')}
+    </div>`;
+}
+
+// Envoie une demande d'intervention depuis l'espace visiteur.
+function kioskSendMessage(){
+  const objet=document.getElementById('kioskMsgObjet').value.trim();
+  const texte=document.getElementById('kioskMsgTexte').value.trim();
+  const urgent=document.getElementById('kioskMsgUrgent').checked;
+  if(!objet||!texte){toast('Objet et message sont obligatoires','w');return;}
+  const v=window._kioskVisitor||{nom:'Anonyme',service:'–',tel:''};
+  const eq=DB.eq.find(e=>e.id===window._kioskEq);
+  const msg={
+    id:nextMsgId(),
+    eq:window._kioskEq||'',
+    eqDes:eq?eq.des:'–',
+    visiteur:v.nom,
+    service:v.service,
+    tel:v.tel||'',
+    objet,texte,
+    urgent:!!urgent,
+    date:new Date().toISOString(),
+    statut:'Nouveau'
+  };
+  DB_MESSAGES.push(msg);
+  document.getElementById('kioskMsgObjet').value='';
+  document.getElementById('kioskMsgTexte').value='';
+  document.getElementById('kioskMsgUrgent').checked=false;
+  kioskRenderMsgList();
+  toast('✅ Message envoyé à l\'atelier de maintenance','s');
+  syncToCloud();
+}
+
+// Liste (lecture seule) les demandes déjà envoyées par ce visiteur pour cet équipement.
+function kioskRenderMsgList(){
+  const el=document.getElementById('kioskMsgList');
+  if(!el)return;
+  const v=window._kioskVisitor;
+  const list=DB_MESSAGES.filter(m=>m.eq===window._kioskEq&&(!v||m.visiteur===v.nom)).sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+  if(list.length===0){el.innerHTML='';return;}
+  el.innerHTML='<div style="font-size:11px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Vos demandes précédentes</div>'+
+    list.map(m=>`<div style="border-left:3px solid var(--lb);padding:8px 12px;margin-bottom:8px;background:var(--gr);border-radius:0 4px 4px 0;font-size:12px">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><strong>${m.objet}</strong>${msgStatBadge(m.statut)}</div>
+      <div style="color:var(--mut);margin-top:2px">${m.texte}</div>
+      <div style="color:var(--mut);font-size:10.5px;margin-top:4px">${m.date?new Date(m.date).toLocaleString('fr-FR'):''}${m.urgent?' · 🚨 Urgent':''}</div>
+    </div>`).join('');
+}
+
+// Quitte l'espace visiteur et revient à l'écran de connexion normal.
+// Permet à un membre de l'atelier de revenir à l'écran de connexion normal
+// depuis l'écran d'accès visiteur (sans perdre le paramètre ?eq dans l'URL,
+// pour qu'il soit redirigé automatiquement vers la fiche après connexion).
+function kioskShowStaffLogin(){
+  window._kioskMode=false;
+  document.getElementById('kioskScreen').style.display='none';
+  const loginEl=document.getElementById('loginScreen');
+  if(loginEl)loginEl.classList.remove('hidden');
+  setTimeout(()=>{const el=document.getElementById('loginUser');if(el)el.focus();},100);
+}
+
+function kioskExit(){
+  try{sessionStorage.removeItem('gmao_kiosk_visitor');}catch(e){}
+  window.location.href=window.location.origin+window.location.pathname;
+}
 function nextDV(){ return 'DV-'+new Date().getFullYear()+'-'+String(DB_DEVIS.length+1).padStart(3,'0'); }
 function openNewDevis(){
   document.getElementById('dv_idx').value='';
@@ -6864,12 +7241,127 @@ function renderDevis(){
       <td style="font-size:11px;color:var(--mut);max-width:160px">${d.obs||'–'}</td>
       <td style="white-space:nowrap">
         <button class="btn btn-g btn-sm" onclick="editDevis(${i})"><i data-lucide="pencil" style="width:13px;height:13px"></i></button>
+        <button class="btn btn-g btn-sm" onclick="printDevis(${i})" title="Imprimer"><i data-lucide="printer" style="width:13px;height:13px"></i></button>
         ${isAdmin()?`<button class="btn btn-d btn-sm" onclick="deleteDevis(${i})"><i data-lucide="trash-2" style="width:13px;height:13px"></i></button>`:''}
       </td>
     </tr>`).join('');
 }
 
-// ════ GESTION DE PROJET ════
+const _docPrintCSS = `
+    *{box-sizing:border-box}
+    body{font-family:Arial,Helvetica,sans-serif;color:#1A1A1A;max-width:900px;margin:0 auto;padding:0 0 20px}
+    .doc-header{background:linear-gradient(135deg,#0D1B2A 0%,#1F4E79 60%,#2E75B6 100%);color:#fff;padding:32px 40px 26px;border-radius:0 0 18px 18px;margin-bottom:28px}
+    .doc-header .brand{display:flex;align-items:center;gap:10px;font-size:13px;opacity:.85;margin-bottom:14px}
+    .doc-header h1{margin:0;font-size:24px;font-weight:800;letter-spacing:-0.3px}
+    .doc-header .sub{font-size:13px;opacity:.9;margin-top:4px}
+    .doc-header .meta{display:flex;gap:24px;margin-top:18px;font-size:11.5px;opacity:.85;flex-wrap:wrap}
+    .doc-header .meta b{color:#fff;font-weight:700}
+    .doc-body{padding:0 40px}
+    h2{font-size:15px;color:#1F4E79;border-bottom:2px solid #E8EBF0;padding-bottom:6px;margin:26px 0 12px}
+    table{width:100%;border-collapse:collapse;font-size:12px;margin-bottom:10px}
+    th{background:#F5F6FA;color:#444;text-align:left;padding:8px 10px;font-size:10.5px;text-transform:uppercase;letter-spacing:.3px}
+    td{padding:8px 10px;border-bottom:1px solid #EEF0F4}
+    .badge{display:inline-block;padding:3px 9px;border-radius:20px;font-size:10.5px;font-weight:700}
+    .bg{background:#E2EFDA;color:#1E6B3C}.br{background:#FFE0E0;color:#9B2335}.by{background:#FFF2CC;color:#C55A11}.bb{background:#DCEBFA;color:#1F4E79}
+    .signature-block{display:flex;gap:40px;margin-top:36px}
+    .signature-box{flex:1;border-top:1px solid #ccc;padding-top:8px}
+    .signature-box .label{font-size:11px;color:#888;margin-bottom:24px}
+    .signature-box .line{font-size:12px;font-weight:600}
+    .doc-footer{margin-top:40px;padding:18px 40px;background:#F5F6FA;border-top:1px solid #E8EBF0;display:flex;justify-content:space-between;align-items:center;font-size:10.5px;color:#888}
+    .fiche-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px 24px;font-size:12.5px;margin-bottom:10px}
+    .fiche-grid .fg-full{grid-column:1/-1}
+    .fiche-grid .lbl{font-size:10.5px;color:#888;text-transform:uppercase;letter-spacing:.3px;margin-bottom:2px}
+    .fiche-grid .val{font-weight:600}
+    @media print{.no-print{display:none}.doc-header{border-radius:0}body{margin:0;max-width:100%}h2{page-break-after:avoid}tr{page-break-inside:avoid}}
+`;
+
+function _devisStatBadge(s){
+  return s==='Accepté'?'<span class="badge bg">✅ Accepté</span>':
+    s==='Refusé'?'<span class="badge br">❌ Refusé</span>':
+    s==='Commandé'?'<span class="badge bb">📦 Commandé</span>':
+    '<span class="badge by">⏳ En attente</span>';
+}
+
+function printDevis(i){
+  const d=DB_DEVIS[i];if(!d)return;
+  const now=new Date();
+  const w=window.open('','_blank');
+  w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Devis ${d.id}</title>
+  <style>${_docPrintCSS}</style></head><body>
+  <div class="doc-header">
+    <div class="brand">🏥 GHRMSA – Hôpital Émile Muller &nbsp;|&nbsp; Atelier Maintenance Matériels Roulants &amp; Transport Automatique</div>
+    <h1>📝 Fiche devis – ${d.id}</h1>
+    <div class="sub">${d.objet}</div>
+    <div class="meta"><div><b>Date demande :</b> ${fmtD(d.date)}</div><div><b>Statut :</b> ${d.statut}</div><div><b>Édité le :</b> ${now.toLocaleDateString('fr-FR')}</div></div>
+  </div>
+  <div class="doc-body">
+    <h2>📋 Détail du devis</h2>
+    <div class="fiche-grid">
+      <div><div class="lbl">N° Devis</div><div class="val">${d.id}</div></div>
+      <div><div class="lbl">Statut</div><div class="val">${_devisStatBadge(d.statut)}</div></div>
+      <div><div class="lbl">Équipement concerné</div><div class="val">${d.eqDes&&d.eqDes!=='–'?d.eq+' – '+d.eqDes:'–'}</div></div>
+      <div><div class="lbl">Fournisseur</div><div class="val">${d.fourn||'–'}</div></div>
+      <div><div class="lbl">Date de demande</div><div class="val">${fmtD(d.date)}</div></div>
+      <div><div class="lbl">Délai estimé</div><div class="val">${d.delai||'–'}</div></div>
+      <div><div class="lbl">Montant estimé HT</div><div class="val">${d.montant>0?fmtE(d.montant):'–'}</div></div>
+      <div><div class="lbl">Demandeur</div><div class="val">${d.demandeur||'–'}</div></div>
+      <div class="fg-full"><div class="lbl">Observations / Détail des prestations</div><div class="val" style="font-weight:400">${d.obs||'–'}</div></div>
+    </div>
+
+    <h2>✍️ Validation</h2>
+    <div class="signature-block">
+      <div class="signature-box">
+        <div class="label">Rédigé par</div>
+        <div class="line">${window._currentUser?window._currentUser.nom+' – '+window._currentUser.role:'_____________________'}</div>
+      </div>
+      <div class="signature-box">
+        <div class="label">Validé par (Responsable d'atelier)</div>
+        <div class="line">Date et signature : _____________________</div>
+      </div>
+    </div>
+
+    <button class="no-print" onclick="window.print()" style="margin-top:28px;padding:11px 24px;background:#1F4E79;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:13px;font-weight:600">🖨️ Imprimer / Exporter en PDF</button>
+  </div>
+  <div class="doc-footer">
+    <span>GMAO · Atelier Maintenance Matériels Roulants &amp; Transport Automatique – GHRMSA Hôpital Emile Muller</span>
+    <span>Document généré automatiquement – ${now.toLocaleDateString('fr-FR')}</span>
+  </div>
+  </body></html>`);
+  w.document.close();
+}
+
+function printDevisListe(){
+  const now=new Date();
+  const total=DB_DEVIS.reduce((s,d)=>s+(d.montant||0),0);
+  const w=window.open('','_blank');
+  w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Liste des devis</title>
+  <style>${_docPrintCSS}</style></head><body>
+  <div class="doc-header">
+    <div class="brand">🏥 GHRMSA – Hôpital Émile Muller &nbsp;|&nbsp; Atelier Maintenance Matériels Roulants &amp; Transport Automatique</div>
+    <h1>📝 Liste des devis</h1>
+    <div class="sub">Suivi et validation – Maintenances et équipements</div>
+    <div class="meta"><div><b>Total devis :</b> ${DB_DEVIS.length}</div><div><b>Montant total HT :</b> ${fmtE(total)}</div><div><b>Édité le :</b> ${now.toLocaleDateString('fr-FR')}</div></div>
+  </div>
+  <div class="doc-body">
+    <table>
+      <thead><tr><th>N° Devis</th><th>Objet</th><th>Équipement</th><th>Fournisseur</th><th>Date</th><th>Montant HT</th><th>Délai</th><th>Statut</th></tr></thead>
+      <tbody>
+        ${DB_DEVIS.length?DB_DEVIS.map(d=>`<tr>
+          <td><b>${d.id}</b></td><td>${d.objet}</td><td>${d.eqDes&&d.eqDes!=='–'?d.eq+' – '+d.eqDes:'–'}</td>
+          <td>${d.fourn||'–'}</td><td>${fmtD(d.date)}</td><td>${d.montant>0?fmtE(d.montant):'–'}</td>
+          <td>${d.delai||'–'}</td><td>${_devisStatBadge(d.statut)}</td>
+        </tr>`).join(''):'<tr><td colspan="8" style="text-align:center;color:#999">Aucun devis</td></tr>'}
+      </tbody>
+    </table>
+    <button class="no-print" onclick="window.print()" style="margin-top:28px;padding:11px 24px;background:#1F4E79;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:13px;font-weight:600">🖨️ Imprimer / Exporter en PDF</button>
+  </div>
+  <div class="doc-footer">
+    <span>GMAO · Atelier Maintenance Matériels Roulants &amp; Transport Automatique – GHRMSA Hôpital Emile Muller</span>
+    <span>Document généré automatiquement – ${now.toLocaleDateString('fr-FR')}</span>
+  </div>
+  </body></html>`);
+  w.document.close();
+}
 const DB_PROJ = [
   {id:'PJ-001',nom:'Cahier des charges & analyse des besoins',type:'phase',cat:'Conception',debut:'2025-09-01',fin:'2025-09-20',avancement:100,respo:'Mhmad',obs:'Reprise du classeur gmao.py existant'},
   {id:'PJ-002',nom:'Conception base de données (équipements, BT, stock)',type:'phase',cat:'Conception',debut:'2025-09-21',fin:'2025-10-10',avancement:100,respo:'Mhmad',obs:''},
@@ -7122,6 +7614,14 @@ async function init(){
   updateCloudStatus(false);
   await loadFromCloud();
   await tryAutoLogin();
+  // Si l'URL contient ?eq=... ET que l'utilisateur n'a pas de session valide,
+  // on bascule sur l'espace visiteur restreint (historique + messagerie uniquement).
+  if(!window._currentUser && kioskCheckUrl()){
+    subscribeCloudRealtime();
+    refreshIcons();
+    startIconObserver();
+    return;
+  }
   subscribeCloudRealtime();
   loadFilters();
   populateSelects();
