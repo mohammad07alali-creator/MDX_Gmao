@@ -1206,7 +1206,10 @@ body.dark-mode thead tr{background:#0d1520}
   <div class="modal-hdr"><span style="display:flex;align-items:center;gap:8px"><i data-lucide="send" class="modal-hdr-ico"></i>Nouvelle demande d'intervention</span> <button class="modal-x" onclick="closeM('mNewMsg')">✕</button></div>
   <div class="modal-body">
     <div class="form-grid">
-      <div class="fg-full"><label>Équipement *</label><select id="msgNew_eq"><option value="">-- Sélectionner un équipement --</option></select></div>
+      <div class="fg-full"><label>Équipement *</label><select id="msgNew_eq" onchange="msgNewEqChanged()"><option value="">-- Sélectionner un équipement --</option></select>
+        <div id="msgNew_qrHint" style="display:none;margin-top:4px;font-size:11px;color:var(--gn)">✅ Équipement détecté automatiquement via le QR code scanné</div>
+        <div id="msgNew_svcInfo" style="margin-top:4px;font-size:11px;color:var(--mut)"></div>
+      </div>
       <div class="fg-full"><label>Objet de la demande *</label><input id="msgNew_objet" placeholder="Ex: Bruit anormal, panne, vérification..."></div>
       <div class="fg-full"><label>Message *</label><textarea id="msgNew_texte" rows="4" placeholder="Décrivez le problème ou la demande..."></textarea></div>
       <div class="fg-full" style="display:flex;align-items:center;gap:8px">
@@ -2812,7 +2815,11 @@ function renderConformite(){
 // ════ HISTORIQUE TECHNIQUE ════
 function renderHistoSelect(){
   const sel=document.getElementById('histEqSel');
-  const list=isServiceAccount()?DB.eq.filter(e=>e.svc===window._currentUser.svc):DB.eq;
+  let list=isServiceAccount()?DB.eq.filter(e=>e.svc===window._currentUser.svc):DB.eq;
+  if(isServiceAccount()&&window._qrEq&&!list.find(e=>e.id===window._qrEq)){
+    const qrEq=DB.eq.find(e=>e.id===window._qrEq);
+    if(qrEq)list=[qrEq,...list];
+  }
   sel.innerHTML='<option value="">-- Sélectionner un équipement --</option>'+list.map(e=>`<option value="${e.id}">${e.id} – ${e.des} (${e.svc})</option>`).join('');
   document.getElementById('histContent').innerHTML='<div class="card"><div class="card-body" style="color:var(--mut);text-align:center;padding:32px">Sélectionnez un équipement pour afficher son historique technique complet.</div></div>';
 }
@@ -6116,6 +6123,7 @@ function doLogout(){
   if(login) releaseSession(login);
   clearLocalSession();
   window._currentUser=null;
+  window._qrEq=null;
   updateNavVisibility();
   NOTIFS.length=0; notifUnread=0; updateNotifBadge();
   const panel=document.getElementById('notifPanel'); if(panel) panel.classList.remove('open');
@@ -6998,14 +7006,39 @@ function fltMsgStatut(v){
 
 // Ouvre le formulaire de nouvelle demande (compte Service ou technicien connecté).
 // La liste d'équipements est limitée au service du compte connecté pour un compte Service.
+// Si la demande provient d'un scan QR code (?eq=...), l'équipement (et donc le service) est
+// pré-sélectionné automatiquement, sans action de l'utilisateur.
 function openNewMsg(){
   const sel=document.getElementById('msgNew_eq');
-  const list=isServiceAccount()?DB.eq.filter(e=>e.svc===window._currentUser.svc):DB.eq;
+  let list=isServiceAccount()?DB.eq.filter(e=>e.svc===window._currentUser.svc):DB.eq;
+  if(window._qrEq&&!list.find(e=>e.id===window._qrEq)){
+    const qrEq=DB.eq.find(e=>e.id===window._qrEq);
+    if(qrEq)list=[qrEq,...list];
+  }
   sel.innerHTML='<option value="">-- Sélectionner un équipement --</option>'+list.map(e=>`<option value="${e.id}">${e.id} – ${e.des} (${e.svc})</option>`).join('');
   document.getElementById('msgNew_objet').value='';
   document.getElementById('msgNew_texte').value='';
   document.getElementById('msgNew_urgent').checked=false;
+  const hint=document.getElementById('msgNew_qrHint');
+  if(window._qrEq&&list.find(e=>e.id===window._qrEq)){
+    sel.value=window._qrEq;
+    if(hint)hint.style.display='block';
+  } else if(hint){
+    hint.style.display='none';
+  }
+  msgNewEqChanged();
   openM('mNewMsg');
+}
+
+// Affiche le service correspondant à l'équipement sélectionné (mapping automatique équipement → service).
+// Si l'équipement est changé manuellement par l'utilisateur, on masque le badge "détecté via QR".
+function msgNewEqChanged(){
+  const sel=document.getElementById('msgNew_eq');
+  const eq=DB.eq.find(e=>e.id===sel.value);
+  const info=document.getElementById('msgNew_svcInfo');
+  if(info)info.textContent=eq?('Service concerné : '+eq.svc):'';
+  const hint=document.getElementById('msgNew_qrHint');
+  if(hint&&sel.value!==window._qrEq)hint.style.display='none';
 }
 
 function saveNewMsg(){
@@ -7021,7 +7054,7 @@ function saveNewMsg(){
     eq:eqId,
     eqDes:eq?eq.des:'–',
     visiteur:u?u.nom:'Anonyme',
-    service:u?u.svc:(eq?eq.svc:'–'),
+    service:eq?eq.svc:(u?u.svc:'–'),
     tel:'',
     objet,texte,
     urgent:!!urgent,
@@ -7780,6 +7813,8 @@ function startIconObserver(){
 
 // Lit le paramètre ?eq= de l'URL et ouvre directement l'historique de l'équipement correspondant.
 // Appelée soit juste après l'auto-login (dans init), soit juste après une connexion manuelle réussie (dans doLogin).
+// Mémorise aussi l'équipement dans window._qrEq pour pré-remplir automatiquement
+// le service et l'équipement lors d'une nouvelle demande de messagerie.
 function handleQrRedirect(){
   const params = new URLSearchParams(window.location.search);
   const eqId = params.get('eq');
@@ -7788,9 +7823,13 @@ function handleQrRedirect(){
   if(!eq){
     toast('⚠️ Équipement '+eqId+' introuvable','e');
   } else {
+    window._qrEq = eq.id;
     show('historique');
     const sel = document.getElementById('histEqSel');
     if(sel){
+      if(!sel.querySelector(`option[value="${eq.id}"]`)){
+        sel.insertAdjacentHTML('beforeend', `<option value="${eq.id}">${eq.id} – ${eq.des} (${eq.svc})</option>`);
+      }
       sel.value = eqId;
       renderHistorique();
       toast('📜 Historique de '+eq.id+' – '+eq.des,'s');
