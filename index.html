@@ -560,7 +560,7 @@ body.dark-mode thead tr{background:#0d1520}
   <div class="nav-item nav-restricted" onclick="show('direction')"><i data-lucide="target" class="nav-ico"></i><span class="nav-lbl">Vue direction</span></div>
   <div class="sid-sec">Parc</div>
   <div class="nav-item" onclick="show('equipements')"><i data-lucide="boxes" class="nav-ico"></i><span class="nav-lbl">Équipements</span></div>
-  <div class="nav-item" onclick="show('historique')"><i data-lucide="history" class="nav-ico"></i><span class="nav-lbl">Historique technique</span></div>
+  <div class="nav-item svc-ok" onclick="show('historique')"><i data-lucide="history" class="nav-ico"></i><span class="nav-lbl">Historique technique</span></div>
   <div class="nav-item nav-restricted" onclick="show('criticite')"><i data-lucide="zap" class="nav-ico"></i><span class="nav-lbl">Criticité auto</span></div>
   <div class="nav-item" onclick="show('qrcode')"><i data-lucide="qr-code" class="nav-ico"></i><span class="nav-lbl">QR Codes</span></div>
   <div class="sid-sec">Maintenance</div>
@@ -576,7 +576,7 @@ body.dark-mode thead tr{background:#0d1520}
   <div class="nav-item" onclick="show('contrats')"><i data-lucide="file-text" class="nav-ico"></i><span class="nav-lbl">Contrats &amp; garanties</span></div>
   <div class="nav-item" onclick="show('devis')"><i data-lucide="file-signature" class="nav-ico"></i><span class="nav-lbl">Devis</span></div>
   <div class="nav-item nav-restricted" onclick="show('projet')"><i data-lucide="chart-gantt" class="nav-ico"></i><span class="nav-lbl">Gestion de projet</span></div>
-  <div class="nav-item" onclick="show('messagerie')"><i data-lucide="message-circle" class="nav-ico"></i><span class="nav-lbl">Messagerie</span><span class="nav-badge" id="bMSG">0</span></div>
+  <div class="nav-item svc-ok" onclick="show('messagerie')"><i data-lucide="message-circle" class="nav-ico"></i><span class="nav-lbl">Messagerie</span><span class="nav-badge" id="bMSG">0</span></div>
   <div class="nav-item" onclick="show('documents')"><i data-lucide="folder-open" class="nav-ico"></i><span class="nav-lbl">Documentation</span></div>
   <div class="sid-sec">Équipe &amp; Qualité</div>
   <div class="nav-item nav-restricted" onclick="show('techniciens')"><i data-lucide="users" class="nav-ico"></i><span class="nav-lbl">Techniciens</span></div>
@@ -1175,6 +1175,7 @@ body.dark-mode thead tr{background:#0d1520}
   <div class="pg-title"><i data-lucide="message-circle" class="pg-title-ico"></i>Messagerie atelier</div>
   <div class="pg-sub">Demandes d'intervention envoyées via QR code par les services – Accès via la fiche équipement</div>
   <div class="btn-row">
+    <button class="btn btn-p" onclick="openNewMsg()"><i data-lucide="plus" class="btn-ico"></i>Nouvelle demande d'intervention</button>
     <input placeholder="🔍 Rechercher..." style="width:220px" oninput="fltTbl('tMsg',this.value)">
     <select onchange="fltMsgStatut(this.value)" style="width:160px">
       <option value="">Tous statuts</option>
@@ -1197,6 +1198,26 @@ body.dark-mode thead tr{background:#0d1520}
   <div class="modal-footer">
     <button class="btn btn-g" onclick="closeM('mMsg')">Fermer</button>
     <button class="btn btn-p" onclick="convertMsgToBT()"><i data-lucide="wrench" class="btn-ico"></i>Créer un BT à partir de ce message</button>
+  </div>
+</div></div>
+
+<!-- MODALE NOUVELLE DEMANDE (envoyée depuis un compte Service ou technicien) -->
+<div class="modal-bg" id="mNewMsg"><div class="modal" style="max-width:600px">
+  <div class="modal-hdr"><span style="display:flex;align-items:center;gap:8px"><i data-lucide="send" class="modal-hdr-ico"></i>Nouvelle demande d'intervention</span> <button class="modal-x" onclick="closeM('mNewMsg')">✕</button></div>
+  <div class="modal-body">
+    <div class="form-grid">
+      <div class="fg-full"><label>Équipement *</label><select id="msgNew_eq"><option value="">-- Sélectionner un équipement --</option></select></div>
+      <div class="fg-full"><label>Objet de la demande *</label><input id="msgNew_objet" placeholder="Ex: Bruit anormal, panne, vérification..."></div>
+      <div class="fg-full"><label>Message *</label><textarea id="msgNew_texte" rows="4" placeholder="Décrivez le problème ou la demande..."></textarea></div>
+      <div class="fg-full" style="display:flex;align-items:center;gap:8px">
+        <input type="checkbox" id="msgNew_urgent" style="width:16px;height:16px">
+        <label style="margin:0;font-weight:600;color:#9B2335">🚨 Urgent / Équipement immobilisé</label>
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button class="btn btn-g" onclick="closeM('mNewMsg')">Annuler</button>
+    <button class="btn btn-p" onclick="saveNewMsg()"><i data-lucide="send" class="btn-ico"></i>Envoyer à l'atelier</button>
   </div>
 </div></div>
 
@@ -1738,8 +1759,10 @@ body.dark-mode thead tr{background:#0d1520}
           <option>Adjoint</option>
           <option selected>Technicien</option>
           <option>Lecture seule</option>
+          <option>Service</option>
         </select></div>
         <div><label>Service</label><input id="uSvc" placeholder="Atelier, Urgences..."></div>
+        <div class="fg-full" style="font-size:11px;color:var(--mut);background:var(--gr);border-radius:4px;padding:6px 10px">ℹ️ Le rôle <strong>Service</strong> donne un accès limité à l'historique des équipements de son service et à la messagerie de l'atelier (idéal pour un compte partagé par un service hospitalier).</div>
         <div class="fg-full" style="display:flex;align-items:center;gap:10px;padding-top:8px">
           <input type="checkbox" id="uActif" checked style="width:auto;width:16px;height:16px">
           <label style="margin:0;text-transform:none;font-size:12.5px;font-weight:600;letter-spacing:0;cursor:pointer" for="uActif">Compte actif</label>
@@ -2025,7 +2048,16 @@ const DB={
     {id:'USR-000',nom:'Dev',login:'Dev_01',mdp:'Dev505',role:'Administrateur',svc:'Administration',lastConn:null,actif:true},
     {id:'USR-001',nom:'MOUSTAPHA Ahmed',login:'admin',mdp:'Admin123!',role:'Administrateur',svc:'Direction',lastConn:'2025-06-01',actif:true},
     {id:'USR-002',nom:'Dupont Marc',login:'dupont.m',mdp:'Dupont2025',role:'Technicien',svc:'Atelier',lastConn:'2025-06-03',actif:true},
-    {id:'USR-003',nom:'Martin Louis',login:'martin.l',mdp:'Martin2025',role:'Technicien',svc:'Atelier',lastConn:'2025-06-02',actif:true}
+    {id:'USR-003',nom:'Martin Louis',login:'martin.l',mdp:'Martin2025',role:'Technicien',svc:'Atelier',lastConn:'2025-06-02',actif:true},
+    {id:'USR-100',nom:'Service Réanimation',login:'svc.reanimation',mdp:'Reanim2025',role:'Service',svc:'Réanimation',lastConn:null,actif:true},
+    {id:'USR-101',nom:'Service Médecine interne',login:'svc.medecine',mdp:'Medecine2025',role:'Service',svc:'Médecine interne',lastConn:null,actif:true},
+    {id:'USR-102',nom:'Service Chirurgie digestive',login:'svc.chirurgie',mdp:'Chirurgie2025',role:'Service',svc:'Chirurgie digestive',lastConn:null,actif:true},
+    {id:'USR-103',nom:'Service Urgences',login:'svc.urgences',mdp:'Urgences2025',role:'Service',svc:'Urgences',lastConn:null,actif:true},
+    {id:'USR-104',nom:'Service Rééducation fonct.',login:'svc.reeducation',mdp:'Reeduc2025',role:'Service',svc:'Rééducation fonct.',lastConn:null,actif:true},
+    {id:'USR-105',nom:'Service Cuisine centrale',login:'svc.cuisine',mdp:'Cuisine2025',role:'Service',svc:'Cuisine centrale',lastConn:null,actif:true},
+    {id:'USR-106',nom:'Service Gériatrie',login:'svc.geriatrie',mdp:'Geriatrie2025',role:'Service',svc:'Gériatrie',lastConn:null,actif:true},
+    {id:'USR-107',nom:'Service Buanderie',login:'svc.buanderie',mdp:'Buanderie2025',role:'Service',svc:'Buanderie',lastConn:null,actif:true},
+    {id:'USR-108',nom:'Service Bloc opératoire',login:'svc.bloc',mdp:'Bloc2025',role:'Service',svc:'Bloc opératoire',lastConn:null,actif:true}
   ],
   conformite:[
     {ref:"HAS-001",exig:"NF EN ISO 9283 – Contrôle des lits médicaux",eq:"Lits motorisés (10 unités)",freq:"Annuelle",dernier:"2025-01-15",prochain:"2026-01-15",org:"Apave",conf:"✅ Conforme"},
@@ -2370,6 +2402,10 @@ function updateBadges(){
 
 // ════ SHOW PAGE ════
 function show(name){
+  if(isServiceAccount()&&!SERVICE_ALLOWED_PAGES.includes(name)){
+    toast('🔒 Ce compte a uniquement accès à l\'historique d\'équipement et à la messagerie','e');
+    return;
+  }
   if(RESTRICTED_PAGES&&RESTRICTED_PAGES.includes(name)&&!isResponsable()){
     toast('🔒 Accès réservé au Responsable, Adjoint et Administrateurs','e');
     return;
@@ -2776,7 +2812,8 @@ function renderConformite(){
 // ════ HISTORIQUE TECHNIQUE ════
 function renderHistoSelect(){
   const sel=document.getElementById('histEqSel');
-  sel.innerHTML='<option value="">-- Sélectionner un équipement --</option>'+DB.eq.map(e=>`<option value="${e.id}">${e.id} – ${e.des} (${e.svc})</option>`).join('');
+  const list=isServiceAccount()?DB.eq.filter(e=>e.svc===window._currentUser.svc):DB.eq;
+  sel.innerHTML='<option value="">-- Sélectionner un équipement --</option>'+list.map(e=>`<option value="${e.id}">${e.id} – ${e.des} (${e.svc})</option>`).join('');
   document.getElementById('histContent').innerHTML='<div class="card"><div class="card-body" style="color:var(--mut);text-align:center;padding:32px">Sélectionnez un équipement pour afficher son historique technique complet.</div></div>';
 }
 
@@ -5812,13 +5849,31 @@ function isResponsable(){
   return window._currentUser && (window._currentUser.role==='Responsable'||window._currentUser.role==='Administrateur'||window._currentUser.role==='Adjoint');
 }
 
+// Compte « Service » : accès hospitalier limité à l'historique de son service + la messagerie
+function isServiceAccount(){
+  return !!(window._currentUser && window._currentUser.role==='Service');
+}
+
+// Pages accessibles aux comptes Service
+const SERVICE_ALLOWED_PAGES=['historique','messagerie'];
+
 // Pages réservées Admin / Responsable / Adjoint
 const RESTRICTED_PAGES=['direction','criticite','fiabilite','immobilisations','predictif','budget','techniciens','conformite','audit','projet'];
 
 function updateNavVisibility(){
   const ok=isResponsable();
-  document.querySelectorAll('.nav-restricted').forEach(el=>{
-    el.style.display=ok?'':'none';
+  const svc=isServiceAccount();
+  document.querySelectorAll('.sidebar .nav-item').forEach(el=>{
+    if(svc){
+      el.style.display=el.classList.contains('svc-ok')?'':'none';
+    } else if(el.classList.contains('nav-restricted')){
+      el.style.display=ok?'':'none';
+    } else {
+      el.style.removeProperty('display');
+    }
+  });
+  document.querySelectorAll('.sidebar .sid-sec').forEach(el=>{
+    el.style.display=svc?'none':'';
   });
 }
 
@@ -5924,6 +5979,7 @@ async function tryAutoLogin(){
   updateAdminUI();
   updateNavVisibility();
   generateNotifications(); // recharge les notifications avec l'état (lu/effacé) propre à ce compte
+  if(isServiceAccount()) show('historique');
   registerSession(local.login, user.nom); // renouvelle le heartbeat
   saveLocalSession(local.login); // prolonge l'expiration locale de 1h supplémentaire
   auditLog('login',`Reconnexion automatique : ${user.nom} (${user.role})`);
@@ -5987,6 +6043,7 @@ async function doLogin(){
     updateAdminUI();
     updateNavVisibility();
     generateNotifications(); // recharge les notifications avec l'état (lu/effacé) propre à ce compte
+    if(isServiceAccount()) show('historique');
     handleQrRedirect();
     const screen0=document.getElementById('loginScreen');
     screen0.classList.add('fading'); // désactive les clics sur l'écran de connexion dès maintenant
@@ -6454,6 +6511,7 @@ function applyDarkMode(on){
 document.addEventListener('keydown', e => {
   if(e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') return;
   if(!window._currentUser) return;
+  if(isServiceAccount()){ if(e.key === 'Escape'){ document.querySelectorAll('.modal-bg.open').forEach(m=>m.classList.remove('open')); } return; }
   if(e.key === 'Escape'){ document.querySelectorAll('.modal-bg.open').forEach(m=>m.classList.remove('open')); }
   if(e.key === 'n' || e.key === 'N'){ e.preventDefault(); openM('mInterv'); }
   if(e.key === 's' || e.key === 'S'){ e.preventDefault(); show('stock'); }
@@ -6903,19 +6961,21 @@ function updateMsgBadge(){
 const msgStatBadge=s=>s==='Traité'?'<span class="badge bg">✅ Traité</span>':s==='En cours'?'<span class="badge by">🔄 En cours</span>':'<span class="badge bb">🆕 Nouveau</span>';
 
 function renderMessagerie(){
-  const nouv=DB_MESSAGES.filter(m=>m.statut==='Nouveau').length;
-  const cours=DB_MESSAGES.filter(m=>m.statut==='En cours').length;
-  const traite=DB_MESSAGES.filter(m=>m.statut==='Traité').length;
-  const urg=DB_MESSAGES.filter(m=>m.urgent&&m.statut!=='Traité').length;
+  const svc=isServiceAccount();
+  const list=svc?DB_MESSAGES.filter(m=>m.service===window._currentUser.svc):DB_MESSAGES;
+  const nouv=list.filter(m=>m.statut==='Nouveau').length;
+  const cours=list.filter(m=>m.statut==='En cours').length;
+  const traite=list.filter(m=>m.statut==='Traité').length;
+  const urg=list.filter(m=>m.urgent&&m.statut!=='Traité').length;
   document.getElementById('kpiMsg').innerHTML=`
-    <div class="kpi bl"><div class="kpi-val">${DB_MESSAGES.length}</div><div class="kpi-lbl">Total messages</div></div>
+    <div class="kpi bl"><div class="kpi-val">${list.length}</div><div class="kpi-lbl">${svc?'Vos messages':'Total messages'}</div></div>
     <div class="kpi bl"><div class="kpi-val">${nouv}</div><div class="kpi-lbl">🆕 Nouveaux</div></div>
     <div class="kpi or"><div class="kpi-val">${cours}</div><div class="kpi-lbl">🔄 En cours</div></div>
     <div class="kpi gn"><div class="kpi-val">${traite}</div><div class="kpi-lbl">✅ Traités</div></div>
     <div class="kpi rd"><div class="kpi-val">${urg}</div><div class="kpi-lbl">🚨 Urgents non traités</div></div>`;
-  const sorted=DB_MESSAGES.map((m,i)=>({m,i})).sort((a,b)=>(b.m.date||'').localeCompare(a.m.date||''));
+  const sorted=list.map(m=>({m,i:DB_MESSAGES.indexOf(m)})).sort((a,b)=>(b.m.date||'').localeCompare(a.m.date||''));
   document.getElementById('bodyMsg').innerHTML=sorted.length===0?
-    '<tr><td colspan="9" style="text-align:center;padding:24px;color:var(--mut)">Aucun message reçu pour le moment. Les demandes envoyées via les QR codes équipements apparaîtront ici.</td></tr>':
+    `<tr><td colspan="9" style="text-align:center;padding:24px;color:var(--mut)">${svc?'Aucune demande envoyée pour le moment. Cliquez sur <strong>➕ Nouvelle demande d\'intervention</strong>.':'Aucun message reçu pour le moment. Les demandes envoyées via les QR codes équipements apparaîtront ici.'}</td></tr>`:
     sorted.map(({m,i})=>`<tr ${m.urgent&&m.statut!=='Traité'?'style="background:var(--lr)"':''}>
       <td><strong style="font-size:11px">${m.id}</strong></td>
       <td style="font-size:11px;white-space:nowrap">${fmtD((m.date||'').slice(0,10))} ${(m.date||'').slice(11,16)}</td>
@@ -6936,6 +6996,46 @@ function fltMsgStatut(v){
   });
 }
 
+// Ouvre le formulaire de nouvelle demande (compte Service ou technicien connecté).
+// La liste d'équipements est limitée au service du compte connecté pour un compte Service.
+function openNewMsg(){
+  const sel=document.getElementById('msgNew_eq');
+  const list=isServiceAccount()?DB.eq.filter(e=>e.svc===window._currentUser.svc):DB.eq;
+  sel.innerHTML='<option value="">-- Sélectionner un équipement --</option>'+list.map(e=>`<option value="${e.id}">${e.id} – ${e.des} (${e.svc})</option>`).join('');
+  document.getElementById('msgNew_objet').value='';
+  document.getElementById('msgNew_texte').value='';
+  document.getElementById('msgNew_urgent').checked=false;
+  openM('mNewMsg');
+}
+
+function saveNewMsg(){
+  const eqId=document.getElementById('msgNew_eq').value;
+  const objet=document.getElementById('msgNew_objet').value.trim();
+  const texte=document.getElementById('msgNew_texte').value.trim();
+  const urgent=document.getElementById('msgNew_urgent').checked;
+  if(!eqId||!objet||!texte){toast('Équipement, objet et message sont obligatoires','w');return;}
+  const eq=DB.eq.find(e=>e.id===eqId);
+  const u=window._currentUser;
+  const msg={
+    id:nextMsgId(),
+    eq:eqId,
+    eqDes:eq?eq.des:'–',
+    visiteur:u?u.nom:'Anonyme',
+    service:u?u.svc:(eq?eq.svc:'–'),
+    tel:'',
+    objet,texte,
+    urgent:!!urgent,
+    date:new Date().toISOString(),
+    statut:'Nouveau'
+  };
+  DB_MESSAGES.push(msg);
+  auditLog('create','Message envoyé : '+msg.id+' – '+objet+' ('+msg.service+')');
+  closeM('mNewMsg');
+  renderMessagerie();
+  toast('✅ Message envoyé à l\'atelier de maintenance','s');
+  syncToCloud();
+}
+
 let _curMsgIdx=null;
 function openMsg(i){
   const m=DB_MESSAGES[i];if(!m)return;
@@ -6953,16 +7053,19 @@ function openMsg(i){
       <div class="fg-full"><label>Message</label><div style="padding:7px 0;white-space:pre-wrap">${m.texte||'–'}</div></div>
       ${m.urgent?'<div class="fg-full"><span class="badge br">🚨 Urgent / Équipement immobilisé</span></div>':''}
     </div>
-    <div class="btn-row" style="margin-top:14px">
+    ${isTechnicien()?`<div class="btn-row" style="margin-top:14px">
       <button class="btn btn-w btn-sm" onclick="setMsgStatut('En cours')"><i data-lucide="loader" class="btn-ico"></i>Prendre en charge</button>
       <button class="btn btn-s btn-sm" onclick="setMsgStatut('Traité')"><i data-lucide="check" class="btn-ico"></i>Marquer traité</button>
-    </div>`;
+    </div>`:''}`;
   openM('mMsg');
+  const convBtn=document.querySelector('#mMsg .modal-footer .btn-p');
+  if(convBtn) convBtn.style.display=isTechnicien()?'':'none';
   refreshIcons();
 }
 
 function setMsgStatut(s){
   if(_curMsgIdx===null)return;
+  if(!isTechnicien()){toast('🔒 Accès réservé aux techniciens et administrateurs','e');return;}
   const m=DB_MESSAGES[_curMsgIdx];if(!m)return;
   m.statut=s;
   auditLog('update','Message '+m.id+' marqué : '+s);
