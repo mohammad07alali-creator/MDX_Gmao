@@ -549,7 +549,7 @@ body.dark-mode thead tr{background:#0d1520}
   </div>
   <button onclick="doLogout()" title="Se déconnecter" style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;border-radius:4px;padding:5px 10px;cursor:pointer;font-size:11px;white-space:nowrap" onmouseover="this.style.background='rgba(197,57,34,.6)'" onmouseout="this.style.background='rgba(255,255,255,.1)'"><i data-lucide="log-out" class="btn-ico"></i>Déconnexion</button>
   <button onclick="adminOnly(()=>openM('mReset'))" title="Réinitialiser les données" style="display:none;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;border-radius:4px;padding:5px 10px;cursor:pointer;font-size:11px;align-items:center;gap:5px;white-space:nowrap" onmouseover="this.style.background='rgba(197,57,34,.6)'" onmouseout="this.style.background='rgba(255,255,255,.1)'"><i data-lucide="rotate-ccw" class="btn-ico"></i>Réinit.</button>
-  <button onclick="openM('mStyle')" title="Personnaliser l'interface" style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;border-radius:4px;padding:5px 10px;cursor:pointer;font-size:11px;display:flex;align-items:center;gap:5px;white-space:nowrap" onmouseover="this.style.background='rgba(46,117,182,.5)'" onmouseout="this.style.background='rgba(255,255,255,.1)'"><i data-lucide="palette" class="btn-ico"></i>Style</button>
+  <button onclick="openStyleModal()" title="Personnaliser l'interface" style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;border-radius:4px;padding:5px 10px;cursor:pointer;font-size:11px;display:flex;align-items:center;gap:5px;white-space:nowrap" onmouseover="this.style.background='rgba(46,117,182,.5)'" onmouseout="this.style.background='rgba(255,255,255,.1)'"><i data-lucide="palette" class="btn-ico"></i>Style</button>
 
 </div>
 
@@ -592,9 +592,9 @@ body.dark-mode thead tr{background:#0d1520}
   <div class="nav-item" onclick="openM('mInterv')"><i data-lucide="plus-circle" class="nav-ico"></i><span class="nav-lbl">Nouveau BT</span></div>
   <div class="nav-item" onclick="openM('mMvt')"><i data-lucide="repeat" class="nav-ico"></i><span class="nav-lbl">Mouvement stock</span></div>
   <div class="nav-item" onclick="rapport()"><i data-lucide="file-bar-chart" class="nav-ico"></i><span class="nav-lbl">Rapport mensuel</span></div>
-  <div class="sid-foot">
+  <div class="sid-foot" id="sidFoot">
     GMAO v1_Vanilla<br>GHRMSA © 2025<br>Atelier MR &amp; TA
-    <div style="margin-top:10px;padding-top:10px;border-top:1px solid #1A3344">
+    <div id="sidFootActions" style="margin-top:10px;padding-top:10px;border-top:1px solid #1A3344">
       <div style="font-size:10px;color:#4A6B85;margin-bottom:6px;display:flex;align-items:center;gap:5px" id="saveStatus"><i data-lucide="save" style="width:11px;height:11px"></i>Aucune sauvegarde</div>
       <button onclick="saveManual()" style="width:100%;background:rgba(30,107,60,.5);border:1px solid rgba(30,107,60,.7);color:#7BC8F6;border-radius:4px;padding:5px 8px;cursor:pointer;font-size:11px;margin-bottom:4px"><i data-lucide="save" class="btn-ico"></i>Sauvegarder</button>
       <div style="display:flex;gap:4px">
@@ -1531,7 +1531,7 @@ body.dark-mode thead tr{background:#0d1520}
         <button class="tab-btn" onclick="switchTab('style','typo')"><i data-lucide="type" class="btn-ico"></i>Typographie</button>
         <button class="tab-btn" onclick="switchTab('style','layout')"><i data-lucide="layout" class="btn-ico"></i>Mise en page</button>
         <button class="tab-btn" onclick="switchTab('style','custom')"><i data-lucide="palette" class="btn-ico"></i>Couleur perso</button>
-        <button class="tab-btn" onclick="switchTab('style','identite');openIdentiteTab()"><i data-lucide="tag" class="btn-ico"></i>Identité</button>
+        <button class="tab-btn" id="tabBtnIdentite" style="display:none" onclick="switchTab('style','identite');openIdentiteTab()"><i data-lucide="tag" class="btn-ico"></i>Identité</button>
       </div>
       <!-- THEMES -->
       <div class="tab-pane active" id="style-themes" style="padding:16px 20px">
@@ -1979,7 +1979,19 @@ const DB={
     {id:"BT-2025-007",eq:"EQ-004",des:"Chariot Ergotron",svc:"Urgences",type:"Correctif",prior:"P3",ouv:"2025-06-18",clo:"2025-06-18",tech:"Martin Louis",desc:"Roulette bloquée",cause:"Corps étranger",cout:25,dur:0.5,stat:"✅ Clôturé",obs:"Roulette remplacée"},
     {id:"BT-2025-008",eq:"EQ-009",des:"AGV Aethon",svc:"Buanderie",type:"Préventif",prior:"P2",ouv:"2025-06-20",clo:"2025-06-20",tech:"Bernard Karim",desc:"Visite mensuelle AGV",cause:"N/A",cout:0,dur:2.0,stat:"✅ Clôturé",obs:"Batterie 72% OK"},
     {id:"BT-2025-009",eq:"EQ-010",des:"Table Maquet",svc:"Bloc op.",type:"Préventif",prior:"P1",ouv:"2025-06-25",clo:"",tech:"Dupont Marc",desc:"Révision semestrielle",cause:"",cout:0,dur:0,stat:"🔄 En cours",obs:""},
-    {id:"BT-2025-010",eq:"EQ-008",des:"Fauteuil Invacare",svc:"Gériatrie",type:"Correctif",prior:"P4",ouv:"2025-06-26",clo:"",tech:"Martin Louis",desc:"Frein gauche HS",cause:"Câble usé",cout:35,dur:0,stat:"📋 Planifié",obs:"Pièce commandée"}
+    {id:"BT-2025-010",eq:"EQ-008",des:"Fauteuil Invacare",svc:"Gériatrie",type:"Correctif",prior:"P4",ouv:"2025-06-26",clo:"",tech:"Martin Louis",desc:"Frein gauche HS",cause:"Câble usé",cout:35,dur:0,stat:"📋 Planifié",obs:"Pièce commandée"},
+    {id:"BT-2026-001",eq:"EQ-003",des:"Lit Hill-Rom",svc:"Chirurgie digestive",type:"Correctif",prior:"P2",ouv:"2026-02-04",clo:"2026-02-05",tech:"Dupont Marc",desc:"Vérin hauteur bruyant",cause:"Usure vérin",cout:210,dur:2.5,stat:"✅ Clôturé",obs:"Vérin remplacé"},
+    {id:"BT-2026-002",eq:"EQ-006",des:"AGV Swisslog",svc:"Cuisine centrale",type:"Préventif",prior:"P2",ouv:"2026-02-18",clo:"2026-02-18",tech:"Bernard Karim",desc:"Visite mensuelle AGV",cause:"N/A",cout:60,dur:1.5,stat:"✅ Clôturé",obs:"RAS"},
+    {id:"BT-2026-003",eq:"EQ-005",des:"Fauteuil Quickie",svc:"Rééducation fonct.",type:"Correctif",prior:"P3",ouv:"2026-03-10",clo:"2026-03-11",tech:"Martin Louis",desc:"Joystick capricieux",cause:"Faux contact",cout:150,dur:2.0,stat:"✅ Clôturé",obs:"Joystick remplacé"},
+    {id:"BT-2026-004",eq:"EQ-001",des:"Lit Stryker – Réa",svc:"Réanimation",type:"Préventif",prior:"P1",ouv:"2026-03-22",clo:"2026-03-22",tech:"Dupont Marc",desc:"Visite semestrielle",cause:"N/A",cout:45,dur:1.5,stat:"✅ Clôturé",obs:"Balance OK"},
+    {id:"BT-2026-005",eq:"EQ-009",des:"AGV Aethon",svc:"Buanderie",type:"Correctif",prior:"P2",ouv:"2026-04-08",clo:"2026-04-09",tech:"Bernard Karim",desc:"Batterie faible autonomie",cause:"Batterie usagée",cout:290,dur:3.0,stat:"✅ Clôturé",obs:"Batterie remplacée"},
+    {id:"BT-2026-006",eq:"EQ-007",des:"Brancard Stryker",svc:"Urgences",type:"Préventif",prior:"P1",ouv:"2026-04-25",clo:"2026-04-25",tech:"Dupont Marc",desc:"Visite semestrielle",cause:"N/A",cout:45,dur:1.5,stat:"✅ Clôturé",obs:"Barrières vérifiées"},
+    {id:"BT-2026-007",eq:"EQ-002",des:"Lit Linet",svc:"Médecine interne",type:"Correctif",prior:"P2",ouv:"2026-05-06",clo:"2026-05-06",tech:"Martin Louis",desc:"Roulette bloquée",cause:"Corps étranger",cout:25,dur:0.5,stat:"✅ Clôturé",obs:"Roulette nettoyée"},
+    {id:"BT-2026-008",eq:"EQ-010",des:"Table Maquet",svc:"Bloc opératoire",type:"Préventif",prior:"P1",ouv:"2026-05-19",clo:"2026-05-20",tech:"Dupont Marc",desc:"Révision semestrielle",cause:"N/A",cout:380,dur:5.0,stat:"✅ Clôturé",obs:"RAS"},
+    {id:"BT-2026-009",eq:"EQ-004",des:"Chariot Ergotron",svc:"Urgences",type:"Correctif",prior:"P3",ouv:"2026-06-03",clo:"2026-06-03",tech:"Martin Louis",desc:"Roulette bloquée",cause:"Corps étranger",cout:25,dur:0.5,stat:"✅ Clôturé",obs:"Roulette remplacée"},
+    {id:"BT-2026-010",eq:"EQ-008",des:"Fauteuil Invacare",svc:"Gériatrie",type:"Correctif",prior:"P4",ouv:"2026-06-15",clo:"2026-06-15",tech:"Bernard Karim",desc:"Frein gauche HS",cause:"Câble usé",cout:35,dur:1.0,stat:"✅ Clôturé",obs:"Câble remplacé"},
+    {id:"BT-2026-011",eq:"EQ-006",des:"AGV Swisslog",svc:"Cuisine centrale",type:"Correctif",prior:"P2",ouv:"2026-06-27",clo:"2026-06-28",tech:"Bernard Karim",desc:"Blocage trajet E09",cause:"Capteur déréglé",cout:95,dur:1.2,stat:"✅ Clôturé",obs:"Recalibrage capteur"},
+    {id:"BT-2026-012",eq:"EQ-001",des:"Lit Stryker – Réa",svc:"Réanimation",type:"Correctif",prior:"P2",ouv:"2026-07-01",clo:"",tech:"Dupont Marc",desc:"Balance instable",cause:"En diagnostic",cout:0,dur:0,stat:"🔄 En cours",obs:""}
   ],
   sk:[
     {ref:"RO-125-F",des:"Roulette Ø125mm avec frein PU",fam:"Roulettes",abc:"A",qte:52,mini:15,pc:30,maxi:120,pu:8.50,fourn:"Tellier Roulements",del:10,mvt:"2025-06-20"},
@@ -5514,7 +5526,13 @@ const ID_DEFAULTS = {
   }
 };
 
+function openStyleModal(){
+  openM('mStyle');
+  const btn = document.getElementById('tabBtnIdentite');
+  if(btn) btn.style.display = isAdmin() ? '' : 'none';
+}
 function openIdentiteTab(){
+  if(!isAdmin()){toast('🔒 Accès réservé aux administrateurs','e');switchTab('style','themes');return;}
   // Pré-remplir avec valeurs actuelles
   const logo = document.querySelector('.topbar-logo');
   const sub  = document.querySelector('.topbar-sub');
@@ -5882,6 +5900,8 @@ function updateNavVisibility(){
   document.querySelectorAll('.sidebar .sid-sec').forEach(el=>{
     el.style.display=svc?'none':'';
   });
+  const sidFootActions=document.getElementById('sidFootActions');
+  if(sidFootActions) sidFootActions.style.display=svc?'none':'';
 }
 
 // ════ CODE SECRET COMPTE TEMPORAIRE ════
@@ -5985,7 +6005,7 @@ async function tryAutoLogin(){
   document.getElementById('loginScreen').classList.add('hidden');
   updateAdminUI();
   updateNavVisibility();
-  generateNotifications(); // recharge les notifications avec l'état (lu/effacé) propre à ce compte
+  generateNotifications(); startNotifAutoRefresh(); // recharge les notifications avec l'état (lu/effacé) propre à ce compte
   if(isServiceAccount()) show('historique');
   registerSession(local.login, user.nom); // renouvelle le heartbeat
   saveLocalSession(local.login); // prolonge l'expiration locale de 1h supplémentaire
@@ -6049,7 +6069,7 @@ async function doLogin(){
     if(nameEl)nameEl.textContent='👤 '+user.nom;
     updateAdminUI();
     updateNavVisibility();
-    generateNotifications(); // recharge les notifications avec l'état (lu/effacé) propre à ce compte
+    generateNotifications(); startNotifAutoRefresh(); // recharge les notifications avec l'état (lu/effacé) propre à ce compte
     if(isServiceAccount()) show('historique');
     handleQrRedirect();
     const screen0=document.getElementById('loginScreen');
@@ -6124,6 +6144,7 @@ function doLogout(){
   clearLocalSession();
   window._currentUser=null;
   window._qrEq=null;
+  if(_notifAutoRefreshTimer){ clearInterval(_notifAutoRefreshTimer); _notifAutoRefreshTimer=null; }
   updateNavVisibility();
   NOTIFS.length=0; notifUnread=0; updateNotifBadge();
   const panel=document.getElementById('notifPanel'); if(panel) panel.classList.remove('open');
@@ -6159,6 +6180,9 @@ function updateAdminUI(){
     // Nouveau BT et clôture : accessible aux techniciens
     if(oc.includes("mInterv")||oc.includes("mCloture")){
       b.style.display = tech ? '' : 'none';
+    // Nouvelle demande messagerie : accessible à TOUS les rôles (comptes Service inclus)
+    } else if(oc.includes("openNewMsg")){
+      b.style.display = '';
     } else {
       b.style.display = admin ? '' : 'none';
     }
@@ -6298,8 +6322,8 @@ function notifStateKey(){
 function getNotifState(){
   try {
     const raw = localStorage.getItem(notifStateKey());
-    return raw ? JSON.parse(raw) : {read:[], cleared:[]};
-  } catch(e){ return {read:[], cleared:[]}; }
+    return raw ? JSON.parse(raw) : {read:[], cleared:[], firstSeen:{}};
+  } catch(e){ return {read:[], cleared:[], firstSeen:{}}; }
 }
 function saveNotifState(state){
   try { localStorage.setItem(notifStateKey(), JSON.stringify(state)); } catch(e){}
@@ -6308,7 +6332,18 @@ function saveNotifState(state){
 function addNotif(id, ico, title, sub, type='info'){
   const state = getNotifState();
   if(state.cleared.includes(id)) return; // notification effacée explicitement par l'utilisateur
-  const now = new Date();
+  if(!state.firstSeen) state.firstSeen = {};
+  // On fige la date au premier instant où cette alerte est détectée (et on la persiste),
+  // au lieu de reprendre l'heure actuelle à chaque régénération : sinon toutes les
+  // notifications affichaient la même heure (celle du dernier recalcul) et paraissaient
+  // "jamais mises à jour".
+  let firstSeenIso = state.firstSeen[id];
+  if(!firstSeenIso){
+    firstSeenIso = new Date().toISOString();
+    state.firstSeen[id] = firstSeenIso;
+    saveNotifState(state);
+  }
+  const now = new Date(firstSeenIso);
   NOTIFS.push({
     id, ico, title, sub, type,
     read: state.read.includes(id),
@@ -6320,6 +6355,16 @@ function addNotif(id, ico, title, sub, type='info'){
 function updateNotifBadge(){
   const el = document.getElementById('notifCount');
   if(el){ el.textContent = notifUnread; el.style.display = notifUnread > 0 ? '' : 'none'; }
+}
+// Certaines alertes (contrat qui approche de son échéance, visite en retard, habilitation...)
+// dépendent uniquement du temps qui passe, pas d'une action utilisateur ni d'une synchro
+// distante : sans rafraîchissement périodique elles n'apparaissent qu'au prochain login/reload.
+let _notifAutoRefreshTimer = null;
+function startNotifAutoRefresh(){
+  if(_notifAutoRefreshTimer) return; // déjà démarré, on évite les doublons
+  _notifAutoRefreshTimer = setInterval(()=>{
+    if(window._currentUser && !window._kioskMode) generateNotifications();
+  }, 3 * 60 * 1000); // toutes les 3 minutes
 }
 let _notifToggleLock = false;
 function toggleNotifPanel(){
@@ -6413,6 +6458,15 @@ function clearNotifs(){
 }
 function generateNotifications(){
   NOTIFS.length = 0; notifUnread = 0;
+  // Les comptes de type Service (comptes partagés par un service hospitalier, ex: svc.reanimation)
+  // ne doivent recevoir aucune notification : ce sont des comptes à accès limité, pas des membres de l'atelier.
+  const notifWrap = document.getElementById('notifWrap');
+  if(isServiceAccount()){
+    if(notifWrap) notifWrap.style.display = 'none';
+    updateNotifBadge();
+    return;
+  }
+  if(notifWrap) notifWrap.style.display = '';
   const now = new Date();
   const user = window._currentUser;
   // Un Responsable/Adjoint/Administrateur voit tout. Un Technicien/Stagiaire ne voit que
@@ -7869,6 +7923,22 @@ function updateSaveStatus(label){
 }
 
 function saveManual(){
+  // Admins : accès direct. Techniciens/Responsables : code secret requis. Autres : refusé.
+  if(!window._currentUser){ toast('🔒 Connexion requise','e'); return; }
+  const role = window._currentUser.role;
+  if(role === 'Service' || role === 'Lecture seule'){
+    toast('🔒 La sauvegarde est réservée aux administrateurs et techniciens','e');
+    return;
+  }
+  if(role !== 'Administrateur'){
+    const code = prompt('🔒 Code secret requis pour sauvegarder :');
+    if(code === null) return;
+    if(code.trim() !== _MASTER_CODE){
+      toast('❌ Code incorrect, sauvegarde annulée','e');
+      auditLog('security','Tentative sauvegarde refusée (code incorrect) – '+window._currentUser.nom);
+      return;
+    }
+  }
   try {
     // Utiliser le source original stocké (pas outerHTML qui casse les scripts)
     let src = window._originalHTMLSource;
@@ -7928,6 +7998,20 @@ function saveManual(){
 }
 
 function exportJSON(){
+  if(!window._currentUser){ toast('🔒 Connexion requise','e'); return; }
+  const role = window._currentUser.role;
+  if(role === 'Service' || role === 'Lecture seule'){
+    toast('🔒 L\'export est réservé aux administrateurs et techniciens','e');
+    return;
+  }
+  if(role !== 'Administrateur'){
+    const code = prompt('🔒 Code secret requis pour exporter :');
+    if(code === null) return;
+    if(code.trim() !== _MASTER_CODE){
+      toast('❌ Code incorrect, export annulé','e');
+      return;
+    }
+  }
   try {
     const snap = getSnapshot();
     const meta = { exportDate: new Date().toISOString(), version: "GMAO v1_Vanilla", hospital: 'GHRMSA' };
@@ -7945,6 +8029,20 @@ function exportJSON(){
 }
 
 function importJSON(input){
+  if(!window._currentUser){ toast('🔒 Connexion requise','e'); input.value=''; return; }
+  const role = window._currentUser.role;
+  if(role === 'Service' || role === 'Lecture seule'){
+    toast('🔒 L\'import est réservé aux administrateurs et techniciens','e');
+    input.value=''; return;
+  }
+  if(role !== 'Administrateur'){
+    const code = prompt('🔒 Code secret requis pour importer :');
+    if(code === null){ input.value=''; return; }
+    if(code.trim() !== _MASTER_CODE){
+      toast('❌ Code incorrect, import annulé','e');
+      input.value=''; return;
+    }
+  }
   const file = input.files[0];
   if(!file) return;
   const reader = new FileReader();
